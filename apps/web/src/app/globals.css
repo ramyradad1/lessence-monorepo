@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #181611;
+    --foreground: #ffffff;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+@layer utilities {
+  .text-balance {
+    word-break: break-word;
+      /* Fallback for older browsers */
+    text-wrap: balance;
+  }
+}
+
+/* Custom Luxury Gradients and Shimmers */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.03);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.primary-gradient {
+  background: linear-gradient(135deg, #f4c025 0%, #eab308 100%);
+}
+
+/* Smooth Scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: rgba(244, 192, 37, 0.3);
+  color: white;
+}
