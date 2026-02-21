@@ -1,0 +1,11 @@
+{
+  "name": "@lessence/supabase",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "dependencies": {
+    "@lessence/core": "*",
+    "@supabase/supabase-js": "^2.97.0",
+    "stripe": "^20.3.1"
+  }
+}
