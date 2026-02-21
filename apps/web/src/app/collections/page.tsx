@@ -1,4 +1,5 @@
 "use client";
+/** Triggering new build for collections page */
 import React from 'react';
 import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
