@@ -65,7 +65,7 @@ export default function ProfilePage() {
               </button>
             </div>
 
-            {profile.role === "admin" && (
+              {['super_admin', 'order_manager', 'inventory_manager', 'content_manager', 'admin'].includes(profile.role) && (
               <div className="glass-effect p-6 rounded-2xl border border-primary/20 bg-primary/5">
                 <div className="flex items-center gap-3 mb-2">
                   <Shield size={18} className="text-primary" />

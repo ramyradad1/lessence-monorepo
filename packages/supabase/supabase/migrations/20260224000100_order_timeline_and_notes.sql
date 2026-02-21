@@ -24,10 +24,7 @@ RETURNS TRIGGER AS $$
 DECLARE
     v_admin_id UUID;
 BEGIN
-    -- Only log if status has changed
     IF (OLD.status IS DISTINCT FROM NEW.status) THEN
-        -- Try to get the current user ID if available in setting
-        -- Note: In Supabase, auth.uid() is available if triggered by an API request
         BEGIN
             v_admin_id := auth.uid();
         EXCEPTION WHEN OTHERS THEN
@@ -49,30 +46,39 @@ CREATE TRIGGER on_order_status_change
     EXECUTE FUNCTION log_order_status_change();
 
 -- 5. RLS Policies
-
--- Enable RLS
 ALTER TABLE order_status_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_admin_notes ENABLE ROW LEVEL SECURITY;
 
--- order_status_history: Users can view history for their own orders
-CREATE POLICY "Users can view own order status history" ON order_status_history
-    FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM orders
-            WHERE orders.id = order_status_history.order_id
-            AND orders.user_id = auth.uid()
-        )
-    );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'order_status_history' AND policyname = 'Users can view own order status history') THEN
+    CREATE POLICY "Users can view own order status history" ON order_status_history
+        FOR SELECT USING (
+            EXISTS (
+                SELECT 1 FROM orders
+                WHERE orders.id = order_status_history.order_id
+                AND orders.user_id = auth.uid()
+            )
+        );
+  END IF;
+END $$;
 
--- order_status_history: Admins can view everything
-CREATE POLICY "Admins can view all order status history" ON order_status_history
-    FOR SELECT USING (is_admin());
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'order_status_history' AND policyname = 'Admins can view all order status history') THEN
+    CREATE POLICY "Admins can view all order status history" ON order_status_history
+        FOR SELECT USING (is_admin());
+  END IF;
+END $$;
 
--- order_admin_notes: Only admins can view/manage
-CREATE POLICY "Admins can manage order admin notes" ON order_admin_notes
-    FOR ALL USING (is_admin());
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'order_admin_notes' AND policyname = 'Admins can manage order admin notes') THEN
+    CREATE POLICY "Admins can manage order admin notes" ON order_admin_notes
+        FOR ALL USING (is_admin());
+  END IF;
+END $$;
 
--- 6. Initial History for Existing Orders
+-- 6. Initial History for Existing Orders (idempotent)
 INSERT INTO order_status_history (order_id, status, created_at)
 SELECT id, status, created_at FROM orders
-ON CONFLICT DO NOTHING;
+WHERE NOT EXISTS (
+    SELECT 1 FROM order_status_history osh WHERE osh.order_id = orders.id
+);

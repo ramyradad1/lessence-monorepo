@@ -1,24 +1,29 @@
--- Add phone column to profiles
-alter table profiles add column if not exists phone text;
+-- Customer Management (Idempotent)
+-- phone column and admin_notes table already exist on Supabase
 
--- Create admin_notes table
-create table if not exists admin_notes (
-  id uuid default gen_random_uuid() primary key,
-  customer_id uuid references auth.users on delete cascade not null,
-  admin_id uuid references auth.users on delete set null not null,
-  note text not null,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+-- Add phone column to profiles (already exists)
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone text;
+
+-- Create admin_notes table (already exists)
+CREATE TABLE IF NOT EXISTS admin_notes (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  customer_id uuid REFERENCES auth.users ON DELETE CASCADE NOT NULL,
+  admin_id uuid REFERENCES auth.users ON DELETE SET NULL NOT NULL,
+  note text NOT NULL,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Enable RLS on admin_notes
-alter table admin_notes enable row level security;
+ALTER TABLE admin_notes ENABLE ROW LEVEL SECURITY;
 
--- Admin-only access to admin_notes
-create policy "Admins can manage admin notes" on admin_notes for all using (public.is_admin());
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'admin_notes' AND policyname = 'Admins can manage admin notes') THEN
+    CREATE POLICY "Admins can manage admin notes" ON admin_notes FOR ALL USING (public.is_admin());
+  END IF;
+END $$;
 
 -- Create customer_aggregates view
-create or replace view customer_aggregates as
-select
+CREATE OR REPLACE VIEW customer_aggregates AS
+SELECT
   p.id,
   p.email,
   p.full_name,
@@ -26,16 +31,16 @@ select
   p.role,
   p.phone,
   p.created_at,
-  coalesce(agg.total_orders, 0)::int as total_orders,
-  coalesce(agg.total_spend, 0)::numeric(10,2) as total_spend,
+  coalesce(agg.total_orders, 0)::int AS total_orders,
+  coalesce(agg.total_spend, 0)::numeric(10,2) AS total_spend,
   agg.last_order_date
-from profiles p
-left join lateral (
-  select
-    count(*)::int as total_orders,
-    sum(o.total_amount)::numeric(10,2) as total_spend,
-    max(o.created_at) as last_order_date
-  from orders o
-  where o.user_id = p.id
-    and o.status not in ('cancelled', 'refunded')
-) agg on true;
+FROM profiles p
+LEFT JOIN LATERAL (
+  SELECT
+    count(*)::int AS total_orders,
+    sum(o.total_amount)::numeric(10,2) AS total_spend,
+    max(o.created_at) AS last_order_date
+  FROM orders o
+  WHERE o.user_id = p.id
+    AND o.status NOT IN ('cancelled', 'refunded')
+) agg ON true;

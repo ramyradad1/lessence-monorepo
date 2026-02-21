@@ -53,7 +53,7 @@ function NotificationBell({ userId }: { userId: string }) {
             <h3 className="text-sm font-bold text-white uppercase tracking-widest">Notifications</h3>
             {unreadCount > 0 && (
               <button
-                onClick={markAllRead}
+                onClick={() => markAllRead()}
                 className="text-[10px] text-primary hover:text-white transition-colors uppercase tracking-widest"
               >
                 Mark all read

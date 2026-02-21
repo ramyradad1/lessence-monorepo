@@ -35,7 +35,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         .eq('id', user.id)
         .single();
 
-      if (profile?.role !== 'admin') {
+      if (!profile || profile.role === 'user') {
         router.push('/');
         return;
       }

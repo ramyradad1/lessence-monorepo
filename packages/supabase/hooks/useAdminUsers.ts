@@ -63,8 +63,8 @@ export function useAdminUsers(supabase: SupabaseClient) {
     }
   };
 
-  const updateUserRole = async (userId: string, role: 'user' | 'admin') => {
-    return updateUser(userId, { role });
+  const updateUserRole = async (userId: string, role: string) => {
+    return updateUser(userId, { role } as any);
   };
 
   useEffect(() => {

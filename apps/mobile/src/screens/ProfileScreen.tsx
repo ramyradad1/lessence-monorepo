@@ -44,7 +44,7 @@ export default function ProfileScreen({ navigation }: { navigation: NativeStackN
           </TouchableOpacity>
         </View>
 
-        {profile.role === 'admin' && (
+        {['super_admin', 'order_manager', 'inventory_manager', 'content_manager', 'admin'].includes(profile.role) && (
           <View className="bg-primary/5 border border-primary/20 rounded-2xl p-6 mb-6">
             <View className="flex-row items-center mb-2">
               <MaterialIcons name="admin-panel-settings" size={18} color="#f4c025" />

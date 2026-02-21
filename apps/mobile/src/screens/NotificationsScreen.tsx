@@ -31,8 +31,10 @@ function NotificationItem({
   item: Notification;
   onPress: (id: string) => void;
 }) {
-  const drop = item.old_price - item.new_price;
-  const dropPct = Math.round((drop / item.old_price) * 100);
+  const oldPrice = item.data?.old_price || 0;
+  const newPrice = item.data?.new_price || 0;
+  const drop = oldPrice - newPrice;
+  const dropPct = oldPrice > 0 ? Math.round((drop / oldPrice) * 100) : 0;
 
   return (
     <TouchableOpacity
@@ -72,10 +74,10 @@ function NotificationItem({
           {/* Pricing row */}
           <View className="flex-row items-center mt-2 gap-2">
             <Text className="text-sm font-bold text-green-400">
-              ${item.new_price.toFixed(2)}
+              ${newPrice.toFixed(2)}
             </Text>
             <Text className="text-xs text-white/30 line-through">
-              ${item.old_price.toFixed(2)}
+              ${oldPrice.toFixed(2)}
             </Text>
             <View className="bg-green-500/15 px-1.5 py-0.5 rounded-full">
               <Text className="text-[10px] text-green-400 font-bold">
@@ -83,7 +85,7 @@ function NotificationItem({
               </Text>
             </View>
             <Text className="text-[10px] text-white/30 ml-auto">
-              {formatRelativeTime(item.created_at)}
+              {item.created_at ? formatRelativeTime(item.created_at) : ''}
             </Text>
           </View>
         </View>
@@ -115,7 +117,7 @@ export default function NotificationsScreen() {
             <View className="bg-primary px-2 py-0.5 rounded-full">
               <Text className="text-black text-[10px] font-bold">{unreadCount} new</Text>
             </View>
-            <TouchableOpacity onPress={markAllRead}>
+            <TouchableOpacity onPress={() => markAllRead()}>
               <MaterialIcons name="done-all" size={22} color="#f4c025" />
             </TouchableOpacity>
           </View>

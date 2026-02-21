@@ -17,8 +17,9 @@ export type Review = {
   };
 };
 
-export function useReviews(supabase: SupabaseClient, productId: string) {
+export function useReviews(supabaseClient: SupabaseClient | undefined, productId: string) {
   const queryClient = useQueryClient();
+  const supabase = supabaseClient || (globalThis as any).supabase;
 
   const { data: reviews = [], isLoading: loadingReviews, error: reviewsError } = useQuery<Review[]>({
     queryKey: ['reviews', productId],

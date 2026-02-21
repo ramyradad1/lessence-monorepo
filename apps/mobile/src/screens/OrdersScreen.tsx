@@ -10,7 +10,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Ionicons } from '@expo-vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth, useOrders } from '@lessence/supabase';
 import { supabase } from '../lib/supabase';
 import { Order } from '@lessence/core';

@@ -15,7 +15,7 @@ export default function AdminUsersPage() {
     email: '',
     password: '',
     full_name: '',
-    role: 'user' as 'user' | 'admin'
+    role: 'user' as string
   });
 
   const resetForm = () => {
@@ -30,7 +30,7 @@ export default function AdminUsersPage() {
     if (editingUser) {
       const { success, error: err } = await updateUser(editingUser.id, {
         full_name: form.full_name,
-        role: form.role
+        role: form.role as any
       });
       if (success) {
         setIsModalOpen(false);
@@ -39,7 +39,7 @@ export default function AdminUsersPage() {
         alert(err);
       }
     } else {
-      const { success, error: err } = await createUser(form.email, form.password, form.full_name, form.role);
+      const { success, error: err } = await createUser(form.email, form.password, form.full_name, form.role as any);
       if (success) {
         setIsModalOpen(false);
         resetForm();
@@ -126,12 +126,18 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
-                      user.role === 'admin' 
-                        ? 'bg-[#f4c025]/10 text-[#f4c025]' 
-                        : 'bg-white/5 text-white/60'
+                      user.role === 'super_admin'
+                        ? 'bg-[#f4c025] text-black'
+                        : user.role !== 'user'
+                          ? 'bg-[#f4c025]/10 text-[#f4c025]'
+                          : 'bg-white/5 text-white/60'
                     }`}>
                       <Shield size={12} />
-                      {user.role === 'admin' ? 'Admin' : 'User'}
+                      {user.role === 'super_admin' ? 'Super Admin' :
+                        user.role === 'order_manager' ? 'Order Manager' :
+                          user.role === 'inventory_manager' ? 'Inventory Manager' :
+                            user.role === 'content_manager' ? 'Content Manager' :
+                              user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-xs text-white/60">
@@ -230,7 +236,10 @@ export default function AdminUsersPage() {
                   className={inputClass}
                 >
                   <option value="user" className="bg-[#1e1b16]">Standard User</option>
-                  <option value="admin" className="bg-[#1e1b16]">Administrator</option>
+                  <option value="super_admin" className="bg-[#1e1b16]">Super Admin</option>
+                  <option value="order_manager" className="bg-[#1e1b16]">Order Manager</option>
+                  <option value="inventory_manager" className="bg-[#1e1b16]">Inventory Manager</option>
+                  <option value="content_manager" className="bg-[#1e1b16]">Content Manager</option>
                 </select>
               </div>
               <div className="pt-4">

@@ -345,6 +345,8 @@ export default function CheckoutScreen() {
               } else if (item.size_options && item.selectedSize) {
                 sizePrice = item.size_options.find((s: { size: string; price: number }) => s.size === item.selectedSize)?.price || item.price;
               }
+              // Ensure sizePrice has a fallback to avoid undefined error
+              sizePrice = sizePrice || 0;
               const key = item.variant_id ? `${item.id}-${item.variant_id}-${idx}` : `${item.id}-${item.selectedSize}-${idx}`;
               return (
                 <View key={key} className="flex-row justify-between mb-2">

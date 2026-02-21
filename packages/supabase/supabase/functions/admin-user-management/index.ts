@@ -36,7 +36,7 @@ serve(async (req: Request) => {
       .eq('id', requester.id)
       .single()
 
-    if (profile?.role !== 'admin') throw new Error('Unauthorized: Admin access required')
+    if (!profile || profile.role !== 'super_admin') throw new Error('Unauthorized: Super Admin access required')
 
     const { action, userData, userId, updates } = await req.json()
 

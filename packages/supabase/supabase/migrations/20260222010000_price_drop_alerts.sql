@@ -1,7 +1,8 @@
--- Migration: Price Drop Alerts
--- Creates price_history, notifications tables + triggers for fan-out price drop notifications
+-- Migration: Price Drop Alerts (Idempotent)
+-- Tables price_history and notifications already exist from Supabase migration 20260221220931
+-- This migration ensures triggers and indexes are present
 
--- 1. price_history
+-- 1. price_history (CREATE IF NOT EXISTS - already exists)
 CREATE TABLE IF NOT EXISTS public.price_history (
   id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   product_id    uuid REFERENCES public.products   ON DELETE CASCADE NOT NULL,
@@ -11,29 +12,27 @@ CREATE TABLE IF NOT EXISTS public.price_history (
   changed_at    timestamp with time zone DEFAULT timezone('utc', now()) NOT NULL
 );
 ALTER TABLE public.price_history ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Admins can view price_history" ON public.price_history FOR SELECT
-USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'));
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'price_history' AND policyname = 'Admins can view price_history') THEN
+    CREATE POLICY "Admins can view price_history" ON public.price_history FOR SELECT
+    USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'));
+  END IF;
+END $$;
 
--- 2. notifications
-CREATE TABLE IF NOT EXISTS public.notifications (
-  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id       uuid REFERENCES auth.users ON DELETE CASCADE NOT NULL,
-  type          text NOT NULL DEFAULT 'price_drop',
-  title         text NOT NULL,
-  body          text NOT NULL,
-  product_id    uuid REFERENCES public.products ON DELETE CASCADE,
-  variant_id    uuid REFERENCES public.product_variants ON DELETE SET NULL,
-  old_price     numeric(10, 2),
-  new_price     numeric(10, 2),
-  is_read       boolean DEFAULT false NOT NULL,
-  created_at    timestamp with time zone DEFAULT timezone('utc', now()) NOT NULL
-);
-ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can view own notifications" ON public.notifications FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can update own notifications" ON public.notifications FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Service role can insert notifications" ON public.notifications FOR INSERT WITH CHECK (true);
-CREATE POLICY "Admins can manage all notifications" ON public.notifications FOR ALL
-USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'));
+-- 2. notifications (already exists - skip creation)
+-- Just ensure policies exist
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'notifications' AND policyname = 'Service role can insert notifications') THEN
+    CREATE POLICY "Service role can insert notifications" ON public.notifications FOR INSERT WITH CHECK (true);
+  END IF;
+END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'notifications' AND policyname = 'Admins can manage all notifications') THEN
+    CREATE POLICY "Admins can manage all notifications" ON public.notifications FOR ALL
+    USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'));
+  END IF;
+END $$;
 
 -- 3. Trigger on products price change
 CREATE OR REPLACE FUNCTION public.fn_record_product_price_change()

@@ -60,7 +60,7 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { cart, cartCount, cartTotal, addToCart, removeFromCart, clearCart, placeOrder } = useCart();
-  const { unreadCount } = useNotifications();
+  const { unreadCount } = useNotifications(supabase, user?.id);
 
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [lastOrder, setLastOrder] = useState<string | null>(null);
@@ -341,9 +341,9 @@ export default function HomeScreen() {
                           <Text className="text-white font-bold">{item.name}</Text>
                           <Text className="text-gray-500 text-xs mt-1">{item.subtitle} • {item.selectedSize}</Text>
                           <View className="flex-row items-center justify-between mt-2">
-                            <Text className="text-white font-medium">${(item.size_options.find(s => s.size === item.selectedSize)?.price || item.price).toFixed(2)}</Text>
+                            <Text className="text-white font-medium">${(Number((item.size_options || []).find((s: any) => s.size === item.selectedSize)?.price || item.price || 0)).toFixed(2)}</Text>
                             <View className="flex-row items-center gap-4">
-                              <TouchableOpacity onPress={() => removeFromCart(item.id, item.selectedSize)}>
+                              <TouchableOpacity onPress={() => removeFromCart(item.id as string, (item.selectedSize || '') as string)}>
                                 <MaterialIcons name="delete-outline" size={20} color="#ef4444" />
                               </TouchableOpacity>
                               <View className="bg-white/5 px-2 py-0.5 rounded border border-white/10">
