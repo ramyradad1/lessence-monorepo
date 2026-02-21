@@ -1,19 +1,49 @@
 "use client";
 import { useAuth } from "@lessence/supabase";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { User, LogOut, Package, MapPin, Shield } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
 export default function ProfilePage() {
   const { user, profile, isLoading, signOut } = useAuth();
   const router = useRouter();
+  const [isStale, setIsStale] = useState(false);
+
+  // Detect stale/stuck loading state — if loading takes >8s, session is likely corrupted
+  useEffect(() => {
+    if (!isLoading) {
+      setIsStale(false);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setIsStale(true);
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   useEffect(() => {
     if (!isLoading && !user) {
       router.push("/login");
     }
   }, [user, isLoading, router]);
+
+  const handleForceRefresh = useCallback(async () => {
+    try {
+      await signOut();
+    } catch { }
+    // Clear any stale local data
+    try {
+      localStorage.removeItem('supabase.auth.token');
+      // Clear all supabase-related keys
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('sb-') || key.includes('supabase')) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch { }
+    router.push("/login");
+  }, [signOut, router]);
 
   if (isLoading || !user || !profile) {
     return (
@@ -22,7 +52,20 @@ export default function ProfilePage() {
         <p className="text-white/40 uppercase tracking-widest text-[10px]">
           {isLoading ? "Connecting to server..." : !user ? "Redirecting to login..." : "Fetching profile..."}
         </p>
-        {!isLoading && user && !profile && (
+        {isStale && (
+          <div className="flex flex-col items-center gap-3 mt-4">
+            <p className="text-amber-400/80 text-[10px] uppercase tracking-widest text-center max-w-xs">
+              Connection appears stuck. Your session may have expired.
+            </p>
+            <button
+              onClick={handleForceRefresh}
+              className="bg-[#f4c025] text-black px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-white transition-colors"
+            >
+              Sign in again
+            </button>
+          </div>
+        )}
+        {!isLoading && user && !profile && !isStale && (
           <div className="flex flex-col items-center gap-2">
             <p className="text-red-400 text-[10px] uppercase tracking-widest">Profile not found</p>
             <button onClick={() => window.location.reload()} className="text-[#f4c025] text-[10px] underline uppercase tracking-widest">

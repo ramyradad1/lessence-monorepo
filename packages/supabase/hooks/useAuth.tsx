@@ -42,13 +42,28 @@ export const AuthProvider = ({
       try {
         const { data } = await supabase.auth.getSession();
         if (mounted && data.session) {
+          // Validate the session is actually still valid by hitting the server
+          const { data: userData, error: userError } = await supabase.auth.getUser();
+          if (userError || !userData.user) {
+            // Session is expired/invalid — clear it
+            console.warn('[Auth] Stale session detected, signing out');
+            await supabase.auth.signOut();
+            if (mounted) {
+              setSession(null);
+              setUser(null);
+              setProfile(null);
+              setIsLoading(false);
+            }
+            return;
+          }
           setSession(data.session);
           setUser(data.session.user);
           await fetchProfile(data.session.user.id);
         } else {
-          setIsLoading(false);
+          if (mounted) setIsLoading(false);
         }
       } catch (err) {
+        console.error('[Auth] Error getting initial session:', err);
         if (mounted) setIsLoading(false);
       }
     }

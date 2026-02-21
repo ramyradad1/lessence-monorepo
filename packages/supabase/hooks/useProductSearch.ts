@@ -45,10 +45,29 @@ export function useProductSearch(supabase: SupabaseClient, filters: ProductSearc
         in_stock_only: filters.inStockOnly ?? false,
         min_rating: filters.minRating ?? null,
         sort_by: filters.sortBy || 'newest',
-      }).select('*, variants:product_variants(*)');
+      });
 
       if (err) throw err;
-      return data || [];
+      if (!data || data.length === 0) return [];
+
+      // Fetch variants separately since RPC doesn't support PostgREST embedding
+      const productIds = data.map((p: any) => p.id);
+      const { data: variants } = await supabase
+        .from('product_variants')
+        .select('*')
+        .in('product_id', productIds);
+
+      // Attach variants to their products
+      const variantMap = new Map<string, any[]>();
+      (variants || []).forEach((v: any) => {
+        if (!variantMap.has(v.product_id)) variantMap.set(v.product_id, []);
+        variantMap.get(v.product_id)!.push(v);
+      });
+
+      return data.map((p: any) => ({
+        ...p,
+        variants: variantMap.get(p.id) || [],
+      }));
     },
     staleTime: 1000 * 60 * 2, // 2 minutes for products
   });
