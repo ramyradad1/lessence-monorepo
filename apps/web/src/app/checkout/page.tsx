@@ -11,7 +11,15 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [couponCode, setCouponCode] = useState('');
-  
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [discountType, setDiscountType] = useState<string | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [isGift, setIsGift] = useState(false);
+  const [giftWrap, setGiftWrap] = useState(false);
+  const [giftMessage, setGiftMessage] = useState('');
+  const originalSubtotal = cartTotal;
+  const orderTotal = originalSubtotal - discountAmount;
   const [address, setAddress] = useState({
     email: '',
     phone: '',
@@ -51,10 +59,23 @@ export default function CheckoutPage() {
           cartItems: cart,
           address,
           couponCode: couponCode || undefined,
+          isGift,
+          giftWrap,
+          giftMessage: giftMessage.trim() || undefined
         }
       });
 
       if (response.error) {
+        // If the error comes from the Edge Function logic itself
+        if (response.error.context && response.error.context.length > 0) {
+          const body = await response.error.context.text();
+          try {
+            const errorObj = JSON.parse(body);
+            throw new Error(errorObj.error || 'Error initiating checkout');
+          } catch (e) {
+            throw new Error(body);
+          }
+        }
           throw new Error(response.error.message || 'Error initiating checkout');
       }
 
@@ -70,6 +91,66 @@ export default function CheckoutPage() {
       setError(err.message || 'An unexpected error occurred during checkout');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode) {
+      setCouponError('Please enter a coupon code.');
+      setDiscountAmount(0);
+      setDiscountType(null);
+      return;
+    }
+
+    setIsApplyingCoupon(true);
+    setCouponError(null);
+
+    try {
+      // Get the authorization header if logged in (for user-specific rules)
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: Record<string, string> = {};
+
+      // Fix for empty string token bug
+      if (session && session.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      const response = await supabase.functions.invoke('apply-coupon', {
+        body: {
+          couponCode,
+          cartItems: cart
+        },
+        headers
+      });
+
+      if (response.error) {
+        if (response.error.context && response.error.context.length > 0) {
+          const body = await response.error.context.text();
+          try {
+            const errorObj = JSON.parse(body);
+            throw new Error(errorObj.error || 'Invalid coupon.');
+          } catch (e) {
+            throw new Error(body);
+          }
+        }
+        throw new Error('Failed to validate coupon.');
+      }
+
+      const data = response.data;
+      if (data?.success) {
+        setDiscountAmount(data.discountAmount);
+        setDiscountType(data.discountType);
+        setCouponError(null);
+      } else {
+        throw new Error('Invalid coupon response.');
+      }
+
+    } catch (err: any) {
+      setCouponError(err.message);
+      setDiscountAmount(0);
+      setDiscountType(null);
+    } finally {
+      setIsApplyingCoupon(false);
     }
   };
 
@@ -176,6 +257,59 @@ export default function CheckoutPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Gift Options */}
+              <div className="pt-4 border-t border-white/10 mt-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <input
+                    type="checkbox"
+                    id="is_gift"
+                    checked={isGift}
+                    onChange={(e) => {
+                      setIsGift(e.target.checked);
+                      if (!e.target.checked) {
+                        setGiftWrap(false);
+                        setGiftMessage('');
+                      }
+                    }}
+                    className="w-5 h-5 rounded border-white/10 bg-[#181611] text-[#f4c025] focus:ring-[#f4c025] focus:ring-offset-background-dark appearance-none checked:bg-[#f4c025] checked:border-[#f4c025] transition-colors relative"
+                    style={{ backgroundImage: isGift ? `url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='black' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e")` : 'none' }}
+                  />
+                  <Label htmlFor="is_gift" className="text-white text-base font-medium cursor-pointer mb-0">This order is a gift</Label>
+                </div>
+
+                {isGift && (
+                  <div className="space-y-4 pl-8 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        id="gift_wrap"
+                        checked={giftWrap}
+                        onChange={(e) => setGiftWrap(e.target.checked)}
+                        className="w-4 h-4 rounded border-white/10 bg-[#181611] text-[#f4c025] focus:ring-[#f4c025] focus:ring-offset-background-dark appearance-none checked:bg-[#f4c025] checked:border-[#f4c025] transition-colors relative"
+                        style={{ backgroundImage: giftWrap ? `url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='black' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e")` : 'none' }}
+                      />
+                      <Label htmlFor="gift_wrap" className="text-white/80 text-sm cursor-pointer mb-0">Add elegant gift wrapping (Complimentary)</Label>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <Label htmlFor="gift_message" className="text-white/80">Gift Message (Optional)</Label>
+                        <span className={`text-xs ${giftMessage.length > 250 ? 'text-red-400' : 'text-white/40'}`}>
+                          {giftMessage.length}/250
+                        </span>
+                      </div>
+                      <textarea
+                        id="gift_message"
+                        value={giftMessage}
+                        onChange={(e) => setGiftMessage(e.target.value.substring(0, 250))}
+                        placeholder="Write a personalized message for the recipient..."
+                        className="w-full h-24 bg-[#181611] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#f4c025]/40 transition-colors placeholder:text-white/20 resize-none"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             </form>
           </div>
 
@@ -190,8 +324,8 @@ export default function CheckoutPage() {
                   {cart.map((item) => (
                     <li key={`${item.id}-${item.selectedSize}`} className="py-6 flex">
                       <div className="flex-shrink-0 w-20 h-20 bg-white/5 rounded-lg overflow-hidden border border-white/5">
-                        {item.image_url ? (
-                          <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                        {item.image_url || item.bundle?.image_url ? (
+                          <img src={item.image_url || item.bundle?.image_url} alt={item.name || item.bundle?.name || 'Item'} className="w-full h-full object-cover" />
                         ) : (
                             <div className="w-full h-full bg-white/5" />
                         )}
@@ -199,26 +333,26 @@ export default function CheckoutPage() {
                       <div className="ml-4 flex-1 flex flex-col">
                         <div>
                           <div className="flex justify-between text-base font-display text-white">
-                            <h3>{item.name}</h3>
-                            <p className="ml-4 text-primary">${(item.price * item.quantity).toFixed(2)}</p>
+                            <h3>{item.bundle ? item.bundle.name : item.name} {item.bundle && <span className="text-xs text-[#f4c025] block mt-1">GIFT SET</span>}</h3>
+                            <p className="ml-4 text-primary">${((item.price || item.bundle?.price || 0) * item.quantity).toFixed(2)}</p>
                           </div>
-                          <p className="mt-1 text-xs text-white/40 uppercase tracking-wider">Size: {item.selectedSize}</p>
+                          {!item.bundle && <p className="mt-1 text-xs text-white/40 uppercase tracking-wider">Size: {item.selectedSize}</p>}
                         </div>
                         <div className="flex-1 flex items-end justify-between text-sm">
                           <div className="flex items-center bg-white/5 rounded-lg border border-white/10">
                               <button
-                                onClick={() => updateQuantity(item.id, item.selectedSize, item.quantity - 1)}
+                              onClick={() => updateQuantity(item.id || '', item.selectedSize, item.quantity - 1)}
                               className="px-3 py-1 text-white/40 hover:text-primary transition-colors"
                               >-</button>
                             <span className="px-3 font-bold text-white text-xs">{item.quantity}</span>
                               <button
-                                onClick={() => updateQuantity(item.id, item.selectedSize, item.quantity + 1)}
+                              onClick={() => updateQuantity(item.id || '', item.selectedSize, item.quantity + 1)}
                               className="px-3 py-1 text-white/40 hover:text-primary transition-colors"
                               >+</button>
                           </div>
                           <button
                             type="button"
-                            onClick={() => removeFromCart(item.id, item.selectedSize)}
+                            onClick={() => removeFromCart(item.id || '', item.selectedSize)}
                             className="font-medium text-red-400/60 hover:text-red-400 transition-colors"
                             aria-label="Remove item"
                           >
@@ -239,26 +373,55 @@ export default function CheckoutPage() {
                             id="coupon" 
                             name="coupon" 
                             value={couponCode} 
-                            onChange={(e) => setCouponCode(e.target.value)} 
+                      onChange={(e) => {
+                        setCouponCode(e.target.value);
+                        if (discountAmount > 0) {
+                          setDiscountAmount(0);
+                          setDiscountType(null);
+                        }
+                      }} 
                             className="rounded-r-none" 
                             placeholder="CODE"
                         />
-                    <Button type="button" variant="outline" className="rounded-l-none border-l-0 px-4">Apply</Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="rounded-l-none border-l-0 px-4 min-w-[80px]"
+                      onClick={handleApplyCoupon}
+                      disabled={isApplyingCoupon || !couponCode}
+                    >
+                      {isApplyingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
+                    </Button>
                     </div>
+                  {couponError && (
+                    <p className="text-red-400 text-xs mt-2">{couponError}</p>
+                  )}
+                  {discountAmount > 0 && !couponError && (
+                    <p className="text-emerald-400 text-xs mt-2">Discount applied successfully!</p>
+                  )}
+                  {discountType === 'free_shipping' && !couponError && (
+                    <p className="text-emerald-400 text-xs mt-2">Free shipping applied!</p>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-2 pt-4">
                   <div className="flex justify-between text-white/40 text-xs uppercase tracking-wider">
                     <p>Subtotal</p>
-                    <p className="text-white">${cartTotal.toFixed(2)}</p>
+                    <p className="text-white">${originalSubtotal.toFixed(2)}</p>
                   </div>
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between text-emerald-400/80 text-xs uppercase tracking-wider">
+                      <p>Discount</p>
+                      <p>-${discountAmount.toFixed(2)}</p>
+                    </div>
+                  )}
                   <div className="flex justify-between text-white/40 text-xs uppercase tracking-wider">
                     <p>Shipping</p>
-                    <p className="italic">Calculated at next step</p>
+                    <p className="italic">{discountType === 'free_shipping' ? <span className="text-emerald-400 font-bold not-italic">FREE</span> : 'Calculated at next step'}</p>
                   </div>
                   <div className="flex justify-between text-lg font-display text-white pt-4 border-t border-white/10">
                     <p className="uppercase tracking-widest text-sm">Total</p>
-                    <p className="text-primary font-bold">${cartTotal.toFixed(2)}</p>
+                    <p className="text-primary font-bold">${Math.max(0, orderTotal).toFixed(2)}</p>
                   </div>
                 </div>
 

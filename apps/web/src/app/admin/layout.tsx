@@ -9,7 +9,11 @@ const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard', icon: '📊' },
   { href: '/admin/orders', label: 'Orders', icon: '📦' },
   { href: '/admin/products', label: 'Products', icon: '🧴' },
+  { href: '/admin/bundles', label: 'Gift Sets', icon: '🎁' },
+  { href: '/admin/reports', label: 'Reports', icon: '📈' },
   { href: '/admin/coupons', label: 'Coupons', icon: '🎟️' },
+  { href: '/admin/reviews', label: 'Reviews', icon: '⭐' },
+  { href: '/admin/customers', label: 'Customers', icon: '🧑‍💼' },
   { href: '/admin/users', label: 'Users', icon: '👥' },
 ];
 

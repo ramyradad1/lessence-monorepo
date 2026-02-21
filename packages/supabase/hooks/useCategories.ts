@@ -1,22 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Category } from '@lessence/core';
 
 export function useCategories(supabase: SupabaseClient) {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetch() {
-      const { data } = await supabase
+  const { data: categories = [], isLoading: loading } = useQuery<Category[]>({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from('categories')
         .select('*')
         .order('sort_order');
-      setCategories(data || []);
-      setLoading(false);
-    }
-    fetch();
-  }, []);
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 1000 * 60 * 60, // 1 hour for categories as they rarely change
+  });
 
   return { categories, loading };
 }

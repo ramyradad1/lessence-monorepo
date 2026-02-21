@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, SafeAreaView, useWindowDimensions, ActivityIndicator, Modal, TextInput } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, SafeAreaView, useWindowDimensions, ActivityIndicator, Modal, TextInput, Switch, FlatList } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useProducts } from '../hooks/useProducts';
 import { Product } from '@lessence/core';
 import { useCategories } from '../hooks/useCategories';
 import { useHeroBanner } from '../hooks/useHeroBanner';
-import { useSearch } from '../hooks/useSearch';
 import { useFavorites } from '../hooks/useFavorites';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '@lessence/supabase';
+import { useAuth, useProductSearch, ProductSearchFilters, useNotifications } from '@lessence/supabase';
+import { supabase } from '../lib/supabase';
 
 // Fallback data when Supabase is not connected yet
 const FALLBACK_PRODUCTS: Product[] = [
@@ -27,42 +26,9 @@ const FALLBACK_CATEGORIES = [
   { id: '4', name: 'Oriental', slug: 'oriental', icon: 'auto_awesome', sort_order: 4 },
 ];
 
-function ProductCard({ product, onPress, onAdd, isWeb, isFav, onFavToggle }: { product: Product; onPress: () => void; onAdd: () => void; isWeb: boolean; isFav?: boolean; onFavToggle?: () => void }) {
-  return (
-    <TouchableOpacity
-      activeOpacity={0.9}
-      onPress={onPress}
-      className={isWeb ? 'flex-col gap-3' : 'w-[180px] mr-4 flex-col gap-3'}
-      style={isWeb ? { flex: 1, minWidth: 180 } : undefined}
-    >
-      <View className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-surface-dark">
-        <Image source={{ uri: product.image_url }} className="h-full w-full" resizeMode="cover" />
-        <TouchableOpacity
-          className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/10"
-          onPress={(e) => { e.stopPropagation(); onFavToggle?.(); }}
-        >
-          <MaterialIcons name={isFav ? "favorite" : "favorite-border"} size={16} color={isFav ? "#ef4444" : "white"} />
-        </TouchableOpacity>
-      </View>
-      <View className="flex-col gap-1">
-        <Text className="text-base font-semibold text-white" numberOfLines={1}>{product.name}</Text>
-        <Text className="text-xs text-gray-400">{product.subtitle}</Text>
-        <View className="mt-1 flex-row items-center justify-between">
-          <Text className="text-sm font-bold text-white">${product.price.toFixed(2)}</Text>
-          <TouchableOpacity 
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-primary"
-            onPress={(e) => {
-              e.stopPropagation();
-              onAdd();
-            }}
-          >
-            <MaterialIcons name="add" size={16} color="black" />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-}
+import { ProductCard } from '../components/ProductCard';
+
+import { RecentlyViewed } from '../components/RecentlyViewed';
 
 export default function HomeScreen() {
   const navigation = useNavigation<any>();
@@ -71,37 +37,60 @@ export default function HomeScreen() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [isCartVisible, setIsCartVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [localSearch, setLocalSearch] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
-  const { products: supabaseProducts, loading: productsLoading } = useProducts(activeCategory);
+  // Filters state
+  const [filters, setFilters] = useState<ProductSearchFilters>({ sortBy: 'newest' });
+  const [draftFilters, setDraftFilters] = useState<ProductSearchFilters>({ sortBy: 'newest' });
+
+  const { products: supabaseProducts, loading: productsLoading } = useProductSearch(supabase, {
+    searchQuery: searchQuery,
+    categorySlugs: activeCategory !== 'all' ? [activeCategory] : undefined,
+    genderTargets: filters.genderTargets,
+    minPrice: filters.minPrice,
+    maxPrice: filters.maxPrice,
+    inStockOnly: filters.inStockOnly,
+    sortBy: filters.sortBy,
+  });
+
   const { categories: supabaseCategories, loading: catsLoading } = useCategories();
   const { banner } = useHeroBanner();
-  const { results: searchResults, loading: searchLoading, search: doSearch, clear: clearSearch } = useSearch();
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { cart, cartCount, cartTotal, addToCart, removeFromCart, clearCart, placeOrder } = useCart();
+  const { unreadCount } = useNotifications();
 
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [lastOrder, setLastOrder] = useState<string | null>(null);
 
   useEffect(() => {
-    if (searchQuery.length >= 2) {
-      const timer = setTimeout(() => doSearch(searchQuery), 300);
-      return () => clearTimeout(timer);
-    } else {
-      clearSearch();
-    }
-  }, [searchQuery]);
+    const timer = setTimeout(() => setSearchQuery(localSearch), 300);
+    return () => clearTimeout(timer);
+  }, [localSearch]);
 
   const handleCheckout = () => {
     setIsCartVisible(false);
     navigation.navigate('Checkout');
   };
 
+  const applyFilters = () => {
+    setFilters(draftFilters);
+    setIsFilterModalOpen(false);
+  };
+
+  const clearFilters = () => {
+    const initial = { sortBy: 'newest' as any };
+    setDraftFilters(initial);
+    setFilters(initial);
+    setIsFilterModalOpen(false);
+  };
+
   const baseProducts = supabaseProducts.length > 0 ? supabaseProducts : FALLBACK_PRODUCTS;
-  const products = searchQuery.length >= 2 ? searchResults : baseProducts;
+  const products = (searchQuery.length >= 2 || Object.keys(filters).length > 1) ? supabaseProducts : baseProducts;
   const categories = supabaseCategories.length > 0 ? supabaseCategories : FALLBACK_CATEGORIES;
-  const currentLoading = searchQuery.length >= 2 ? searchLoading : productsLoading;
+  const currentLoading = productsLoading;
 
   const heroTitle = banner?.title || 'Scents of';
   const heroSubtitle = banner?.subtitle || 'Elegance';
@@ -116,18 +105,34 @@ export default function HomeScreen() {
 
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-4 bg-background-dark/90 border-b border-white/5 z-20">
-          <TouchableOpacity className="p-2 rounded-full" onPress={() => setIsSearchOpen(!isSearchOpen)}>
-            <MaterialIcons name={isSearchOpen ? "close" : "search"} size={24} color="white" />
-          </TouchableOpacity>
-          <Text className="text-xl font-bold tracking-[0.2em] text-white uppercase">L'Essence</Text>
-          <TouchableOpacity className="relative p-2 rounded-full" onPress={() => setIsCartVisible(true)}>
-            <MaterialIcons name="shopping-bag" size={24} color="white" />
-            {cartCount > 0 && (
-              <View className="absolute top-1 right-1 h-5 w-5 rounded-full bg-primary items-center justify-center border-2 border-background-dark">
-                <Text className="text-[10px] font-bold text-black">{cartCount}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+          <View className="flex-row items-center">
+            <TouchableOpacity className="p-2 rounded-full" onPress={() => setIsSearchOpen(!isSearchOpen)}>
+              <MaterialIcons name={isSearchOpen ? "close" : "search"} size={24} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity className="p-2 rounded-full ml-1" onPress={() => { setDraftFilters(filters); setIsFilterModalOpen(true); }}>
+              <MaterialIcons name="tune" size={24} color="rgba(255,255,255,0.7)" />
+              {Object.keys(filters).length > 1 && <View className="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary" />}
+            </TouchableOpacity>
+          </View>
+          <Text className="text-xl font-bold tracking-[0.2em] text-white uppercase ml-4">L'Essence</Text>
+          <View className="flex-row items-center">
+            <TouchableOpacity className="relative p-2 rounded-full mr-2" onPress={() => navigation.navigate('Notifications')}>
+              <MaterialIcons name="notifications" size={24} color="white" />
+              {unreadCount > 0 && (
+                <View className="absolute top-1 right-1 h-4 w-4 rounded-full bg-primary items-center justify-center border-2 border-background-dark">
+                  <Text className="text-[9px] font-bold text-black">{unreadCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity className="relative p-2 rounded-full" onPress={() => setIsCartVisible(true)}>
+              <MaterialIcons name="shopping-bag" size={24} color="white" />
+              {cartCount > 0 && (
+                <View className="absolute top-1 right-1 h-5 w-5 rounded-full bg-primary items-center justify-center border-2 border-background-dark">
+                  <Text className="text-[10px] font-bold text-black">{cartCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Search Bar */}
@@ -138,13 +143,13 @@ export default function HomeScreen() {
               <TextInput
                 placeholder="Search by name, brand, scent..."
                 placeholderTextColor="rgba(255,255,255,0.2)"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
+                value={localSearch}
+                onChangeText={setLocalSearch}
                 autoFocus
                 className="flex-1 ml-2 text-white text-xs tracking-widest"
               />
-              {searchQuery.length > 0 && (
-                <TouchableOpacity onPress={() => { setSearchQuery(''); clearSearch(); }}>
+              {localSearch.length > 0 && (
+                <TouchableOpacity onPress={() => { setLocalSearch(''); setSearchQuery(''); }}>
                   <MaterialIcons name="close" size={16} color="rgba(255,255,255,0.3)" />
                 </TouchableOpacity>
               )}
@@ -200,7 +205,7 @@ export default function HomeScreen() {
             {currentLoading ? (
               <ActivityIndicator color="#f4c025" style={{ marginTop: 20 }} />
             ) : isDesktop ? (
-              /* DESKTOP: Grid layout */
+                /* DESKTOP: Grid layout - using View/Map is fine for small-ish fixed grids on desktop-web-mode */
               <View className="flex-row flex-wrap px-4 gap-4">
                   {products.length === 0 ? (
                     <View className="w-full items-center py-16">
@@ -221,29 +226,40 @@ export default function HomeScreen() {
                 ))}
               </View>
             ) : (
-              /* MOBILE: Horizontal scroll */
+                  /* MOBILE: Horizontal scroll using FlatList for better performance */
                   products.length === 0 ? (
                     <View className="w-full items-center py-16">
                       <MaterialIcons name="search-off" size={48} color="rgba(255,255,255,0.1)" />
                       <Text className="text-white/40 mt-4 text-center">{searchQuery ? `No results for "${searchQuery}"` : 'No products found.'}</Text>
                     </View>
                   ) : (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}>
-                {products.map((product) => (
-                  <ProductCard 
-                    key={product.id} 
-                    product={product} 
-                    onPress={() => navigation.navigate('ProductDetails', { product })} 
-                    onAdd={() => addToCart(product, '50ml')}
-                    isWeb={false}
-                    isFav={isFavorite(product.id)}
-                    onFavToggle={() => toggleFavorite(product.id)}
-                  />
-                ))}
-              </ScrollView>
+                      <View>
+                        <FlatList
+                          horizontal
+                          data={products}
+                          showsHorizontalScrollIndicator={false}
+                          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
+                          keyExtractor={(item) => item.id}
+                          initialNumToRender={4}
+                          maxToRenderPerBatch={4}
+                          windowSize={5}
+                          renderItem={({ item: product }) => (
+                            <ProductCard 
+                              product={product}
+                              onPress={() => navigation.navigate('ProductDetails', { product })}
+                              onAdd={() => addToCart(product, '50ml')}
+                              isWeb={false}
+                              isFav={isFavorite(product.id)}
+                              onFavToggle={() => toggleFavorite(product.id)}
+                            />
+                          )}
+                        />
+                      </View>
                     )
             )}
           </View>
+
+          <RecentlyViewed />
 
           {/* Gift Sets Banner */}
           <View className="px-4 pb-8 mt-2">
@@ -362,6 +378,101 @@ export default function HomeScreen() {
                   </View>
                 )}
               </SafeAreaView>
+            </View>
+          </View>
+        </Modal>
+
+        <Modal visible={isFilterModalOpen} animationType="slide" transparent={true} onRequestClose={() => setIsFilterModalOpen(false)}>
+          <View className="flex-1 bg-black/60 justify-end">
+            <View className="bg-background-dark border-t border-white/10 rounded-t-3xl h-[85%]" style={isDesktop ? { width: 400, alignSelf: 'flex-end', height: '100%', borderRadius: 0, borderLeftWidth: 1 } : {}}>
+              <View className="flex-row items-center justify-between p-6 pb-4 border-b border-white/5">
+                <Text className="text-xl font-bold text-white tracking-widest uppercase">Filters</Text>
+                <TouchableOpacity onPress={() => setIsFilterModalOpen(false)} className="p-2 -mr-2">
+                  <MaterialIcons name="close" size={24} color="white" />
+                </TouchableOpacity>
+              </View>
+              <ScrollView className="flex-1 px-6 py-4">
+
+                {/* Sort Options */}
+                <Text className="text-xs font-bold tracking-widest uppercase text-white/50 mb-3">Sort By</Text>
+                <View className="flex-row flex-wrap gap-2 mb-8">
+                  {[
+                    { label: 'Newest', value: 'newest' },
+                    { label: 'Price: Low', value: 'price_asc' },
+                    { label: 'Price: High', value: 'price_desc' },
+                    { label: 'Popular', value: 'most_popular' }
+                  ].map(sort => (
+                    <TouchableOpacity
+                      key={sort.value}
+                      onPress={() => setDraftFilters(prev => ({ ...prev, sortBy: sort.value as any }))}
+                      className={`px-4 py-2 rounded-full border ${draftFilters.sortBy === sort.value ? 'bg-primary border-primary' : 'bg-surface-dark border-white/10'}`}
+                    >
+                      <Text className={`text-xs font-bold ${draftFilters.sortBy === sort.value ? 'text-black' : 'text-white/70'}`}>{sort.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {/* Gender Targets */}
+                <Text className="text-xs font-bold tracking-widest uppercase text-white/50 mb-3">Gender Target</Text>
+                <View className="flex-row flex-wrap gap-2 mb-8">
+                  {[
+                    { label: 'Unisex', value: 'unisex' },
+                    { label: 'Women', value: 'women' },
+                    { label: 'Men', value: 'men' }
+                  ].map(gender => (
+                    <TouchableOpacity
+                      key={gender.value}
+                      onPress={() => setDraftFilters(prev => ({ ...prev, genderTargets: prev.genderTargets?.includes(gender.value) ? [] : [gender.value] }))}
+                      className={`px-4 py-2 rounded-full border ${draftFilters.genderTargets?.includes(gender.value) ? 'bg-primary border-primary' : 'bg-surface-dark border-white/10'}`}
+                    >
+                      <Text className={`text-xs font-bold ${draftFilters.genderTargets?.includes(gender.value) ? 'text-black' : 'text-white/70'}`}>{gender.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {/* Price Range */}
+                <Text className="text-xs font-bold tracking-widest uppercase text-white/50 mb-3">Price Range ($)</Text>
+                <View className="flex-row items-center gap-4 mb-8">
+                  <TextInput
+                    placeholder="Min"
+                    placeholderTextColor="rgba(255,255,255,0.2)"
+                    keyboardType="numeric"
+                    value={draftFilters.minPrice ? String(draftFilters.minPrice) : ''}
+                    onChangeText={(val) => setDraftFilters(prev => ({ ...prev, minPrice: val ? Number(val) : undefined }))}
+                    className="flex-1 bg-surface-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm"
+                  />
+                  <Text className="text-white/30">-</Text>
+                  <TextInput
+                    placeholder="Max"
+                    placeholderTextColor="rgba(255,255,255,0.2)"
+                    keyboardType="numeric"
+                    value={draftFilters.maxPrice ? String(draftFilters.maxPrice) : ''}
+                    onChangeText={(val) => setDraftFilters(prev => ({ ...prev, maxPrice: val ? Number(val) : undefined }))}
+                    className="flex-1 bg-surface-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm"
+                  />
+                </View>
+
+                {/* In Stock */}
+                <View className="flex-row items-center justify-between mb-8">
+                  <Text className="text-sm font-bold tracking-widest uppercase text-white">In Stock Only</Text>
+                  <Switch
+                    value={!!draftFilters.inStockOnly}
+                    onValueChange={(val) => setDraftFilters(prev => ({ ...prev, inStockOnly: val }))}
+                    trackColor={{ false: 'rgba(255,255,255,0.1)', true: '#f4c025' }}
+                    thumbColor={draftFilters.inStockOnly ? '#000' : '#fff'}
+                  />
+                </View>
+
+              </ScrollView>
+
+              <View className="p-6 border-t border-white/5 flex-row gap-4 bg-background-dark">
+                <TouchableOpacity onPress={clearFilters} className="flex-1 items-center justify-center py-4">
+                  <Text className="text-white/60 font-bold uppercase tracking-widest text-xs">Clear All</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={applyFilters} className="flex-1 bg-primary items-center justify-center py-4 rounded-full shadow-lg">
+                  <Text className="text-black font-bold uppercase tracking-widest text-xs">Apply</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </Modal>

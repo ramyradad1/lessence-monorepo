@@ -69,32 +69,43 @@ export default function CartDrawer() {
           <>
             {/* Cart Items */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              {cart.map((item) => {
-                const sizePrice = item.size_options.find((s: { size: string; price: number }) => s.size === item.selectedSize)?.price || item.price;
+                  {cart.map((item: any, index: number) => {
+                    let sizePrice = item.price || 0;
+                    if (item.variant) {
+                      sizePrice = item.variant.price;
+                    } else if (item.size_options && item.selectedSize) {
+                      sizePrice = item.size_options.find((s: { size: string; price: number }) => s.size === item.selectedSize)?.price || item.price;
+                    }
+                    const itemId = item.bundle_id || item.id || item.product_id || '';
+                    const isBundle = !!item.bundle_id;
+                    const key = item.variant_id ? `${itemId}-${item.variant_id}-${index}` : `${itemId}-${item.selectedSize}-${index}`;
+
                 return (
-                  <div key={`${item.id}-${item.selectedSize}`} className="flex gap-4 bg-surface-dark/40 rounded-xl p-4 border border-white/5">
+                  <div key={key} className="flex gap-4 bg-surface-dark/40 rounded-xl p-4 border border-white/5">
                     <img src={item.image_url} alt={item.name} className="w-20 h-20 object-cover rounded-lg" />
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start">
                         <div>
                           <h4 className="text-sm font-display text-white truncate">{item.name}</h4>
-                          <p className="text-[10px] text-white/30 uppercase">{item.selectedSize}</p>
+                          <p className="text-[10px] text-white/30 uppercase">
+                            {isBundle ? "Gift Set" : item.selectedSize}
+                          </p>
                         </div>
-                        <button onClick={() => removeFromCart(item.id, item.selectedSize)} className="text-white/20 hover:text-red-400 transition-colors" aria-label="Remove item">
+                        <button onClick={() => removeFromCart(itemId, item.selectedSize, item.variant_id, isBundle)} className="text-white/20 hover:text-red-400 transition-colors" aria-label="Remove item">
                           <Trash2 size={14} />
                         </button>
                       </div>
                       <div className="flex items-center justify-between mt-3">
                         <div className="flex items-center gap-2 bg-white/5 rounded-full">
-                          <button onClick={() => updateQuantity(item.id, item.selectedSize, item.quantity - 1)} className="p-1.5 text-white/40 hover:text-primary transition-colors" aria-label="Decrease quantity">
+                          <button onClick={() => updateQuantity(itemId, item.selectedSize, item.quantity - 1, item.variant_id, isBundle)} className="p-1.5 text-white/40 hover:text-primary transition-colors" aria-label="Decrease quantity">
                             <Minus size={12} />
                           </button>
                           <span className="text-xs text-white font-bold w-5 text-center">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.id, item.selectedSize, item.quantity + 1)} className="p-1.5 text-white/40 hover:text-primary transition-colors" aria-label="Increase quantity">
+                          <button onClick={() => updateQuantity(itemId, item.selectedSize, item.quantity + 1, item.variant_id, isBundle)} className="p-1.5 text-white/40 hover:text-primary transition-colors" aria-label="Increase quantity">
                             <Plus size={12} />
                           </button>
                         </div>
-                        <p className="text-primary font-bold text-sm">${(sizePrice * item.quantity).toFixed(0)}</p>
+                        <p className="text-primary font-bold text-sm">${(Number(sizePrice) * item.quantity).toFixed(0)}</p>
                       </div>
                     </div>
                   </div>

@@ -2,7 +2,20 @@
 const nextConfig = {
     transpilePackages: ["@lessence/core", "@lessence/supabase", "@lessence/ui"],
     images: {
-        unoptimized: true,
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'mdlceagbdodmpgdfocrz.supabase.co',
+                port: '',
+                pathname: '/storage/v1/object/public/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'lh3.googleusercontent.com',
+                port: '',
+                pathname: '/**',
+            }
+        ],
     },
     eslint: {
         ignoreDuringBuilds: true,

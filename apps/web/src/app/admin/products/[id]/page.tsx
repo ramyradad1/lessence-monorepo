@@ -14,9 +14,14 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    name: string; subtitle: string; description: string; price: number; sku: string;
+    image_url: string; is_active: boolean; is_new: boolean; category_id: string;
+    low_stock_threshold: number;
+  }>({
     name: '', subtitle: '', description: '', price: 0, sku: '',
-    image_url: '', is_active: true, is_new: false, category_id: ''
+    image_url: '', is_active: true, is_new: false, category_id: '',
+    low_stock_threshold: 5
   });
 
   useEffect(() => {
@@ -27,7 +32,8 @@ export default function ProductDetailPage() {
         setForm({
           name: data.name, subtitle: data.subtitle || '', description: data.description || '',
           price: data.price, sku: data.sku || '', image_url: data.image_url || '',
-          is_active: data.is_active, is_new: data.is_new, category_id: data.category_id
+          is_active: data.is_active, is_new: data.is_new, category_id: data.category_id,
+          low_stock_threshold: data.low_stock_threshold ?? 5
         });
       }
       setLoading(false);
@@ -96,6 +102,16 @@ export default function ProductDetailPage() {
               <option key={c.id} value={c.id} className="bg-[#1e1b16]">{c.name}</option>
             ))}
           </select>
+        </div>
+        <div>
+          <label className="text-xs text-white/40 mb-1 block uppercase tracking-wider">Low Stock Threshold</label>
+          <input
+            title="Low stock threshold"
+            type="number"
+            value={form.low_stock_threshold}
+            onChange={e => setForm({ ...form, low_stock_threshold: Number(e.target.value) })}
+            className={inputClass}
+          />
         </div>
         <div className="flex gap-6">
           <label className="flex items-center gap-2 text-sm text-white/60 cursor-pointer">

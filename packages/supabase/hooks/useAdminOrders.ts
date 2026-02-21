@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { Order, OrderStatus, OrderItem, Payment, AdminAuditLog } from '@lessence/core';
+import { Order, OrderStatus, OrderItem, Payment, AdminAuditLog, OrderStatusHistory, OrderAdminNote } from '@lessence/core';
 
 export type OrderFilter = {
   status?: OrderStatus;
@@ -109,6 +109,20 @@ export function useAdminOrders(supabase: SupabaseClient) {
         .eq('record_id', orderId)
         .order('created_at', { ascending: false });
 
+      // Status history
+      const { data: statusHistory } = await supabase
+        .from('order_status_history')
+        .select('*, profiles(full_name)')
+        .eq('order_id', orderId)
+        .order('created_at', { ascending: true });
+
+      // Admin notes
+      const { data: adminNotes } = await supabase
+        .from('order_admin_notes')
+        .select('*, profiles(full_name)')
+        .eq('order_id', orderId)
+        .order('created_at', { ascending: false });
+
       // Customer profile
       let customerName = '';
       let customerEmail = '';
@@ -131,6 +145,14 @@ export function useAdminOrders(supabase: SupabaseClient) {
         payment: payments?.[0] || undefined,
         address: address || undefined,
         audit_logs: logs || [],
+        status_history: (statusHistory || []).map(h => ({
+          ...h,
+          changed_by_name: (h.profiles as any)?.full_name
+        })),
+        admin_notes: (adminNotes || []).map(n => ({
+          ...n,
+          admin_name: (n.profiles as any)?.full_name
+        })),
       } as OrderDetail;
     } catch (err) {
       console.error('Fetch order detail error:', err);
@@ -176,9 +198,36 @@ export function useAdminOrders(supabase: SupabaseClient) {
     }
   }, [supabase]);
 
+  const addOrderNote = useCallback(async (orderId: string, note: string, adminId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('order_admin_notes')
+        .insert({
+          order_id: orderId,
+          admin_id: adminId,
+          note
+        })
+        .select('*, profiles(full_name)')
+        .single();
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        note: {
+          ...data,
+          admin_name: (data.profiles as any)?.full_name
+        } as OrderAdminNote
+      };
+    } catch (err: any) {
+      console.error('Add order note error:', err);
+      return { success: false, error: err.message };
+    }
+  }, [supabase]);
+
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
 
-  return { orders, loading, totalCount, fetchOrders, fetchOrderDetail, updateOrderStatus };
+  return { orders, loading, totalCount, fetchOrders, fetchOrderDetail, updateOrderStatus, addOrderNote };
 }

@@ -1,13 +1,15 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
-import { useAuth } from '@lessence/supabase';
+import { useAuth, useNotifications } from '@lessence/supabase';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import LoginScreen from './LoginScreen';
+import { supabase } from '../lib/supabase';
 
 export default function ProfileScreen({ navigation }: { navigation: NativeStackNavigationProp<any> }) {
   const { user, profile, isLoading, signOut } = useAuth();
+  const { unreadCount } = useNotifications(supabase, user?.id);
 
   if (isLoading) {
     return (
@@ -59,13 +61,51 @@ export default function ProfileScreen({ navigation }: { navigation: NativeStackN
         )}
 
         <View className="space-y-4 mb-10">
-          <View className="bg-surface-dark border border-white/5 rounded-2xl p-6">
-            <View className="flex-row items-center mb-4">
-              <MaterialIcons name="local-mall" size={20} color="rgba(255,255,255,0.6)" />
-              <Text className="text-white font-display text-lg ml-3">Order History</Text>
+          {/* Notifications */}
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Notifications')}
+            className="bg-surface-dark border border-white/5 rounded-2xl p-6 flex-row items-center justify-between"
+          >
+            <View className="flex-row items-center">
+              <MaterialIcons name="notifications-none" size={20} color="rgba(255,255,255,0.6)" />
+              <Text className="text-white font-display text-lg ml-3">Notifications</Text>
             </View>
-            <Text className="text-white/40 text-xs">Your recent purchases will appear here.</Text>
-          </View>
+            <View className="flex-row items-center gap-3">
+              {unreadCount > 0 && (
+                <View className="bg-primary px-2 py-0.5 rounded-full">
+                  <Text className="text-black text-[10px] font-bold">{unreadCount} new</Text>
+                </View>
+              )}
+              <MaterialIcons name="chevron-right" size={20} color="rgba(255,255,255,0.3)" />
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => navigation.navigate('NotificationPreferences')}
+            className="bg-surface-dark border border-white/5 rounded-2xl p-6 flex-row items-center justify-between"
+          >
+            <View className="flex-row items-center">
+              <MaterialIcons name="settings" size={20} color="rgba(255,255,255,0.6)" />
+              <Text className="text-white font-display text-lg ml-3">Notification Settings</Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={20} color="rgba(255,255,255,0.3)" />
+          </TouchableOpacity>
+
+
+          {/* Order History */}
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Orders')}
+            className="bg-surface-dark border border-white/5 rounded-2xl p-6"
+          >
+            <View className="flex-row items-center justify-between mb-2">
+              <View className="flex-row items-center">
+                <MaterialIcons name="local-mall" size={20} color="rgba(255,255,255,0.6)" />
+                <Text className="text-white font-display text-lg ml-3">Order History</Text>
+              </View>
+              <MaterialIcons name="chevron-right" size={20} color="rgba(255,255,255,0.3)" />
+            </View>
+            <Text className="text-white/40 text-xs">View and track your previous purchases.</Text>
+          </TouchableOpacity>
 
           <View className="bg-surface-dark border border-white/5 rounded-2xl p-6">
             <View className="flex-row items-center mb-4">

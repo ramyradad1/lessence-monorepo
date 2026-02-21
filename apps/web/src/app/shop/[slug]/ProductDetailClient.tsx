@@ -1,89 +1,69 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { webFavoritesStorage } from "@/lib/favoritesStorage";
-import { useAuth, useFavorites } from "@lessence/supabase";
+import { webRecentlyViewedStorage } from "@/lib/recentlyViewedStorage";
+import { useAuth, useFavorites, useRecentlyViewed, useBackInStock } from "@lessence/supabase";
 import { useCart } from "@/context/CartContext";
 import { Product } from "@lessence/core";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Star, Heart, ShoppingCart, ArrowLeft, ChevronRight } from "lucide-react";
+import ProductReviews from "@/components/ProductReviews";
+import RecentlyViewed from "@/components/RecentlyViewed";
+import RelatedProducts from "@/components/RelatedProducts";
+import { Star, Heart, ShoppingCart, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { Bell } from "lucide-react";
 
-export default function ProductDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const productId = params.id as string;
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedSize, setSelectedSize] = useState(0);
+interface ProductDetailClientProps {
+  initialProduct: Product;
+}
+
+export default function ProductDetailClient({ initialProduct: product }: ProductDetailClientProps) {
+  const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
   const [isAdding, setIsAdding] = useState(false);
   const { addToCart } = useCart();
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites(supabase, user?.id, webFavoritesStorage);
+  const { addRecentlyViewed } = useRecentlyViewed(supabase, user?.id, webRecentlyViewedStorage);
+  const { isSubscribed, subscribe, loading: bisLoading } = useBackInStock(supabase, user?.id);
+  const [notifySuccess, setNotifySuccess] = useState(false);
 
   useEffect(() => {
-    async function fetchProduct() {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("id", productId)
-        .single();
-
-      if (!error && data) setProduct(data);
-      setLoading(false);
+    if (product) {
+      addRecentlyViewed(product.id);
     }
-    if (productId) fetchProduct();
-  }, [productId]);
+  }, [product, addRecentlyViewed]);
 
-  if (loading) {
-    return (
-      <main className="bg-background-dark min-h-screen">
-        <Navbar />
-        <div className="pt-28 max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div className="aspect-[4/5] bg-surface-dark/50 animate-pulse rounded-2xl" />
-            <div className="space-y-6 pt-8">
-              <div className="h-8 w-48 bg-surface-dark/50 animate-pulse rounded" />
-              <div className="h-6 w-32 bg-surface-dark/50 animate-pulse rounded" />
-              <div className="h-12 w-28 bg-surface-dark/50 animate-pulse rounded" />
-              <div className="h-32 bg-surface-dark/50 animate-pulse rounded" />
-            </div>
-          </div>
-        </div>
-      </main>
-    );
-  }
+  const variants = product.variants?.length && product.variants.length > 0
+    ? product.variants
+    : undefined;
 
-  if (!product) {
-    return (
-      <main className="bg-background-dark min-h-screen">
-        <Navbar />
-        <div className="pt-28 flex flex-col items-center justify-center min-h-[60vh]">
-          <h2 className="text-2xl font-display text-white mb-4">Product Not Found</h2>
-          <p className="text-white/40 text-sm mb-8">This fragrance may no longer be available.</p>
-          <Link href="/shop" className="bg-primary text-black px-8 py-3 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-white transition-all">
-            Browse Collection
-          </Link>
-        </div>
-      </main>
-    );
-  }
+  const sizes = !variants
+    ? (product.size_options?.length > 0
+      ? product.size_options
+      : [{ size: "50ml", price: product.price }, { size: "100ml", price: Math.round(product.price * 1.44) }])
+    : [];
 
-  const sizes = product.size_options?.length > 0
-    ? product.size_options
-    : [{ size: "50ml", price: product.price }, { size: "100ml", price: Math.round(product.price * 1.44) }];
-  const currentPrice = sizes[selectedSize]?.price || product.price;
+  const currentPrice = variants
+    ? (variants[selectedVariantIdx]?.price || product.price)
+    : (sizes[selectedVariantIdx]?.price || product.price);
+
   const notes = product.fragrance_notes || { top: [], heart: [], base: [] };
   const profiles = product.scent_profiles || [];
 
   const handleAddToCart = () => {
     setIsAdding(true);
-    addToCart(product, sizes[selectedSize].size);
+    if (variants) {
+      const selected = variants[selectedVariantIdx];
+      addToCart(product, `${selected.size_ml}ml ${selected.concentration}`, selected.id);
+    } else {
+      addToCart(product, sizes[selectedVariantIdx].size);
+    }
     setTimeout(() => setIsAdding(false), 1500);
   };
+
+  const isOutOfStock = variants ? variants[selectedVariantIdx]?.stock_qty <= 0 : false;
 
   return (
     <main className="bg-background-dark min-h-screen">
@@ -144,16 +124,27 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              {/* Size Selector */}
+              {/* Variant / Size Selector */}
               <div>
-                <span className="text-white/40 text-xs uppercase tracking-widest font-bold block mb-3">Select Size</span>
-                <div className="flex gap-3">
-                  {sizes.map((s: { size: string; price: number }, i: number) => (
+                <span className="text-white/40 text-xs uppercase tracking-widest font-bold block mb-3">Select Variant</span>
+                <div className="flex gap-3 flex-wrap">
+                  {variants ? variants.map((v, i) => (
                     <button
                       key={i}
-                      onClick={() => setSelectedSize(i)}
+                      onClick={() => setSelectedVariantIdx(i)}
                       className={`px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest border transition-all ${
-                        selectedSize === i
+                        selectedVariantIdx === i
+                          ? "bg-primary text-black border-primary"
+                          : "bg-transparent text-white/60 border-white/10 hover:border-white/30"
+                        } ${v.stock_qty <= 0 ? 'opacity-50 line-through' : ''}`}
+                    >
+                      {v.size_ml}ml {v.concentration} — ${v.price}
+                    </button>
+                  )) : sizes.map((s: { size: string; price: number }, i: number) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedVariantIdx(i)}
+                      className={`px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest border transition-all ${selectedVariantIdx === i
                           ? "bg-primary text-black border-primary"
                           : "bg-transparent text-white/60 border-white/10 hover:border-white/30"
                       }`}
@@ -185,20 +176,43 @@ export default function ProductDetailPage() {
               {/* CTA */}
               <button
                 onClick={handleAddToCart}
-                disabled={isAdding}
+                disabled={isAdding || isOutOfStock}
                 className={`w-full py-4 rounded-full font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 transition-all ${
                   isAdding
                     ? "bg-green-500 text-white"
+                  : isOutOfStock
+                    ? "bg-white/10 text-white/40 cursor-not-allowed"
                     : "bg-primary text-black hover:bg-white"
                 }`}
               >
                 {isAdding ? "Added to Bag ✓" : (
                   <>
                     <ShoppingCart size={16} />
-                    Add to Bag — ${currentPrice}
+                    {isOutOfStock ? "Out of Stock" : `Add to Bag — $${currentPrice}`}
                   </>
                 )}
               </button>
+
+              {/* Notify Me – Back in Stock */}
+              {isOutOfStock && variants && (
+                <button
+                  onClick={async () => {
+                    const variantId = variants[selectedVariantIdx]?.id;
+                    const ok = await subscribe(product.id, variantId);
+                    if (ok) setNotifySuccess(true);
+                  }}
+                  disabled={bisLoading || isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess}
+                  className={`w-full py-3 rounded-full text-xs font-bold uppercase tracking-widest border transition-all flex items-center justify-center gap-2 ${isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess
+                      ? 'border-green-500/30 text-green-400 cursor-default'
+                      : 'border-white/20 text-white hover:border-primary hover:text-primary'
+                    }`}
+                >
+                  <Bell size={14} />
+                  {isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess
+                    ? "You'll Be Notified ✓"
+                    : 'Notify Me When Available'}
+                </button>
+              )}
             </div>
           </div>
 
@@ -228,8 +242,14 @@ export default function ProductDetailPage() {
               </div>
             </div>
           )}
+
+          {/* Reviews Section */}
+          <ProductReviews productId={product.id} />
         </div>
       </div>
+
+      <RelatedProducts currentProduct={product} />
+      <RecentlyViewed currentProductId={product.id} />
 
       <Footer />
     </main>

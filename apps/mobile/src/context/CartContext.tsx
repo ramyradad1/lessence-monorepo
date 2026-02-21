@@ -25,14 +25,14 @@ const mobileCartStorage: CartStorage = {
 // ── Context type ──
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product, selectedSize: string) => void;
-  removeFromCart: (productId: string, selectedSize: string) => void;
-  updateQuantity: (productId: string, selectedSize: string, quantity: number) => void;
+  addToCart: (item: any, selectedSize?: string, variantId?: string, isBundle?: boolean) => void;
+  removeFromCart: (productId: string, selectedSize?: string, variantId?: string, isBundle?: boolean) => void;
+  updateQuantity: (productId: string, selectedSize: string | undefined, quantity: number, variantId?: string, isBundle?: boolean) => void;
   clearCart: () => void;
   placeOrder: (customerName?: string) => Promise<{ success: boolean; orderNumber?: string; error?: any }>;
   cartCount: number;
   cartTotal: number;
-  stockErrors: { productId: string; size: string; available: number; requested: number; ok: boolean }[];
+  stockErrors: { productId?: string; variantId?: string; bundleId?: string; size?: string; available: number; requested: number; ok: boolean }[];
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);

@@ -11,8 +11,10 @@ export interface CartStorage {
 
 // ── Stock validation result ──
 export type StockCheckResult = {
-  productId: string;
-  size: string;
+  productId?: string;
+  variantId?: string;
+  bundleId?: string;
+  size?: string;
   available: number;
   requested: number;
   ok: boolean;
@@ -82,13 +84,19 @@ export function useCartEngine(
 
       // Upsert items
       for (const item of items) {
-        const { data: existing } = await supabase
+        let query = supabase
           .from('cart_items')
           .select('id, quantity')
-          .eq('cart_id', cartId)
-          .eq('product_id', item.id)
-          .eq('selected_size', item.selectedSize)
-          .maybeSingle();
+          .eq('cart_id', cartId);
+        
+        if (item.bundle_id) {
+          query = query.eq('bundle_id', item.bundle_id);
+        } else {
+          query = query.eq('product_id', item.id)
+            .eq(item.variant_id ? 'variant_id' : 'selected_size', item.variant_id ? item.variant_id : item.selectedSize);
+        }
+        
+        const { data: existing } = await query.maybeSingle();
 
         if (existing) {
           await supabase
@@ -100,8 +108,10 @@ export function useCartEngine(
             .from('cart_items')
             .insert({
               cart_id: cartId,
-              product_id: item.id,
-              selected_size: item.selectedSize,
+              product_id: item.bundle_id ? null : item.id,
+              bundle_id: item.bundle_id || null,
+              selected_size: item.bundle_id ? null : item.selectedSize,
+              variant_id: item.bundle_id ? null : item.variant_id,
               quantity: item.quantity,
             });
         }
@@ -112,16 +122,38 @@ export function useCartEngine(
   };
 
   // ── Add to cart ──
-  const addToCart = useCallback((product: Product, selectedSize: string) => {
+  const addToCart = useCallback((itemObj: Partial<Product> | import('@lessence/core').Bundle, selectedSize?: string, variantId?: string, isBundle: boolean = false) => {
     setStockErrors([]);
     setCart(prev => {
-      const idx = prev.findIndex(i => i.id === product.id && i.selectedSize === selectedSize);
+      let isMatch;
+      if (isBundle) {
+        isMatch = (i: CartItem) => i.bundle_id === itemObj.id;
+      } else {
+        isMatch = (i: CartItem) => i.id === itemObj.id && 
+          (variantId ? i.variant_id === variantId : i.selectedSize === selectedSize);
+      }
+      const idx = prev.findIndex(isMatch);
       let next: CartItem[];
+      
       if (idx > -1) {
         next = [...prev];
         next[idx] = { ...next[idx], quantity: next[idx].quantity + 1 };
       } else {
-        next = [...prev, { ...product, quantity: 1, selectedSize }];
+        if (isBundle) {
+          const bundle = itemObj as import('@lessence/core').Bundle;
+          next = [...prev, { 
+            bundle_id: bundle.id, 
+            name: bundle.name, 
+            price: bundle.price,
+            image_url: bundle.image_url || '',
+            bundle: bundle, 
+            quantity: 1 
+          }];
+        } else {
+          const product = itemObj as Product;
+          const targetVariant = variantId ? product.variants?.find(v => v.id === variantId) : undefined;
+          next = [...prev, { ...product, quantity: 1, selectedSize, variant_id: variantId, variant: targetVariant }];
+        }
       }
       persistLocally(next);
       return next;
@@ -129,27 +161,34 @@ export function useCartEngine(
   }, [persistLocally]);
 
   // ── Update quantity ──
-  const updateQuantity = useCallback((productId: string, selectedSize: string, quantity: number) => {
+  const updateQuantity = useCallback((id: string, selectedSize: string | undefined, quantity: number, variantId?: string, isBundle?: boolean) => {
     setStockErrors([]);
     if (quantity <= 0) {
-      removeFromCart(productId, selectedSize);
+      removeFromCart(id, selectedSize, variantId, isBundle);
       return;
     }
     setCart(prev => {
-      const next = prev.map(item =>
-        item.id === productId && item.selectedSize === selectedSize
-          ? { ...item, quantity }
-          : item
-      );
+      const next = prev.map(item => {
+        if (isBundle && item.bundle_id === id) {
+           return { ...item, quantity };
+        }
+        if (!isBundle && item.id === id && (variantId ? item.variant_id === variantId : item.selectedSize === selectedSize)) {
+           return { ...item, quantity };
+        }
+        return item;
+      });
       persistLocally(next);
       return next;
     });
   }, [persistLocally]);
 
   // ── Remove item ──
-  const removeFromCart = useCallback((productId: string, selectedSize: string) => {
+  const removeFromCart = useCallback((id: string, selectedSize?: string, variantId?: string, isBundle?: boolean) => {
     setCart(prev => {
-      const next = prev.filter(i => !(i.id === productId && i.selectedSize === selectedSize));
+      const next = prev.filter(i => {
+         if (isBundle) return i.bundle_id !== id;
+         return !(i.id === id && (variantId ? i.variant_id === variantId : i.selectedSize === selectedSize));
+      });
       persistLocally(next);
       return next;
     });
@@ -165,22 +204,82 @@ export function useCartEngine(
   const validateStock = useCallback(async (): Promise<StockCheckResult[]> => {
     const checks: StockCheckResult[] = [];
     for (const item of cart) {
-      const { data } = await supabase
-        .from('inventory')
-        .select('quantity_available')
-        .eq('product_id', item.id)
-        .eq('size', item.selectedSize)
-        .maybeSingle();
+      if (item.bundle_id) {
+        // Fetch bundle items to validate stock for each component
+        const { data: bundleItems } = await supabase
+          .from('bundle_items')
+          .select('product_id, variant_id, quantity')
+          .eq('bundle_id', item.bundle_id);
+          
+        if (bundleItems) {
+            for (const bItem of bundleItems) {
+                if (bItem.variant_id) {
+                    const { data } = await supabase
+                      .from('product_variants')
+                      .select('stock_qty')
+                      .eq('id', bItem.variant_id)
+                      .maybeSingle();
+                    const available = data?.stock_qty ?? Infinity;
+                    const reqQty = item.quantity * bItem.quantity;
+                    checks.push({
+                      bundleId: item.bundle_id,
+                      productId: bItem.product_id,
+                      variantId: bItem.variant_id,
+                      available,
+                      requested: reqQty,
+                      ok: available >= reqQty,
+                    });
+                } else {
+                     const { data } = await supabase
+                      .from('inventory')
+                      .select('quantity_available')
+                      .eq('product_id', bItem.product_id)
+                      .maybeSingle();
+            
+                    const available = data?.quantity_available ?? Infinity;
+                    const reqQty = item.quantity * bItem.quantity;
+                    checks.push({
+                      bundleId: item.bundle_id,
+                      productId: bItem.product_id,
+                      available,
+                      requested: reqQty,
+                      ok: available >= reqQty,
+                    });
+                }
+            }
+        }
+      } else if (item.variant_id) {
+        const { data } = await supabase
+          .from('product_variants')
+          .select('stock_qty')
+          .eq('id', item.variant_id)
+          .maybeSingle();
+        const available = data?.stock_qty ?? Infinity;
+        checks.push({
+          productId: item.id,
+          variantId: item.variant_id,
+          size: item.selectedSize,
+          available,
+          requested: item.quantity,
+          ok: available >= item.quantity,
+        });
+      } else {
+        const { data } = await supabase
+          .from('inventory')
+          .select('quantity_available')
+          .eq('product_id', item.id)
+          .eq('size', item.selectedSize)
+          .maybeSingle();
 
-      // If no inventory row exists, assume unlimited
-      const available = data?.quantity_available ?? Infinity;
-      checks.push({
-        productId: item.id,
-        size: item.selectedSize,
-        available,
-        requested: item.quantity,
-        ok: available >= item.quantity,
-      });
+        const available = data?.quantity_available ?? Infinity;
+        checks.push({
+          productId: item.id,
+          size: item.selectedSize,
+          available,
+          requested: item.quantity,
+          ok: available >= item.quantity,
+        });
+      }
     }
     const bad = checks.filter(c => !c.ok);
     setStockErrors(bad);
@@ -197,15 +296,26 @@ export function useCartEngine(
       const outOfStock = checks.filter(c => !c.ok);
       if (outOfStock.length > 0) {
         const names = outOfStock.map(c => {
-          const item = cart.find(i => i.id === c.productId && i.selectedSize === c.size);
-          return `${item?.name || c.productId} (${c.size})`;
+          if (c.bundleId) {
+             const bItem = cart.find(i => i.bundle_id === c.bundleId);
+             return `${bItem?.bundle?.name || 'Bundle'} (Component stock issue)`;
+          }
+          const item = cart.find(i => i.id === c.productId && (c.variantId ? i.variant_id === c.variantId : i.selectedSize === c.size));
+          return `${item?.name || c.productId} (${c.size || 'Variant'})`;
         });
         throw new Error(`Stock unavailable: ${names.join(', ')}`);
       }
 
       const cartTotal = cart.reduce((acc, item) => {
-        const sizePrice = item.size_options?.find((s: { size: string; price: number }) => s.size === item.selectedSize)?.price || item.price;
-        return acc + sizePrice * item.quantity;
+        let price = item.price || 0;
+        if (item.bundle) {
+          price = item.bundle.price;
+        } else if (item.variant) {
+          price = item.variant.price;
+        } else if (item.size_options && item.selectedSize) {
+          price = item.size_options.find((s: { size: string; price: number }) => s.size === item.selectedSize)?.price || (item.price || 0);
+        }
+        return acc + price * item.quantity;
       }, 0);
 
       const orderNumber = `LE-${Date.now().toString(36).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -223,14 +333,27 @@ export function useCartEngine(
         .single();
       if (orderError) throw orderError;
 
-      const orderItems = cart.map(item => ({
-        order_id: orderData.id,
-        product_id: item.id,
-        product_name: item.name,
-        selected_size: item.selectedSize,
-        price: item.size_options?.find((s: { size: string; price: number }) => s.size === item.selectedSize)?.price || item.price,
-        quantity: item.quantity,
-      }));
+      const orderItems = cart.map(item => {
+        let price = item.price || 0;
+        if (item.bundle) {
+            price = item.bundle.price;
+        } else if (item.variant) {
+          price = item.variant.price;
+        } else if (item.size_options && item.selectedSize) {
+          price = item.size_options.find((s: { size: string; price: number }) => s.size === item.selectedSize)?.price || (item.price || 0);
+        }
+        return {
+          order_id: orderData.id,
+          product_id: item.bundle_id ? null : item.id,
+          bundle_id: item.bundle_id,
+          variant_id: item.variant_id,
+          product_name: item.bundle_id ? null : item.name,
+          bundle_name: item.bundle_id ? item.bundle?.name : null,
+          selected_size: item.selectedSize,
+          price: price,
+          quantity: item.quantity,
+        };
+      });
       const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
       if (itemsError) throw itemsError;
 
@@ -254,8 +377,15 @@ export function useCartEngine(
   // ── Computed ──
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
   const cartTotal = cart.reduce((acc, item) => {
-    const sizePrice = item.size_options?.find((s: { size: string; price: number }) => s.size === item.selectedSize)?.price || item.price;
-    return acc + sizePrice * item.quantity;
+    let price = item.price || 0;
+    if (item.bundle) {
+      price = item.bundle.price;
+    } else if (item.variant) {
+      price = item.variant.price;
+    } else if (item.size_options && item.selectedSize) {
+      price = item.size_options.find((s: { size: string; price: number }) => s.size === item.selectedSize)?.price || (item.price || 0);
+    }
+    return acc + price * item.quantity;
   }, 0);
 
   return {

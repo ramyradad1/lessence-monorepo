@@ -3,8 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { useAdminDashboard } from '@lessence/supabase';
-import { OrderStatus } from '@lessence/core';
+import { useAdminDashboard, useAdminNotifications } from '@lessence/supabase';
+import { OrderStatus, AdminNotification } from '@lessence/core';
 
 const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
@@ -17,7 +17,10 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function AdminDashboard() {
-  const { kpis, chartData, recentOrders, loading } = useAdminDashboard(supabase);
+  const { kpis, chartData, recentOrders, loading: dashboardLoading } = useAdminDashboard(supabase);
+  const { notifications, unreadCount, loading: notificationsLoading, markAsRead, markAllAsRead } = useAdminNotifications(supabase);
+
+  const loading = dashboardLoading || notificationsLoading;
 
   if (loading) {
     return (
@@ -138,6 +141,64 @@ export default function AdminDashboard() {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Low Stock Alerts */}
+      <div className="bg-[#1e1b16] border border-white/5 rounded-2xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-bold text-white">Inventory Alerts</h2>
+            {unreadCount > 0 && (
+              <span className="bg-red-500/10 text-red-500 text-xs font-bold px-2 py-0.5 rounded-full">
+                {unreadCount} new
+              </span>
+            )}
+          </div>
+          {unreadCount > 0 && (
+            <button
+              onClick={() => markAllAsRead()}
+              className="text-sm text-white/40 hover:text-white transition-colors"
+            >
+              Mark all as read
+            </button>
+          )}
+        </div>
+
+        <div className="space-y-3">
+          {notifications.length === 0 ? (
+            <div className="text-center py-8 text-white/20 text-sm">No inventory alerts</div>
+          ) : (
+            notifications.map(notification => (
+              <div
+                key={notification.id}
+                className={`p-4 rounded-xl border flex items-start justify-between gap-4 transition-colors ${notification.is_read
+                    ? 'bg-white/[0.02] border-white/5'
+                    : 'bg-red-500/5 border-red-500/20'
+                  }`}
+              >
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-red-400 text-sm">⚠️</span>
+                    <span className={`text-sm font-medium ${notification.is_read ? 'text-white/60' : 'text-white'}`}>
+                      {notification.message}
+                    </span>
+                  </div>
+                  <div className="text-xs text-white/30 ml-6">
+                    {new Date(notification.created_at || '').toLocaleString()}
+                  </div>
+                </div>
+                {!notification.is_read && (
+                  <button
+                    onClick={() => markAsRead(notification.id)}
+                    className="text-xs text-[#f4c025] hover:underline whitespace-nowrap"
+                  >
+                    Mark read
+                  </button>
+                )}
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

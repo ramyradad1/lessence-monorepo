@@ -5,7 +5,13 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Product } from '@lessence/core';
 import { useCart } from '../context/CartContext';
 import { useFavorites } from '../hooks/useFavorites';
-import { useAuth } from '@lessence/supabase';
+import { useAuth, useBackInStock } from '@lessence/supabase';
+import { ProductReviews } from '../components/ProductReviews';
+import { supabase } from '../lib/supabase';
+import { useRecentlyViewed } from '@lessence/supabase';
+import { mobileRecentlyViewedStorage } from '../lib/recentlyViewedStorage';
+import { RecentlyViewed } from '../components/RecentlyViewed';
+import { RelatedProducts } from '../components/RelatedProducts';
 
 const DEFAULT_PRODUCT: Product = {
   id: '4', name: 'Noire Essence', subtitle: 'Eau de Parfum',
@@ -28,17 +34,35 @@ export default function ProductDetailsScreen() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= 768;
   const product: Product = route.params?.product || DEFAULT_PRODUCT;
-  const [selectedSize, setSelectedSize] = useState(0);
+  const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
   const [isAdding, setIsAdding] = useState(false);
+  const [notifySuccess, setNotifySuccess] = useState(false);
   const { addToCart } = useCart();
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { addRecentlyViewed } = useRecentlyViewed(supabase, user?.id, mobileRecentlyViewedStorage);
+  const { isSubscribed, subscribe, loading: bisLoading } = useBackInStock(supabase, user?.id);
 
-  const sizes = product.size_options?.length > 0
-    ? product.size_options
-    : [{ size: '50ml', price: product.price }, { size: '100ml', price: product.price * 1.44 }];
+  React.useEffect(() => {
+    if (product?.id) {
+      addRecentlyViewed(product.id);
+    }
+  }, [product?.id, addRecentlyViewed]);
 
-  const currentPrice = sizes[selectedSize]?.price || product.price;
+  const variants = product.variants?.length && product.variants.length > 0
+    ? product.variants
+    : undefined;
+
+  const sizes = !variants
+    ? (product.size_options?.length > 0
+      ? product.size_options
+      : [{ size: '50ml', price: product.price }, { size: '100ml', price: product.price * 1.44 }])
+    : [];
+
+  const currentPrice = variants
+    ? (variants[selectedVariantIdx]?.price || product.price)
+    : (sizes[selectedVariantIdx]?.price || product.price);
+
   const notes = product.fragrance_notes || { top: [], heart: [], base: [] };
   const profiles = product.scent_profiles || [];
 
@@ -107,13 +131,17 @@ export default function ProductDetailsScreen() {
                   </View>
                 </View>
 
-                {/* Size Selector */}
+                {/* Variant / Size Selector */}
                 <View>
-                  <Text className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Select Size</Text>
-                  <View className="flex-row p-1 rounded-lg bg-surface-dark border border-white/10">
-                    {sizes.map((s, i) => (
-                      <TouchableOpacity key={i} onPress={() => setSelectedSize(i)} className={`flex-1 py-3 items-center justify-center rounded-md ${selectedSize === i ? 'bg-primary shadow-sm' : 'bg-transparent'}`}>
-                        <Text className={`text-sm font-bold ${selectedSize === i ? 'text-black' : 'text-slate-400'}`}>{s.size}</Text>
+                  <Text className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Select Variant</Text>
+                  <View className="flex-row flex-wrap p-1 gap-2 rounded-lg bg-surface-dark border border-white/10">
+                    {variants ? variants.map((v, i) => (
+                      <TouchableOpacity key={i} onPress={() => setSelectedVariantIdx(i)} className={`py-3 px-4 items-center justify-center rounded-md ${selectedVariantIdx === i ? 'bg-primary shadow-sm' : 'bg-transparent'} ${v.stock_qty <= 0 ? 'opacity-50' : ''}`}>
+                        <Text className={`text-sm font-bold ${selectedVariantIdx === i ? 'text-black' : 'text-slate-400'} ${v.stock_qty <= 0 ? 'line-through' : ''}`}>{v.size_ml}ml {v.concentration}</Text>
+                      </TouchableOpacity>
+                    )) : sizes.map((s, i) => (
+                      <TouchableOpacity key={i} onPress={() => setSelectedVariantIdx(i)} className={`py-3 px-4 items-center justify-center rounded-md ${selectedVariantIdx === i ? 'bg-primary shadow-sm' : 'bg-transparent'}`}>
+                        <Text className={`text-sm font-bold ${selectedVariantIdx === i ? 'text-black' : 'text-slate-400'}`}>{s.size}</Text>
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -139,20 +167,47 @@ export default function ProductDetailsScreen() {
 
                 {/* Add to Bag */}
                 <TouchableOpacity 
-                   className={`w-full py-4 px-6 rounded-xl shadow-lg flex-row items-center justify-between mt-4 ${isAdding ? 'bg-green-500' : 'bg-primary'}`}
-                   disabled={isAdding}
+                  className={`w-full py-4 px-6 rounded-xl shadow-lg flex-row items-center justify-between mt-4 ${isAdding ? 'bg-green-500' : (variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'bg-white/10' : 'bg-primary'}`}
+                  disabled={isAdding || (variants && variants[selectedVariantIdx]?.stock_qty <= 0)}
                    onPress={() => {
                      setIsAdding(true);
-                     addToCart(product, sizes[selectedSize].size);
+                     if (variants) {
+                       const selected = variants[selectedVariantIdx];
+                       addToCart(product, `${selected.size_ml}ml ${selected.concentration}`, selected.id);
+                     } else {
+                       addToCart(product, sizes[selectedVariantIdx].size);
+                     }
                      setTimeout(() => setIsAdding(false), 1500);
                    }}
                 >
-                  <Text className="text-black font-bold text-lg">{isAdding ? 'Added to Bag!' : 'Add to Bag'}</Text>
+                  <Text className={`font-bold text-lg ${(variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'text-white/40' : 'text-black'}`}>{isAdding ? 'Added to Bag!' : (variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'Out of Stock' : 'Add to Bag'}</Text>
                   <View className="flex-row items-center gap-2">
-                    <Text className="text-black/80 font-bold">${currentPrice.toFixed(2)}</Text>
-                    <MaterialIcons name={isAdding ? "check" : "arrow-forward"} size={20} color="black" />
+                    {(!variants || variants[selectedVariantIdx]?.stock_qty > 0) && (
+                      <Text className="text-black/80 font-bold">${currentPrice.toFixed(2)}</Text>
+                    )}
+                    <MaterialIcons name={isAdding ? "check" : "arrow-forward"} size={20} color={(variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'white' : 'black'} />
                   </View>
                 </TouchableOpacity>
+
+                {/* Notify Me – Back in Stock (Desktop) */}
+                {variants && variants[selectedVariantIdx]?.stock_qty <= 0 && (
+                  <TouchableOpacity
+                    className={`w-full py-3 px-6 rounded-xl border mt-3 flex-row items-center justify-center gap-2 ${isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess
+                        ? 'border-green-500/30'
+                        : 'border-white/20'
+                      }`}
+                    disabled={bisLoading || isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess}
+                    onPress={async () => {
+                      const ok = await subscribe(product.id, variants[selectedVariantIdx]?.id);
+                      if (ok) setNotifySuccess(true);
+                    }}
+                  >
+                    <MaterialIcons name="notifications-none" size={16} color={isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess ? '#4ade80' : 'white'} />
+                    <Text className={`text-xs font-bold uppercase tracking-widest ${isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess ? 'text-green-400' : 'text-white'}`}>
+                      {isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess ? "You'll Be Notified ✓" : 'Notify Me When Available'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
 
@@ -178,6 +233,18 @@ export default function ProductDetailsScreen() {
                   </View>
                 ))}
               </View>
+            </View>
+
+            <View className="px-8 mt-4 pb-8">
+              <ProductReviews productId={product.id} />
+            </View>
+
+            <View className="px-8 mt-4 pb-4">
+              <RelatedProducts currentProduct={product} />
+            </View>
+
+            <View className="px-8 pb-20">
+              <RecentlyViewed currentProductId={product.id} />
             </View>
           </ScrollView>
         </View>
@@ -244,13 +311,17 @@ export default function ProductDetailsScreen() {
               <Text className="text-slate-400 text-lg font-light italic" style={{ fontFamily: 'Newsreader_400Regular_Italic' }}>{product.subtitle}</Text>
             </View>
 
-            {/* Size Selection */}
+            {/* Variant / Size Selection */}
             <View className="py-2 mt-4">
-              <Text className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Select Size</Text>
-              <View className="flex-row p-1 rounded-lg bg-surface-dark border border-white/10 w-full">
-                {sizes.map((s, i) => (
-                  <TouchableOpacity key={i} onPress={() => setSelectedSize(i)} className={`flex-1 py-3 items-center justify-center rounded-md ${selectedSize === i ? 'bg-primary shadow-sm' : 'bg-transparent'}`}>
-                    <Text className={`text-sm font-bold ${selectedSize === i ? 'text-white' : 'text-slate-400'}`}>{s.size}</Text>
+              <Text className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Select Variant</Text>
+              <View className="flex-row flex-wrap gap-2 p-1 rounded-lg bg-surface-dark border border-white/10 w-full">
+                {variants ? variants.map((v, i) => (
+                  <TouchableOpacity key={i} onPress={() => setSelectedVariantIdx(i)} className={`py-3 px-4 flex-grow items-center justify-center rounded-md ${selectedVariantIdx === i ? 'bg-primary shadow-sm' : 'bg-transparent'} ${v.stock_qty <= 0 ? 'opacity-50' : ''}`}>
+                    <Text className={`text-sm font-bold ${selectedVariantIdx === i ? 'text-black' : 'text-slate-400'} ${v.stock_qty <= 0 ? 'line-through' : ''}`}>{v.size_ml}ml {v.concentration}</Text>
+                  </TouchableOpacity>
+                )) : sizes.map((s, i) => (
+                  <TouchableOpacity key={i} onPress={() => setSelectedVariantIdx(i)} className={`flex-1 py-3 items-center justify-center rounded-md ${selectedVariantIdx === i ? 'bg-primary shadow-sm' : 'bg-transparent'}`}>
+                    <Text className={`text-sm font-bold ${selectedVariantIdx === i ? 'text-white' : 'text-slate-400'}`}>{s.size}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -299,8 +370,20 @@ export default function ProductDetailsScreen() {
             </View>
 
             {/* Description */}
-            <View className="pb-20">
+            <View className="pb-4">
               <Text className="text-slate-300 leading-relaxed text-sm">{product.description}</Text>
+            </View>
+
+            <View className="pb-8">
+              <ProductReviews productId={product.id} />
+            </View>
+
+            <View className="pb-4 -mx-2">
+              <RelatedProducts currentProduct={product} />
+            </View>
+
+            <View className="pb-32 -mx-2">
+              <RecentlyViewed currentProductId={product.id} />
             </View>
           </View>
         </ScrollView>
@@ -308,20 +391,47 @@ export default function ProductDetailsScreen() {
         {/* Sticky Bottom CTA */}
         <View className="absolute bottom-0 left-0 right-0 p-4 bg-background-dark/95 border-t border-white/10 z-40">
           <TouchableOpacity 
-            className={`w-full py-4 px-6 rounded-xl shadow-lg flex-row items-center justify-between ${isAdding ? 'bg-green-500' : 'bg-primary'}`}
-            disabled={isAdding}
+            className={`w-full py-4 px-6 rounded-xl shadow-lg flex-row items-center justify-between ${isAdding ? 'bg-green-500' : (variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'bg-white/10' : 'bg-primary'}`}
+            disabled={isAdding || (variants && variants[selectedVariantIdx]?.stock_qty <= 0)}
             onPress={() => {
               setIsAdding(true);
-              addToCart(product, sizes[selectedSize].size);
+              if (variants) {
+                const selected = variants[selectedVariantIdx];
+                addToCart(product, `${selected.size_ml}ml ${selected.concentration}`, selected.id);
+              } else {
+                addToCart(product, sizes[selectedVariantIdx].size);
+              }
               setTimeout(() => setIsAdding(false), 1500);
             }}
           >
-            <Text className="text-black font-bold text-lg">{isAdding ? 'Added to Bag!' : 'Add to Bag'}</Text>
+            <Text className={`font-bold text-lg ${(variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'text-white/40' : 'text-black'}`}>{isAdding ? 'Added to Bag!' : (variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'Out of Stock' : 'Add to Bag'}</Text>
             <View className="flex-row items-center gap-2">
-              <Text className="text-black/80 font-bold">${currentPrice.toFixed(2)}</Text>
-              <MaterialIcons name={isAdding ? "check" : "arrow-forward"} size={20} color="black" />
+              {(!variants || variants[selectedVariantIdx]?.stock_qty > 0) && (
+                <Text className="text-black/80 font-bold">${currentPrice.toFixed(2)}</Text>
+              )}
+              <MaterialIcons name={isAdding ? "check" : "arrow-forward"} size={20} color={(variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'white' : 'black'} />
             </View>
           </TouchableOpacity>
+
+          {/* Notify Me – Back in Stock (Mobile) */}
+          {variants && variants[selectedVariantIdx]?.stock_qty <= 0 && (
+            <TouchableOpacity
+              className={`w-full py-3 px-6 rounded-xl border mt-2 flex-row items-center justify-center gap-2 ${isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess
+                  ? 'border-green-500/30'
+                  : 'border-white/20'
+                }`}
+              disabled={bisLoading || isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess}
+              onPress={async () => {
+                const ok = await subscribe(product.id, variants[selectedVariantIdx]?.id);
+                if (ok) setNotifySuccess(true);
+              }}
+            >
+              <MaterialIcons name="notifications-none" size={16} color={isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess ? '#4ade80' : 'white'} />
+              <Text className={`text-xs font-bold uppercase tracking-widest ${isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess ? 'text-green-400' : 'text-white'}`}>
+                {isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess ? "You'll Be Notified ✓" : 'Notify Me When Available'}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </SafeAreaView>

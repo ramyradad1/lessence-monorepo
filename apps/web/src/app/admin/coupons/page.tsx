@@ -5,13 +5,20 @@ import { supabase } from '@/lib/supabase';
 import { useAdminCoupons } from '@lessence/supabase';
 import { Coupon } from '@lessence/core';
 
-const EMPTY_COUPON = { code: '', discount_type: 'percentage' as 'percentage' | 'fixed', discount_amount: '', valid_from: '', valid_until: '', usage_limit: '' };
+const EMPTY_COUPON = { code: '', discount_type: 'percentage' as 'percentage' | 'fixed' | 'free_shipping', discount_amount: '', valid_from: '', valid_until: '', usage_limit: '' };
 
 export default function AdminCouponsPage() {
   const { coupons, loading, createCoupon, updateCoupon, toggleCouponActive, deleteCoupon } = useAdminCoupons(supabase);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState(EMPTY_COUPON);
+  const [form, setForm] = useState<{
+    code: string;
+    discount_type: 'percentage' | 'fixed' | 'free_shipping';
+    discount_amount: string;
+    valid_from: string;
+    valid_until: string;
+    usage_limit: string;
+  }>(EMPTY_COUPON);
   const [saving, setSaving] = useState(false);
 
   const openCreate = () => {
@@ -91,6 +98,7 @@ export default function AdminCouponsPage() {
               <select title="Discount Type" value={form.discount_type} onChange={e => setForm({ ...form, discount_type: e.target.value as any })} className={inputClass}>
                 <option value="percentage" className="bg-[#1e1b16]">Percentage (%)</option>
                 <option value="fixed" className="bg-[#1e1b16]">Fixed ($)</option>
+                <option value="free_shipping" className="bg-[#1e1b16]">Free Shipping</option>
               </select>
             </div>
             <div>
@@ -149,7 +157,7 @@ export default function AdminCouponsPage() {
                     <tr key={coupon.id} className="hover:bg-white/[0.02] transition-colors">
                       <td className="px-6 py-4 text-sm font-mono font-bold text-white">{coupon.code}</td>
                       <td className="px-6 py-4 text-sm text-white">
-                        {coupon.discount_type === 'percentage' ? `${coupon.discount_amount}%` : `$${coupon.discount_amount}`}
+                        {coupon.discount_type === 'percentage' ? `${coupon.discount_amount}%` : coupon.discount_type === 'free_shipping' ? 'Free Shipping' : `$${coupon.discount_amount}`}
                       </td>
                       <td className="px-6 py-4 text-sm text-white/40">
                         {coupon.times_used}{coupon.usage_limit ? ` / ${coupon.usage_limit}` : ''}

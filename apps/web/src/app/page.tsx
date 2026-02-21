@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import FeaturedProducts from "@/components/FeaturedProducts";
+import RecentlyViewed from "@/components/RecentlyViewed";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -10,6 +11,7 @@ export default function Home() {
       <Hero />
       <div className="bg-background-dark">
         <FeaturedProducts />
+        <RecentlyViewed />
 
         {/* Luxury Quote Section */}
         <section className="py-32 border-y border-white/5">

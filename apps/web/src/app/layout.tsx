@@ -21,6 +21,8 @@ export const metadata: Metadata = {
   description: "Experience the pinnacle of olfactory craftsmanship. High-end, artisanal perfumes for the modern individual.",
 };
 
+import QueryProviderWrapper from "@/components/QueryProviderWrapper";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,12 +31,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark scroll-smooth">
       <body className={`${sans.variable} ${display.variable} font-sans antialiased text-white selection:bg-primary/30`}>
-        <WebAuthProvider>
-          <CartProvider>
-            {children}
-            <CartDrawer />
-          </CartProvider>
-        </WebAuthProvider>
+        <QueryProviderWrapper>
+          <WebAuthProvider>
+            <CartProvider>
+              {children}
+              <CartDrawer />
+            </CartProvider>
+          </WebAuthProvider>
+        </QueryProviderWrapper>
       </body>
     </html>
   );

@@ -1,10 +1,12 @@
 "use client";
+import { memo } from "react";
 import { Product } from "@lessence/core";
 import { ShoppingCart, Star, Heart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import Link from "next/link";
+import Image from "next/image";
 
-export default function ProductCard({
+function ProductCard({
   product,
   isFavorite = false,
   onToggleFavorite,
@@ -18,15 +20,18 @@ export default function ProductCard({
 
   return (
     <div className="group relative bg-surface-dark/40 rounded-2xl overflow-hidden border border-white/5 hover:border-primary/30 transition-all">
-      <Link href={`/shop/${product.id}`} className="block">
+      <Link href={`/shop/${product.slug}`} className="block">
         <div className="aspect-[4/5] relative overflow-hidden">
-          <img
+          <Image
             src={product.image_url}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            className="object-cover group-hover:scale-110 transition-transform duration-700"
+            priority={product.is_new}
           />
           {product.is_new && (
-            <div className="absolute top-4 left-4 bg-primary text-black text-[10px] font-bold px-2 py-1 rounded uppercase">
+            <div className="absolute top-4 left-4 bg-primary text-black text-[10px] font-bold px-2 py-1 rounded uppercase z-10">
               New
             </div>
           )}
@@ -81,3 +86,5 @@ export default function ProductCard({
     </div>
   );
 }
+
+export default memo(ProductCard);

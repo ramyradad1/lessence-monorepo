@@ -29,8 +29,13 @@ function OrderItem({ order, onUpdateStatus }: { order: Order; onUpdateStatus: (i
     setIsUpdating(false);
   };
 
+  const navigation = useNavigation<any>();
+
   return (
-    <View className="flex-row items-center justify-between rounded-xl bg-surface-dark border border-surface-lighter p-4 mb-3">
+    <TouchableOpacity
+      onPress={() => navigation.navigate('AdminOrderDetail', { orderId: order.id })}
+      className="flex-row items-center justify-between rounded-xl bg-surface-dark border border-surface-lighter p-4 mb-3"
+    >
       <View className="flex-row items-center gap-4 flex-1">
         <View className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-lighter">
           <MaterialIcons name="inventory-2" size={20} color="#cbd5e1" />
@@ -77,7 +82,7 @@ function OrderItem({ order, onUpdateStatus }: { order: Order; onUpdateStatus: (i
           <Text className="text-xs font-bold text-white">${order.total_amount?.toFixed(2) || '0.00'}</Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -275,8 +280,28 @@ export default function AdminDashboardScreen() {
             </View>
           </View>
 
+          {/* Quick Actions */}
+          <View className="mb-4 mt-6">
+            <Text className="text-lg font-bold text-white mb-4">Quick Actions</Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('AdminReviews')}
+              className="flex-row items-center justify-between bg-surface-dark border border-surface-lighter p-4 rounded-xl"
+            >
+              <View className="flex-row items-center gap-3">
+                <View className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center">
+                  <MaterialIcons name="star" size={20} color="#f4c025" />
+                </View>
+                <View>
+                  <Text className="text-white font-bold">Manage Reviews</Text>
+                  <Text className="text-white/40 text-xs">Hide or remove customer reviews</Text>
+                </View>
+              </View>
+              <MaterialIcons name="chevron-right" size={24} color="rgba(255,255,255,0.4)" />
+            </TouchableOpacity>
+          </View>
+
           {/* Recent Orders */}
-          <View className="pb-4 mt-8">
+          <View className="pb-4 mt-4">
             <View className="flex-row items-center justify-between mb-4">
               <Text className="text-lg font-bold text-white">Recent Orders</Text>
               <TouchableOpacity>

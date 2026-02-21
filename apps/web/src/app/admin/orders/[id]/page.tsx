@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAdminOrders, OrderDetail } from '@lessence/supabase';
-import { OrderStatus } from '@lessence/core';
+import { OrderStatus, OrderAdminNote } from '@lessence/core';
+import OrderTimeline from '@/components/OrderTimeline';
 
 const ALL_STATUSES: OrderStatus[] = ['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
 const STATUS_COLORS: Record<string, string> = {
@@ -21,10 +22,12 @@ export default function OrderDetailPage() {
   const params = useParams();
   const router = useRouter();
   const orderId = params.id as string;
-  const { fetchOrderDetail, updateOrderStatus } = useAdminOrders(supabase);
+  const { fetchOrderDetail, updateOrderStatus, addOrderNote } = useAdminOrders(supabase);
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [newNote, setNewNote] = useState('');
+  const [addingNote, setAddingNote] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -42,6 +45,25 @@ export default function OrderDetailPage() {
     const updated = await fetchOrderDetail(orderId);
     setOrder(updated);
     setUpdating(false);
+  };
+
+  const handleAddNote = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newNote.trim() || !order) return;
+
+    setAddingNote(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const result = await addOrderNote(orderId, newNote, user.id);
+      if (result.success && result.note) {
+        setOrder({
+          ...order,
+          admin_notes: [result.note, ...(order.admin_notes || [])]
+        });
+        setNewNote('');
+      }
+    }
+    setAddingNote(false);
   };
 
   if (loading) {
@@ -80,6 +102,12 @@ export default function OrderDetailPage() {
           </select>
           <span className={`text-[11px] font-bold uppercase px-3 py-1.5 rounded-full border ${STATUS_COLORS[order.status]}`}>{order.status}</span>
         </div>
+      </div>
+
+      {/* Order Timeline */}
+      <div className="bg-[#1e1b16] border border-white/5 rounded-2xl p-6">
+        <h2 className="text-sm font-semibold text-white/40 uppercase tracking-wider mb-2">Order Progress</h2>
+        <OrderTimeline currentStatus={order.status} history={order.status_history} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -127,25 +155,75 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
-      {/* Audit Log */}
-      {order.audit_logs && order.audit_logs.length > 0 && (
-        <div className="bg-[#1e1b16] border border-white/5 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-white/40 uppercase tracking-wider mb-4">Status History</h2>
-          <div className="space-y-2">
-            {order.audit_logs.map(log => (
-              <div key={log.id} className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="text-white/60">{log.action}:</span>
-                  <span className="text-orange-400">{(log.changes as any)?.from}</span>
-                  <span className="text-white/20">→</span>
-                  <span className="text-green-400">{(log.changes as any)?.to}</span>
+      {/* Gift Details */}
+      {order.is_gift && (
+        <div className="bg-[#1e1b16] border border-[#f4c025]/20 rounded-2xl p-5 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-10">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 12V22H4V12" stroke="#f4c025" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M22 7H2V12H22V7Z" stroke="#f4c025" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M12 22V7" stroke="#f4c025" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M12 7H16.5C17.163 7 17.7989 6.73661 18.2678 6.26777C18.7366 5.79893 19 5.16304 19 4.5C19 3.83696 18.7366 3.20107 18.2678 2.73223C17.7989 2.26339 17.163 2 16.5 2C13 2 12 7 12 7Z" stroke="#f4c025" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M12 7H7.5C6.83696 7 6.20107 6.73661 5.73223 6.26777C5.26339 5.79893 5 5.16304 5 4.5C5 3.83696 5.26339 3.20107 5.73223 2.73223C6.20107 2.26339 6.83696 2 7.5 2C11 2 12 7 12 7Z" stroke="#f4c025" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <h2 className="text-sm font-semibold text-[#f4c025] uppercase tracking-wider mb-4">Gift Information</h2>
+          <div className="space-y-4 relative z-10">
+            <div>
+              <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Gift Wrap Requested</p>
+              <p className="text-sm text-white font-medium">{order.gift_wrap ? 'Yes, please wrap' : 'No'}</p>
+            </div>
+            {order.gift_message && (
+              <div>
+                <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Gift Message</p>
+                <div className="bg-black/30 p-4 rounded-xl border border-white/5 italic">
+                  <p className="text-sm text-white/90 whitespace-pre-wrap">{order.gift_message}</p>
                 </div>
-                <span className="text-xs text-white/20">{log.created_at ? new Date(log.created_at).toLocaleString() : ''}</span>
               </div>
-            ))}
+            )}
           </div>
         </div>
       )}
+
+      {/* Admin Notes */}
+      <div className="bg-[#1e1b16] border border-white/5 rounded-2xl p-5">
+        <h2 className="text-sm font-semibold text-white/40 uppercase tracking-wider mb-4">Internal Admin Notes</h2>
+
+        <form onSubmit={handleAddNote} className="mb-6">
+          <textarea
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+            placeholder="Add an internal note..."
+            className="w-full bg-black/30 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-[#f4c025] transition-colors resize-none mb-3"
+            rows={3}
+          />
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={addingNote || !newNote.trim()}
+              className="bg-[#f4c025] text-black px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-white transition-all disabled:opacity-50"
+            >
+              {addingNote ? 'Adding...' : 'Add Note'}
+            </button>
+          </div>
+        </form>
+
+        <div className="space-y-4">
+          {order.admin_notes && order.admin_notes.length > 0 ? (
+            order.admin_notes.map((note: OrderAdminNote) => (
+              <div key={note.id} className="bg-white/5 rounded-xl p-4 border border-white/5">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-bold text-[#f4c025] uppercase tracking-wider">{note.admin_name || 'Admin'}</span>
+                  <span className="text-[10px] text-white/20">{new Date(note.created_at).toLocaleString()}</span>
+                </div>
+                <p className="text-sm text-white/80 whitespace-pre-wrap">{note.note}</p>
+              </div>
+            ))
+          ) : (
+            <p className="text-center py-4 text-white/20 text-xs italic">No internal notes yet.</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
