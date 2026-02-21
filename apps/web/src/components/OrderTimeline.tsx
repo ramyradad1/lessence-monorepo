@@ -49,6 +49,8 @@ export default function OrderTimeline({ currentStatus, history = [] }: OrderTime
         <div className="absolute top-5 left-0 w-full h-[2px] bg-white/5 -z-0" />
         <div 
           className="absolute top-5 left-0 h-[2px] bg-[#f4c025] transition-all duration-500 -z-0"
+          role="progressbar"
+          aria-label="Order progress"
           style={{ width: `${Math.max(0, (STEPS.findIndex(s => s.status === currentStatus)) / (STEPS.length - 1)) * 100}%` } as React.CSSProperties}
         />
 

@@ -203,8 +203,9 @@ export default function AdminBundlesPage() {
             <div className="p-6 overflow-y-auto space-y-6 flex-1">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1.5 cursor-pointer">Name</label>
+                  <label htmlFor="bundle-name" className="block text-sm font-medium text-white/70 mb-1.5 cursor-pointer">Name</label>
                   <input
+                    id="bundle-name"
                     type="text"
                     value={name}
                     onChange={(e) => {
@@ -215,8 +216,9 @@ export default function AdminBundlesPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1.5 cursor-pointer">Slug</label>
+                  <label htmlFor="bundle-slug" className="block text-sm font-medium text-white/70 mb-1.5 cursor-pointer">Slug</label>
                   <input
+                    id="bundle-slug"
                     type="text"
                     value={slug}
                     onChange={(e) => setSlug(e.target.value)}
@@ -226,8 +228,9 @@ export default function AdminBundlesPage() {
               </div>
               
                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1.5 cursor-pointer">Description</label>
+                <label htmlFor="bundle-description" className="block text-sm font-medium text-white/70 mb-1.5 cursor-pointer">Description</label>
                   <textarea
+                  id="bundle-description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     rows={3}
@@ -237,8 +240,9 @@ export default function AdminBundlesPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1.5 cursor-pointer">Price ($)</label>
+                  <label htmlFor="bundle-price" className="block text-sm font-medium text-white/70 mb-1.5 cursor-pointer">Price ($)</label>
                     <input
+                    id="bundle-price"
                       type="number"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
@@ -278,6 +282,7 @@ export default function AdminBundlesPage() {
                                         <select
                                             value={item.product_id}
                                             onChange={(e) => updateItem(index, 'product_id', e.target.value)}
+                                     aria-label="Select product"
                                             className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#f4c025]"
                                         >
                                             <option value="">Select Product...</option>
@@ -290,6 +295,7 @@ export default function AdminBundlesPage() {
                                             <select
                                                 value={item.variant_id || ''}
                                                 onChange={(e) => updateItem(index, 'variant_id', e.target.value)}
+                                       aria-label="Select variant"
                                                 className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#f4c025]"
                                             >
                                                 <option value="">Select Variant (Optional)</option>

@@ -142,8 +142,9 @@ export default function ReportsPage() {
       <div className="bg-[#1e1b16] border border-white/5 rounded-2xl p-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-white/30 uppercase tracking-wider">Start Date</label>
+            <label htmlFor="report-start-date" className="text-xs font-semibold text-white/30 uppercase tracking-wider">Start Date</label>
             <input
+              id="report-start-date"
               type="date"
               value={filters.startDate}
               onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
@@ -151,8 +152,9 @@ export default function ReportsPage() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-white/30 uppercase tracking-wider">End Date</label>
+            <label htmlFor="report-end-date" className="text-xs font-semibold text-white/30 uppercase tracking-wider">End Date</label>
             <input
+              id="report-end-date"
               type="date"
               value={filters.endDate}
               onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
@@ -160,8 +162,9 @@ export default function ReportsPage() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-white/30 uppercase tracking-wider">Status</label>
+            <label htmlFor="report-status" className="text-xs font-semibold text-white/30 uppercase tracking-wider">Status</label>
             <select
+              id="report-status"
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
               className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-[#f4c025] transition-colors"
@@ -177,8 +180,9 @@ export default function ReportsPage() {
             </select>
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-white/30 uppercase tracking-wider">Category</label>
+            <label htmlFor="report-category" className="text-xs font-semibold text-white/30 uppercase tracking-wider">Category</label>
             <select
+              id="report-category"
               value={filters.categoryId}
               onChange={(e) => setFilters({ ...filters, categoryId: e.target.value })}
               className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-[#f4c025] transition-colors"

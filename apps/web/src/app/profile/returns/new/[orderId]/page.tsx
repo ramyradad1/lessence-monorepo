@@ -208,6 +208,7 @@ export default function NewReturnPage() {
                               max={item.quantity}
                               value={selectedItems[item.id]}
                               onChange={(e) => handleQtyChange(item.id!, parseInt(e.target.value), item.quantity)}
+                              aria-label="Return quantity"
                               className="w-16 bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-sm text-white focus:outline-none focus:border-[#f4c025]/40"
                             />
                           </div>
@@ -226,6 +227,7 @@ export default function NewReturnPage() {
                 <select 
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
+                  aria-label="Reason for return"
                   className="w-full bg-white/[0.02] border border-white/5 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-[#f4c025]/40 transition-all"
                   required
                 >
@@ -261,6 +263,7 @@ export default function NewReturnPage() {
                     <button 
                       type="button"
                       onClick={() => removeFile(index)}
+                      aria-label="Remove photo"
                       className="absolute top-1 right-1 bg-black/60 rounded-full p-1 text-white opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <X size={12} />

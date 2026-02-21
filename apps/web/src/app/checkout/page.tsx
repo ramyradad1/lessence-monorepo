@@ -272,8 +272,8 @@ export default function CheckoutPage() {
                         setGiftMessage('');
                       }
                     }}
-                    className="w-5 h-5 rounded border-white/10 bg-[#181611] text-[#f4c025] focus:ring-[#f4c025] focus:ring-offset-background-dark appearance-none checked:bg-[#f4c025] checked:border-[#f4c025] transition-colors relative"
-                    style={{ backgroundImage: isGift ? `url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='black' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e")` : 'none' }}
+                    aria-label="This order is a gift"
+                    className="w-5 h-5 rounded border border-white/10 bg-[#181611] accent-[#f4c025] focus:ring-[#f4c025] focus:ring-offset-background-dark transition-colors cursor-pointer"
                   />
                   <Label htmlFor="is_gift" className="text-white text-base font-medium cursor-pointer mb-0">This order is a gift</Label>
                 </div>
@@ -286,8 +286,8 @@ export default function CheckoutPage() {
                         id="gift_wrap"
                         checked={giftWrap}
                         onChange={(e) => setGiftWrap(e.target.checked)}
-                        className="w-4 h-4 rounded border-white/10 bg-[#181611] text-[#f4c025] focus:ring-[#f4c025] focus:ring-offset-background-dark appearance-none checked:bg-[#f4c025] checked:border-[#f4c025] transition-colors relative"
-                        style={{ backgroundImage: giftWrap ? `url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='black' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e")` : 'none' }}
+                        aria-label="Add gift wrapping"
+                        className="w-4 h-4 rounded border border-white/10 bg-[#181611] accent-[#f4c025] focus:ring-[#f4c025] focus:ring-offset-background-dark transition-colors cursor-pointer"
                       />
                       <Label htmlFor="gift_wrap" className="text-white/80 text-sm cursor-pointer mb-0">Add elegant gift wrapping (Complimentary)</Label>
                     </div>
