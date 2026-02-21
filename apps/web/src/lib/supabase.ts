@@ -1,6 +1,3 @@
-import { createSupabaseClient } from '@lessence/supabase';
+import { createClient } from '@/utils/supabase/client';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_PROJECT_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-export const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
+export const supabase = createClient();
