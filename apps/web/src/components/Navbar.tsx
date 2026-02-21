@@ -10,7 +10,7 @@ export default function Navbar() {
     <nav className="fixed top-0 w-full z-40 bg-background-dark/80 backdrop-blur-md border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
         <Link href="/" className="text-2xl font-display tracking-widest text-primary uppercase">
-          L&apos;Essence
+          L&apos;Essence <span className="text-[8px] opacity-20">v1.0.2</span>
         </Link>
         
         <div className="hidden md:flex items-center space-x-8 text-white/70">
