@@ -82,17 +82,17 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background-dark py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-light text-zinc-900 dark:text-zinc-50 mb-12">Checkout</h1>
+        <h1 className="text-4xl font-display text-white mb-12 uppercase tracking-[0.2em]">Checkout</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Main Checkout Form */}
           <div className="lg:col-span-7 space-y-10">
-            <form id="checkout-form" onSubmit={handleCheckout} className="space-y-8 bg-white dark:bg-zinc-900 p-8 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800">
+            <form id="checkout-form" onSubmit={handleCheckout} className="space-y-8 glass-effect p-8 rounded-2xl shadow-2xl border border-white/5 relative overflow-hidden">
               
               <div>
-                <h2 className="text-xl font-medium text-zinc-900 dark:text-zinc-50 mb-6">Contact Information</h2>
+                <h2 className="text-xl font-display text-primary mb-6 uppercase tracking-widest">Contact Information</h2>
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="email">Email</Label>
@@ -110,7 +110,7 @@ export default function CheckoutPage() {
               </div>
 
               <div>
-                <h2 className="text-xl font-medium text-zinc-900 dark:text-zinc-50 mb-6 mt-10">Shipping Address</h2>
+                <h2 className="text-xl font-display text-primary mb-6 mt-10 uppercase tracking-widest">Shipping Address</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
                     <Label htmlFor="fullName">Full Name</Label>
@@ -147,44 +147,44 @@ export default function CheckoutPage() {
 
           {/* Order Summary Sidebar */}
           <div className="lg:col-span-5">
-            <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 sticky top-24">
-              <h2 className="text-xl font-medium text-zinc-900 dark:text-zinc-50 mb-6">Order Summary</h2>
+            <div className="glass-effect p-8 rounded-2xl shadow-2xl border border-white/5 sticky top-24">
+              <h2 className="text-xl font-display text-primary mb-6 uppercase tracking-widest">Order Summary</h2>
               
-              <div className="flow-root mb-6 max-h-96 overflow-y-auto pr-2">
-                <ul className="-my-6 divide-y divide-zinc-200 dark:divide-zinc-800">
+              <div className="flow-root mb-6 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                <ul className="-my-6 divide-y divide-white/5">
                   {cart.map((item) => (
                     <li key={`${item.id}-${item.selectedSize}`} className="py-6 flex">
-                      <div className="flex-shrink-0 w-20 h-20 bg-zinc-100 dark:bg-zinc-800 rounded-lg overflow-hidden">
+                      <div className="flex-shrink-0 w-20 h-20 bg-white/5 rounded-lg overflow-hidden border border-white/5">
                         {item.image_url ? (
                           <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
                         ) : (
-                          <div className="w-full h-full bg-zinc-200 dark:bg-zinc-700" />
+                            <div className="w-full h-full bg-white/5" />
                         )}
                       </div>
                       <div className="ml-4 flex-1 flex flex-col">
                         <div>
-                          <div className="flex justify-between text-base font-medium text-zinc-900 dark:text-zinc-50">
+                          <div className="flex justify-between text-base font-display text-white">
                             <h3>{item.name}</h3>
-                            <p className="ml-4">${(item.price * item.quantity).toFixed(2)}</p>
+                            <p className="ml-4 text-primary">${(item.price * item.quantity).toFixed(2)}</p>
                           </div>
-                          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Size: {item.selectedSize}</p>
+                          <p className="mt-1 text-xs text-white/40 uppercase tracking-wider">Size: {item.selectedSize}</p>
                         </div>
                         <div className="flex-1 flex items-end justify-between text-sm">
-                          <div className="flex items-center border border-zinc-200 dark:border-zinc-700 rounded-lg">
+                          <div className="flex items-center bg-white/5 rounded-lg border border-white/10">
                               <button
                                 onClick={() => updateQuantity(item.id, item.selectedSize, item.quantity - 1)}
-                                className="px-3 py-1 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-l-lg transition-colors"
+                              className="px-3 py-1 text-white/40 hover:text-primary transition-colors"
                               >-</button>
-                              <span className="px-3 font-medium text-zinc-900 dark:text-zinc-50">{item.quantity}</span>
+                            <span className="px-3 font-bold text-white text-xs">{item.quantity}</span>
                               <button
                                 onClick={() => updateQuantity(item.id, item.selectedSize, item.quantity + 1)}
-                                className="px-3 py-1 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-r-lg transition-colors"
+                              className="px-3 py-1 text-white/40 hover:text-primary transition-colors"
                               >+</button>
                           </div>
                           <button
                             type="button"
                             onClick={() => removeFromCart(item.id, item.selectedSize)}
-                            className="font-medium text-red-600 hover:text-red-500 transition-colors"
+                            className="font-medium text-red-400/60 hover:text-red-400 transition-colors"
                             aria-label="Remove item"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -196,7 +196,7 @@ export default function CheckoutPage() {
                 </ul>
               </div>
 
-              <div className="border-t border-zinc-200 dark:border-zinc-800 pt-6 space-y-4">
+              <div className="border-t border-white/10 pt-6 space-y-4">
                  <div>
                     <Label htmlFor="coupon">Gift card or discount code</Label>
                     <div className="flex mt-1">
@@ -208,27 +208,27 @@ export default function CheckoutPage() {
                             className="rounded-r-none" 
                             placeholder="CODE"
                         />
-                        <Button type="button" variant="outline" className="rounded-l-none border-l-0">Apply</Button>
+                    <Button type="button" variant="outline" className="rounded-l-none border-l-0 px-4">Apply</Button>
                     </div>
                 </div>
 
                 <div className="flex flex-col gap-2 pt-4">
-                  <div className="flex justify-between text-zinc-600 dark:text-zinc-400">
+                  <div className="flex justify-between text-white/40 text-xs uppercase tracking-wider">
                     <p>Subtotal</p>
-                    <p>${cartTotal.toFixed(2)}</p>
+                    <p className="text-white">${cartTotal.toFixed(2)}</p>
                   </div>
-                  <div className="flex justify-between text-zinc-600 dark:text-zinc-400">
+                  <div className="flex justify-between text-white/40 text-xs uppercase tracking-wider">
                     <p>Shipping</p>
-                    <p>Calculated at next step</p>
+                    <p className="italic">Calculated at next step</p>
                   </div>
-                  <div className="flex justify-between text-lg font-medium text-zinc-900 dark:text-zinc-50 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-                    <p>Total</p>
-                    <p>${cartTotal.toFixed(2)}</p>
+                  <div className="flex justify-between text-lg font-display text-white pt-4 border-t border-white/10">
+                    <p className="uppercase tracking-widest text-sm">Total</p>
+                    <p className="text-primary font-bold">${cartTotal.toFixed(2)}</p>
                   </div>
                 </div>
 
                 {error && (
-                  <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-lg text-sm border border-red-100 dark:border-red-900/50">
+                  <div className="bg-red-500/10 text-red-400 p-3 rounded-lg text-xs border border-red-500/20">
                     {error}
                   </div>
                 )}
@@ -236,11 +236,11 @@ export default function CheckoutPage() {
                 <Button 
                     type="submit" 
                     form="checkout-form"
-                    className="w-full h-12 text-lg" 
+                  className="w-full h-14 text-sm" 
                     disabled={loading}
                 >
                   {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Place Order (Cash on Delivery)'}
-                  {!loading && <ArrowRight className="w-5 h-5 ml-2" />}
+                  {!loading && <ArrowRight className="w-5 ml-2" />}
                 </Button>
               </div>
             </div>
@@ -248,5 +248,6 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+
   );
 }
