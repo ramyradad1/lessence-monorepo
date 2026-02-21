@@ -29,7 +29,7 @@
         "../../packages/supabase/index.ts"
       ],
       "@lessence/ui": [
-        "../../packages/ui/index.ts"
+        "../../packages/ui/index.tsx"
       ]
     }
   },
