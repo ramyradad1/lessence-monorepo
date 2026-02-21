@@ -7,7 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -55,22 +55,25 @@ serve(async (req) => {
     const validatedCartItems = [];
 
     for (const item of cartItems) {
+      const productId = item.id || item.product_id;
+      const selectedSize = item.selectedSize || item.selected_size;
+
       const { data: product, error: productError } = await supabaseClient
         .from('products')
         .select('name, image_url, size_options')
-        .eq('id', item.product_id)
+        .eq('id', productId)
         .single()
 
       if (productError || !product) {
-        throw new Error(`Product not found: ${item.product_id}`)
+        throw new Error(`Product not found: ${productId}`)
       }
 
       // Find the specific size price
       const sizeOptions = product.size_options as any[];
-      const sizeOption = (sizeOptions || []).find((s: any) => s.size === item.selected_size);
+      const sizeOption = (sizeOptions || []).find((s: any) => s.size === selectedSize);
       
       if (!sizeOption) {
-        throw new Error(`Invalid size ${item.selected_size} for product ${product.name}`)
+        throw new Error(`Invalid size ${selectedSize} for product ${product.name}`)
       }
 
       const price = sizeOption.price;
@@ -79,17 +82,19 @@ serve(async (req) => {
       const { data: inventory, error: inventoryError } = await supabaseClient
         .from('inventory')
         .select('quantity_available')
-        .eq('product_id', item.product_id)
-        .eq('size', item.selected_size)
+        .eq('product_id', productId)
+        .eq('size', selectedSize)
         .single();
         
       if (inventoryError || !inventory || inventory.quantity_available < item.quantity) {
-          throw new Error(`Insufficient stock for ${product.name} (${item.selected_size})`)
+        throw new Error(`Insufficient stock for ${product.name} (${selectedSize})`)
       }
 
       subtotal += price * item.quantity;
       validatedCartItems.push({
          ...item,
+        product_id: productId,
+        selected_size: selectedSize,
          price,
          product_name: product.name
       });
@@ -98,7 +103,7 @@ serve(async (req) => {
         price_data: {
           currency: 'usd',
           product_data: {
-            name: `${product.name} (${item.selected_size})`,
+            name: `${product.name} (${selectedSize})`,
             images: product.image_url ? [product.image_url] : [],
           },
           unit_amount: Math.round(price * 100), // Stripe expects amounts in cents
