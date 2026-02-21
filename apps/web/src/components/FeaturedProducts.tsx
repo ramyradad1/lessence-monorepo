@@ -2,11 +2,12 @@
 import { useProducts, useAuth, useFavorites } from "@lessence/supabase";
 import { supabase } from "@/lib/supabase";
 import { webFavoritesStorage } from "@/lib/favoritesStorage";
+import { webProductsStorage } from "@/lib/productsStorage";
 import ProductCard from "./ProductCard";
 import Link from "next/link";
 
 export default function FeaturedProducts() {
-  const { products, loading } = useProducts(supabase);
+  const { products, loading } = useProducts(supabase, undefined, webProductsStorage);
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites(supabase, user?.id, webFavoritesStorage);
 

@@ -23,6 +23,17 @@ export * from './hooks/useSearch';
 export * from './hooks/useFavorites';
 export * from './hooks/useCartEngine';
 
+export interface FavoritesStorage {
+  getGuestFavorites(): Promise<string[]>;
+  setGuestFavorites(ids: string[]): Promise<void>;
+  clearGuestFavorites(): Promise<void>;
+}
+
+export interface ProductsStorage {
+  getProducts(categorySlug?: string): Promise<any[] | null>;
+  setProducts(products: any[], categorySlug?: string): Promise<void>;
+}
+
 // Admin Hooks
 export * from './hooks/useAdminDashboard';
 export * from './hooks/useAdminOrders';

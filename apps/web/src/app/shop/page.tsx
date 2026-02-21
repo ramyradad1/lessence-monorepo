@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useProducts, useCategories, useSearch, useFavorites, useAuth } from "@lessence/supabase";
 import { supabase } from "@/lib/supabase";
 import { webFavoritesStorage } from "@/lib/favoritesStorage";
+import { webProductsStorage } from "@/lib/productsStorage";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
@@ -13,7 +14,11 @@ export default function ShopPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  const { products, loading: productsLoading, error: productsError } = useProducts(supabase, activeCategory === "all" ? undefined : activeCategory);
+  const { products, loading: productsLoading, error: productsError } = useProducts(
+    supabase,
+    activeCategory === "all" ? undefined : activeCategory,
+    webProductsStorage
+  );
   const { categories, loading: catsLoading } = useCategories(supabase);
   const { results: searchResults, loading: searchLoading, search, clear } = useSearch(supabase);
   const { user } = useAuth();
