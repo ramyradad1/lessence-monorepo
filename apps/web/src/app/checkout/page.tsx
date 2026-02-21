@@ -14,18 +14,27 @@ export default function CheckoutPage() {
   
   const [address, setAddress] = useState({
     email: '',
+    phone: '',
     fullName: '',
     line1: '',
     line2: '',
     city: '',
     state: '',
     postal_code: '',
-    country: '',
+    country: 'Egypt',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setAddress(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
+
+  const EGYPT_GOVERNORATES = [
+    "Cairo", "Giza", "Alexandria", "Dakahlia", "Red Sea", "Beheira", "Fayoum",
+    "Gharbia", "Ismailia", "Menofia", "Minya", "Qalyubia", "New Valley",
+    "Sharqia", "Suez", "Aswan", "Assiut", "Beni Suef", "Damietta",
+    "Kafr El Sheikh", "Matrouh", "Port Said", "Qena", "South Sinai",
+    "North Sinai", "Sohag", "Luxor"
+  ].sort();
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,7 +102,7 @@ export default function CheckoutPage() {
               
               <div>
                 <h2 className="text-xl font-display text-primary mb-6 uppercase tracking-widest">Contact Information</h2>
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="email">Email</Label>
                     <Input 
@@ -104,6 +113,18 @@ export default function CheckoutPage() {
                       value={address.email} 
                       onChange={handleChange}
                       placeholder="you@example.com"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      required
+                      value={address.phone}
+                      onChange={handleChange}
+                      placeholder="+20 1XX XXX XXXX"
                     />
                   </div>
                 </div>
@@ -125,12 +146,25 @@ export default function CheckoutPage() {
                     <Input id="line2" name="line2" value={address.line2} onChange={handleChange} />
                   </div>
                   <div>
-                    <Label htmlFor="city">City</Label>
+                    <Label htmlFor="city">City / District</Label>
                     <Input id="city" name="city" required value={address.city} onChange={handleChange} />
                   </div>
                   <div>
-                    <Label htmlFor="state">State / Province</Label>
-                    <Input id="state" name="state" required value={address.state} onChange={handleChange} />
+                    <Label htmlFor="state">Governorate</Label>
+                    <select
+                      id="state"
+                      name="state"
+                      required
+                      value={address.state}
+                      onChange={handleChange}
+                      title="Select Governorate"
+                      className="w-full bg-[#181611] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#f4c025]/40 transition-colors appearance-none"
+                    >
+                      <option value="" disabled>Select Governorate</option>
+                      {EGYPT_GOVERNORATES.map(gov => (
+                        <option key={gov} value={gov}>{gov}</option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <Label htmlFor="postal_code">ZIP / Postal Code</Label>
@@ -138,12 +172,13 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <Label htmlFor="country">Country</Label>
-                    <Input id="country" name="country" required value={address.country} onChange={handleChange} />
+                    <Input id="country" name="country" required value={address.country} onChange={handleChange} readOnly />
                   </div>
                 </div>
               </div>
             </form>
           </div>
+
 
           {/* Order Summary Sidebar */}
           <div className="lg:col-span-5">
