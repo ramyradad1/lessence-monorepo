@@ -18,11 +18,16 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen bg-[#181611] flex flex-col items-center justify-center p-4 gap-4">
         <div className="h-8 w-8 border-2 border-[#f4c025] border-t-transparent rounded-full animate-spin mb-2" />
-        <p className="text-white/40 uppercase tracking-widest text-[10px]">Loading Profile...</p>
+        <p className="text-white/40 uppercase tracking-widest text-[10px]">
+          {isLoading ? "Connecting to server..." : !user ? "Redirecting to login..." : "Fetching profile..."}
+        </p>
         {!isLoading && user && !profile && (
-          <button onClick={() => window.location.reload()} className="text-[#f4c025] text-[10px] underline uppercase tracking-widest mt-4">
-            Retry Loading
-          </button>
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-red-400 text-[10px] uppercase tracking-widest">Profile not found</p>
+            <button onClick={() => window.location.reload()} className="text-[#f4c025] text-[10px] underline uppercase tracking-widest">
+              Retry
+            </button>
+          </div>
         )}
       </div>
     );
