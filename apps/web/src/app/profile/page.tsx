@@ -3,6 +3,7 @@ import { useAuth } from "@lessence/supabase";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { User, LogOut, Package, MapPin, Shield } from "lucide-react";
+import Navbar from "@/components/Navbar";
 
 export default function ProfilePage() {
   const { user, profile, isLoading, signOut } = useAuth();
@@ -39,8 +40,10 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background-dark pt-32 pb-20 px-4">
-      <div className="max-w-4xl mx-auto">
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-background-dark pt-32 pb-20 px-4">
+        <div className="max-w-4xl mx-auto">
         <h1 className="font-display text-4xl text-white mb-10">My Account</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -105,5 +108,6 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

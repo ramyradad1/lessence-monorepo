@@ -1,10 +1,13 @@
 "use client";
 import React from 'react';
+import Navbar from "@/components/Navbar";
 
 export default function JournalPage() {
   return (
-    <div className="min-h-screen pt-32 pb-20 px-4">
-      <div className="max-w-7xl mx-auto">
+    <>
+      <Navbar />
+      <div className="min-h-screen pt-32 pb-20 px-4">
+        <div className="max-w-7xl mx-auto">
         <h1 className="text-5xl font-display text-white mb-12 uppercase tracking-widest text-center">Journal</h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[1, 2, 3].map((i) => (
@@ -19,7 +22,8 @@ export default function JournalPage() {
             </div>
           ))}
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

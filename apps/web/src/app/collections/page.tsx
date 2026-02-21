@@ -3,11 +3,14 @@
 import React from 'react';
 import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
+import Navbar from "@/components/Navbar";
 
 export default function CollectionsPage() {
   return (
-    <div className="min-h-screen pt-32 pb-20 px-4">
-      <div className="max-w-7xl mx-auto text-center">
+    <>
+      <Navbar />
+      <div className="min-h-screen pt-32 pb-20 px-4">
+        <div className="max-w-7xl mx-auto text-center">
         <Sparkles className="w-16 h-16 text-primary mx-auto mb-8 animate-pulse" />
         <h1 className="text-5xl font-display text-white mb-6 uppercase tracking-widest">Collections</h1>
         <p className="text-white/40 max-w-2xl mx-auto mb-12 text-lg italic">
@@ -19,7 +22,8 @@ export default function CollectionsPage() {
         >
           Explore All Fragrances
         </Link>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

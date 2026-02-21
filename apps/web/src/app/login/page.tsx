@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@lessence/supabase";
 import { useRouter } from "next/navigation";
+import Navbar from "@/components/Navbar";
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -45,8 +46,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background-dark pt-32 pb-20 flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-md glass-effect p-8 sm:p-12 rounded-2xl shadow-2xl border border-white/5 relative overflow-hidden">
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-background-dark pt-32 pb-20 flex flex-col items-center justify-center px-4">
+        <div className="w-full max-w-md glass-effect p-8 sm:p-12 rounded-2xl shadow-2xl border border-white/5 relative overflow-hidden">
         {/* Decorative background blur */}
         <div className="absolute -top-32 -right-32 w-64 h-64 bg-primary/20 rounded-full blur-[100px] pointer-events-none" />
         
@@ -118,6 +121,7 @@ export default function LoginPage() {
           </button>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

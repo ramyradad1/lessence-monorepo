@@ -1,10 +1,13 @@
 "use client";
 import React from 'react';
+import Navbar from "@/components/Navbar";
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen pt-32 pb-20 px-4">
-      <div className="max-w-4xl mx-auto">
+    <>
+      <Navbar />
+      <div className="min-h-screen pt-32 pb-20 px-4">
+        <div className="max-w-4xl mx-auto">
         <h1 className="text-5xl font-display text-white mb-12 uppercase tracking-widest text-center">Our Story</h1>
         <div className="space-y-8 text-white/70 leading-relaxed text-lg text-center font-light">
           <p>
@@ -18,7 +21,8 @@ export default function AboutPage() {
           </p>
           <p className="italic text-primary/60">"Elegance is the only beauty that never fades."</p>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
