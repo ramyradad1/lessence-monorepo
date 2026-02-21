@@ -7,7 +7,7 @@ import { useAuth } from "@lessence/supabase";
 export default function CartDrawer() {
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, cartTotal, cartCount, placeOrder } = useCart();
   const [isCheckout, setIsCheckout] = useState(false);
-  const [orderResult, setOrderResult] = useState<{ success: boolean; orderNumber?: string } | null>(null);
+  const [orderResult, setOrderResult] = useState<{ success: boolean; orderNumber?: string; error?: any } | null>(null);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
@@ -123,11 +123,10 @@ export default function CartDrawer() {
                     </div>
                   ) : (
                     <button
-                      onClick={handlePlaceOrder}
-                      disabled={loading}
+                            onClick={() => { setIsCartOpen(false); window.location.href = '/checkout'; }}
                       className="w-full bg-primary text-black py-4 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-white transition-all disabled:opacity-50"
                     >
-                      {loading ? "Processing..." : "Place Order"}
+                            Proceed to Checkout
                     </button>
                   )}
                   <button onClick={() => setIsCheckout(false)} className="w-full text-white/40 text-xs uppercase tracking-widest hover:text-white transition-colors py-2">
