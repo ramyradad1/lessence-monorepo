@@ -4,6 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabase';
+import { useTranslation } from 'react-i18next';
 
 export default function OrderConfirmationScreen() {
   const navigation = useNavigation<any>();
@@ -12,10 +13,11 @@ export default function OrderConfirmationScreen() {
   const { clearCart } = useCart();
   const [loading, setLoading] = useState(true);
 
+  const { t, i18n } = useTranslation('checkout');
+  const isRTL = i18n.dir() === 'rtl';
+
   useEffect(() => {
     const handleSuccess = async () => {
-      // In a real app, verify session status with backend.
-      // For now, assume success if session_id exists and clear local cart.
       if (session_id) {
         clearCart();
       }
@@ -40,15 +42,17 @@ export default function OrderConfirmationScreen() {
           <MaterialIcons name="check-circle" size={56} color="#22c55e" />
         </View>
         
-        <Text className="text-3xl font-bold text-white mb-3 text-center">Order Confirmed!</Text>
+        <Text className={`text-3xl font-bold text-white mb-3 text-center ${isRTL ? 'font-display' : ''}`}>
+          {t('order_confirmed')}
+        </Text>
         
         <Text className="text-gray-400 text-center mb-8 text-lg px-4 leading-relaxed">
-          Thank you for your purchase. We've received your order and it's being processed.
+          {t('thank_you_msg')}
         </Text>
 
         {session_id && (
-            <Text className="text-xs text-gray-500 font-mono mb-12">
-                Order Ref: {session_id.split('_')[1] || session_id}
+          <Text className="text-xs text-gray-500 font-mono mb-12 text-center">
+            {t('order_ref')} {session_id.split('_')[1] || session_id}
             </Text>
         )}
 
@@ -57,14 +61,14 @@ export default function OrderConfirmationScreen() {
             onPress={() => navigation.navigate('Main', { screen: 'Profile' })}
             className="w-full bg-surface-dark border border-white/10 px-8 py-4 rounded-xl shadow-lg"
             >
-            <Text className="text-white font-bold text-center text-lg">View Order History</Text>
+            <Text className="text-white font-bold text-center text-lg">{t('view_history')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
             onPress={() => navigation.navigate('Main', { screen: 'Home' })}
             className="w-full bg-primary px-8 py-4 rounded-xl shadow-lg"
             >
-            <Text className="text-black font-bold text-center text-lg">Continue Shopping</Text>
+            <Text className="text-black font-bold text-center text-lg">{t('continue_shopping')}</Text>
             </TouchableOpacity>
         </View>
       </View>

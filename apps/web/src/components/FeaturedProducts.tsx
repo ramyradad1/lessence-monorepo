@@ -3,12 +3,14 @@ import { useProducts, useAuth, useFavorites } from "@lessence/supabase";
 import { supabase } from "@/lib/supabase";
 import { webFavoritesStorage } from "@/lib/favoritesStorage";
 import ProductCard from "./ProductCard";
-import Link from "next/link";
+import { Link } from "@/navigation";
+import { useTranslations } from "next-intl";
 
 export default function FeaturedProducts() {
   const { products, loading } = useProducts(supabase);
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites(supabase, user?.id, webFavoritesStorage);
+  const t = useTranslations('common');
 
   if (loading) return (
     <div className="max-w-7xl mx-auto px-4 py-24">
@@ -25,11 +27,11 @@ export default function FeaturedProducts() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-end mb-12">
           <div>
-            <span className="text-primary text-xs font-bold tracking-widest uppercase">Curated For You</span>
-            <h2 className="text-4xl font-display text-white mt-2">Signature Scents</h2>
+            <span className="text-primary text-xs font-bold tracking-widest uppercase">{t('curated_for_you')}</span>
+            <h2 className="text-4xl font-display text-white mt-2">{t('signature_scents')}</h2>
           </div>
           <Link href="/shop" className="text-white/60 hover:text-primary transition-colors uppercase text-xs tracking-widest font-bold">
-            View All Collection
+            {t('view_all_collection')}
           </Link>
         </div>
 

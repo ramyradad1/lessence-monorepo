@@ -11,25 +11,32 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth, useNotifications } from '@lessence/supabase';
 import { supabase } from '../lib/supabase';
-import { Notification } from '@lessence/core';
+import { Notification, formatCurrency } from '@lessence/core';
 import LoginScreen from './LoginScreen';
+import { useTranslation } from 'react-i18next';
 
-function formatRelativeTime(dateStr: string): string {
+function formatRelativeTime(dateStr: string, t: any): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t('just_now');
+  if (mins < 60) return t('m_ago', { count: mins });
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
+  if (hrs < 24) return t('h_ago', { count: hrs });
+  return t('d_ago', { count: Math.floor(hrs / 24) });
 }
 
 function NotificationItem({
   item,
   onPress,
+  isRTL,
+  locale,
+  t
 }: {
   item: Notification;
   onPress: (id: string) => void;
+    isRTL: boolean;
+    locale: string;
+    t: any;
 }) {
   const oldPrice = item.data?.old_price || 0;
   const newPrice = item.data?.new_price || 0;
@@ -46,16 +53,16 @@ function NotificationItem({
           : 'bg-primary/5 border-primary/20'
       }`}
     >
-      <View className="flex-row items-start p-4 gap-3">
+      <View className={`flex-row items-start p-4 gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
         {/* Icon */}
         <View className="w-10 h-10 rounded-full bg-green-500/15 items-center justify-center flex-shrink-0 mt-0.5">
           <MaterialIcons name="trending-down" size={18} color="#4ade80" />
         </View>
 
         <View className="flex-1">
-          <View className="flex-row items-center justify-between">
+          <View className={`flex-row items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
             <Text
-              className={`text-sm flex-1 mr-2 ${
+              className={`text-sm flex-1 ${isRTL ? 'ml-2 text-right' : 'mr-2 text-left'} ${
                 item.is_read ? 'text-white/75' : 'text-white font-bold'
               }`}
               numberOfLines={1}
@@ -67,25 +74,25 @@ function NotificationItem({
             )}
           </View>
 
-          <Text className="text-xs text-white/50 mt-1 leading-snug" numberOfLines={2}>
+          <Text className={`text-xs text-white/50 mt-1 leading-snug ${isRTL ? 'text-right' : 'text-left'}`} numberOfLines={2}>
             {item.body}
           </Text>
 
           {/* Pricing row */}
-          <View className="flex-row items-center mt-2 gap-2">
+          <View className={`flex-row items-center mt-2 gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <Text className="text-sm font-bold text-green-400">
-              ${newPrice.toFixed(2)}
+              {formatCurrency(newPrice, locale)}
             </Text>
             <Text className="text-xs text-white/30 line-through">
-              ${oldPrice.toFixed(2)}
+              {formatCurrency(oldPrice, locale)}
             </Text>
             <View className="bg-green-500/15 px-1.5 py-0.5 rounded-full">
               <Text className="text-[10px] text-green-400 font-bold">
                 -{dropPct}%
               </Text>
             </View>
-            <Text className="text-[10px] text-white/30 ml-auto">
-              {item.created_at ? formatRelativeTime(item.created_at) : ''}
+            <Text className={`text-[10px] text-white/30 ${isRTL ? 'mr-auto' : 'ml-auto'}`}>
+              {item.created_at ? formatRelativeTime(item.created_at, t) : ''}
             </Text>
           </View>
         </View>
@@ -97,6 +104,10 @@ function NotificationItem({
 export default function NotificationsScreen() {
   const navigation = useNavigation<any>();
   const { user, isLoading: authLoading } = useAuth();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
+  const locale = i18n.language;
+
   const { notifications, unreadCount, loading, markRead, markAllRead } =
     useNotifications(supabase, user?.id);
 
@@ -105,17 +116,17 @@ export default function NotificationsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background-dark">
       {/* Header */}
-      <View className="flex-row items-center px-4 py-4 border-b border-white/5">
-        <TouchableOpacity onPress={() => navigation.goBack()} className="mr-3">
-          <MaterialIcons name="arrow-back" size={22} color="white" />
+      <View className={`flex-row items-center px-4 py-4 border-b border-white/5 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <TouchableOpacity onPress={() => navigation.goBack()} className={isRTL ? 'ml-3' : 'mr-3'}>
+          <MaterialIcons name={isRTL ? "arrow-forward" : "arrow-back"} size={22} color="white" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold tracking-[0.2em] text-white uppercase flex-1">
-          Notifications
+        <Text className={`text-xl font-bold tracking-[0.2em] text-white uppercase flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+          {t('notifications')}
         </Text>
         {unreadCount > 0 && (
-          <View className="flex-row items-center gap-3">
+          <View className={`flex-row items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <View className="bg-primary px-2 py-0.5 rounded-full">
-              <Text className="text-black text-[10px] font-bold">{unreadCount} new</Text>
+              <Text className="text-black text-[10px] font-bold">{t('new_unread', { count: unreadCount })}</Text>
             </View>
             <TouchableOpacity onPress={() => markAllRead()}>
               <MaterialIcons name="done-all" size={22} color="#f4c025" />
@@ -136,10 +147,10 @@ export default function NotificationsScreen() {
             color="rgba(255,255,255,0.07)"
           />
           <Text className="text-white/60 font-display text-xl mt-6 mb-2">
-            All caught up!
+              {t('all_caught_up')}
           </Text>
           <Text className="text-white/30 text-xs text-center">
-            You'll be notified here when prices drop on items in your Favorites.
+              {t('price_drop_desc')}
           </Text>
         </View>
       ) : (
@@ -149,7 +160,13 @@ export default function NotificationsScreen() {
           contentContainerStyle={{ paddingTop: 16, paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
-            <NotificationItem item={item} onPress={markRead} />
+            <NotificationItem
+              item={item}
+              onPress={markRead}
+              isRTL={isRTL}
+              locale={locale}
+              t={t}
+            />
           )}
         />
       )}

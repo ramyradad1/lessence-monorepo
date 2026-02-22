@@ -1,0 +1,40 @@
+{
+  "order_history": "سجل الطلبات",
+  "timeline": {
+    "pending": "تم الطلب",
+    "paid": "تم الدفع",
+    "processing": "قيد التجهيز",
+    "shipped": "تم الشحن",
+    "delivered": "تم التوصيل"
+  },
+  "order_number": "طلب رقم {{number}}",
+  "order_total": "إجمالي الطلب",
+  "view_details": "عرض التفاصيل",
+  "no_orders": "لم تقم بإجراء أي طلبات بعد.",
+  "start_shopping": "ابدأ التسوق",
+  "order_details": "تفاصيل الطلب",
+  "order_id": "رقم الطلب",
+  "date": "التاريخ",
+  "status": "الحالة",
+  "payment": "الدفع",
+  "total": "الإجمالي",
+  "items": "الأصناف",
+  "shipping_address": "عنوان الشحن",
+  "back_to_profile": "العودة للملف الشخصي",
+  "status_progress": "تقدم الحالة",
+  "return": "إرجاع",
+  "requested_on": "تم الطلب في {{date}}",
+  "payment_summary": "ملخص الدفع",
+  "shipping_details": "تفاصيل الشحن",
+  "shipping_not_available": "تفاصيل الشحن غير متوفرة.",
+  "return_request": "طلب إرجاع",
+  "statuses": {
+    "pending": "قيد الانتظار",
+    "paid": "مدفوع",
+    "processing": "قيد التنفيذ",
+    "shipped": "تم الشحن",
+    "delivered": "تم التوصيل",
+    "cancelled": "ملغي",
+    "refunded": "مسترجع"
+  }
+}

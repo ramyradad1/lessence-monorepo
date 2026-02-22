@@ -29,6 +29,8 @@ import { CartProvider } from './src/context/CartContext';
 import { FavoritesProvider } from './src/context/FavoritesContext';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { PushNotificationManager } from './src/components/PushNotificationManager';
+import { I18nextProvider } from 'react-i18next';
+import i18n from './src/i18n';
 
 import { supabase } from './src/lib/supabase';
 import * as Linking from 'expo-linking';
@@ -38,8 +40,12 @@ const Tab = createBottomTabNavigator();
 
 const SearchScreen = () => <View className="flex-1 bg-background-dark" />;
 
+import { useTranslation } from 'react-i18next';
+
 // Customer-facing bottom tabs (Home, Search, Favorites, Profile)
 function CustomerTabs() {
+  const { t } = useTranslation();
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -59,6 +65,7 @@ function CustomerTabs() {
         name="Home"
         component={HomeScreen}
         options={{
+          tabBarLabel: t('home'),
           tabBarIcon: ({ color, size }) => <MaterialIcons name="home" size={size} color={color} />,
         }}
       />
@@ -66,6 +73,7 @@ function CustomerTabs() {
         name="Search"
         component={SearchScreen}
         options={{
+          tabBarLabel: t('search'),
           tabBarIcon: ({ color, size }) => <MaterialIcons name="search" size={size} color={color} />,
         }}
       />
@@ -73,6 +81,7 @@ function CustomerTabs() {
         name="Favorites"
         component={FavoritesScreen}
         options={{
+          tabBarLabel: t('favorites'),
           tabBarIcon: ({ color, size }) => <MaterialIcons name="favorite" size={size} color={color} />,
         }}
       />
@@ -80,6 +89,7 @@ function CustomerTabs() {
         name="Profile"
         component={ProfileScreen}
         options={{
+          tabBarLabel: t('profile'),
           tabBarIcon: ({ color, size }) => <MaterialIcons name="person" size={size} color={color} />,
         }}
       />
@@ -133,33 +143,35 @@ export default function App() {
   };
 
   return (
-    <SafeAreaProvider>
-      <QueryProvider>
-        <AuthProvider supabase={supabase}>
-          <PushNotificationManager />
-          <FavoritesProvider>
-            <CartProvider>
-              <StatusBar style="light" />
-              <NavigationContainer linking={linking}>
-                <Stack.Navigator screenOptions={{ headerShown: false }}>
-                  <Stack.Screen name="Main" component={CustomerTabs} />
-                  <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} />
-                  <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
-                  <Stack.Screen name="AdminReviews" component={AdminReviewsScreen} />
-                  <Stack.Screen name="Checkout" component={CheckoutScreen} />
-                  <Stack.Screen name="OrderConfirmation" component={OrderConfirmationScreen} />
-                  <Stack.Screen name="Notifications" component={NotificationsScreen} />
-                  <Stack.Screen name="NotificationPreferences" component={NotificationPreferencesScreen} />
-                  <Stack.Screen name="Orders" component={OrdersScreen} />
-                  <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
-                  <Stack.Screen name="NewReturn" component={NewReturnScreen} />
-                  <Stack.Screen name="AdminOrderDetail" component={AdminOrderDetailScreen} />
-                </Stack.Navigator>
-              </NavigationContainer>
-            </CartProvider>
-          </FavoritesProvider>
-        </AuthProvider>
-      </QueryProvider>
-    </SafeAreaProvider>
+    <I18nextProvider i18n={i18n}>
+      <SafeAreaProvider>
+        <QueryProvider>
+          <AuthProvider supabase={supabase}>
+            <PushNotificationManager />
+            <FavoritesProvider>
+              <CartProvider>
+                <StatusBar style="light" />
+                <NavigationContainer linking={linking}>
+                  <Stack.Navigator screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="Main" component={CustomerTabs} />
+                    <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} />
+                    <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
+                    <Stack.Screen name="AdminReviews" component={AdminReviewsScreen} />
+                    <Stack.Screen name="Checkout" component={CheckoutScreen} />
+                    <Stack.Screen name="OrderConfirmation" component={OrderConfirmationScreen} />
+                    <Stack.Screen name="Notifications" component={NotificationsScreen} />
+                    <Stack.Screen name="NotificationPreferences" component={NotificationPreferencesScreen} />
+                    <Stack.Screen name="Orders" component={OrdersScreen} />
+                    <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
+                    <Stack.Screen name="NewReturn" component={NewReturnScreen} />
+                    <Stack.Screen name="AdminOrderDetail" component={AdminOrderDetailScreen} />
+                  </Stack.Navigator>
+                </NavigationContainer>
+              </CartProvider>
+            </FavoritesProvider>
+          </AuthProvider>
+        </QueryProvider>
+      </SafeAreaProvider>
+    </I18nextProvider>
   );
 }

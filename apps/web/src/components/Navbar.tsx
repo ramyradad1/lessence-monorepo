@@ -1,11 +1,12 @@
 "use client";
-import Link from "next/link";
-import { ShoppingBag, Search, User, Menu, Bell, TrendingDown, X } from "lucide-react";
+import { Link, usePathname, useRouter } from "@/navigation";
+import { ShoppingBag, Search, User, Menu, Bell, TrendingDown, X, Globe } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useNotifications } from "@lessence/supabase";
 import { useAuth } from "@lessence/supabase";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
+import { useTranslations, useLocale } from 'next-intl';
 
 function formatRelativeTime(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -18,6 +19,7 @@ function formatRelativeTime(dateStr: string) {
 }
 
 function NotificationBell({ userId }: { userId: string }) {
+  const t = useTranslations('common');
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications(supabase, userId);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -36,7 +38,7 @@ function NotificationBell({ userId }: { userId: string }) {
       <button
         onClick={() => setOpen((v) => !v)}
         className="relative hover:text-primary transition-colors focus:outline-none"
-        aria-label="Notifications"
+        aria-label={t('notifications')}
       >
         <Bell size={22} />
         {unreadCount > 0 && (
@@ -50,13 +52,13 @@ function NotificationBell({ userId }: { userId: string }) {
         <div className="absolute right-0 mt-3 w-80 bg-[#1a1812] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
           {/* Header */}
           <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white uppercase tracking-widest">Notifications</h3>
+            <h3 className="text-sm font-bold text-white uppercase tracking-widest">{t('notifications')}</h3>
             {unreadCount > 0 && (
               <button
                 onClick={() => markAllRead()}
                 className="text-[10px] text-primary hover:text-white transition-colors uppercase tracking-widest"
               >
-                Mark all read
+                {t('mark_all_read')}
               </button>
             )}
           </div>
@@ -66,7 +68,7 @@ function NotificationBell({ userId }: { userId: string }) {
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 gap-2">
                 <Bell size={28} className="text-white/10" />
-                <p className="text-white/40 text-xs uppercase tracking-widest">No notifications yet</p>
+                <p className="text-white/40 text-xs uppercase tracking-widest">{t('no_notifications')}</p>
               </div>
             ) : (
               notifications.map((n) => (
@@ -121,9 +123,18 @@ export default function Navbar() {
   const { cartCount, setIsCartOpen } = useCart();
   const { user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const t = useTranslations('common');
+  const locale = useLocale();
+  const pathname = usePathname();
+  const router = useRouter();
 
   // Close menu on navigation
   const closeMenu = () => setIsMenuOpen(false);
+
+  const toggleLanguage = () => {
+    const nextLocale = locale === 'ar' ? 'en' : 'ar';
+    router.replace(pathname, { locale: nextLocale });
+  };
 
   // Prevent background scroll when menu is open
   useEffect(() => {
@@ -138,10 +149,10 @@ export default function Navbar() {
   }, [isMenuOpen]);
 
   const navLinks = [
-    { name: "Fragrances", href: "/shop" },
-    { name: "Collections", href: "/collections" },
-    { name: "Our Story", href: "/about" },
-    { name: "Journal", href: "/journal" },
+    { name: t('fragrances'), href: "/shop" },
+    { name: t('collections'), href: "/collections" },
+    { name: t('our_story'), href: "/about" },
+    { name: t('journal'), href: "/journal" },
   ];
 
   return (
@@ -161,17 +172,26 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center space-x-5 text-white">
-            <Link href="/shop" className="hover:text-primary transition-colors hidden sm:block" aria-label="Search">
+            <button
+              onClick={toggleLanguage}
+              className="hover:text-primary transition-colors flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/5 border border-white/10"
+              aria-label="Switch Language"
+            >
+              <Globe size={18} />
+              <span className="text-[10px] font-bold uppercase tracking-widest">{locale === 'ar' ? 'English' : 'عربي'}</span>
+            </button>
+
+            <Link href="/shop" className="hover:text-primary transition-colors hidden sm:block" aria-label={t('search')}>
               <Search size={22} />
             </Link>
-            <Link href="/profile" onClick={closeMenu} className="hover:text-primary transition-colors" aria-label="Account">
+            <Link href="/profile" onClick={closeMenu} className="hover:text-primary transition-colors" aria-label={t('profile')}>
               <User size={22} />
             </Link>
 
             {/* Bell – only when logged in */}
             {user && <NotificationBell userId={user.id} />}
 
-            <button onClick={() => setIsCartOpen(true)} className="relative hover:text-primary transition-colors" aria-label="Shopping bag">
+            <button onClick={() => setIsCartOpen(true)} className="relative hover:text-primary transition-colors" aria-label={t('your_bag')}>
               <ShoppingBag size={22} />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-primary text-black text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
@@ -183,7 +203,7 @@ export default function Navbar() {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="md:hidden hover:text-primary transition-colors z-[110]"
-              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              aria-label={isMenuOpen ? t('close') : t('search')}
             >
               {isMenuOpen ? <X size={26} /> : <Menu size={22} />}
             </button>
@@ -213,13 +233,20 @@ export default function Navbar() {
             }`}>
             <Link href="/shop" onClick={closeMenu} className="text-white/40 hover:text-primary transition-colors flex flex-col items-center gap-2">
               <Search size={24} />
-              <span className="text-[10px] uppercase tracking-widest">Search</span>
+              <span className="text-[10px] uppercase tracking-widest">{t('search')}</span>
             </Link>
             <Link href="/profile" onClick={closeMenu} className="text-white/40 hover:text-primary transition-colors flex flex-col items-center gap-2">
               <User size={24} />
-              <span className="text-[10px] uppercase tracking-widest">Profile</span>
+              <span className="text-[10px] uppercase tracking-widest">{t('profile')}</span>
             </Link>
           </div>
+
+          <button
+            onClick={toggleLanguage}
+            className={`mt-4 px-6 py-2 rounded-full border border-primary text-primary font-bold uppercase tracking-widest text-xs transition-all duration-500 delay-700 ${isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+          >
+            {locale === 'ar' ? 'English' : 'العربية'}
+          </button>
         </div>
 
         {/* Background Decorative Element */}

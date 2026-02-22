@@ -13,7 +13,8 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth, useOrders } from '@lessence/supabase';
 import { supabase } from '../lib/supabase';
-import { Order } from '@lessence/core';
+import { Order, formatCurrency } from '@lessence/core';
+import { useTranslation } from 'react-i18next';
 
 const STATUS_COLORS: Record<string, string> = {
   pending: '#F49E0B',
@@ -30,6 +31,9 @@ export default function OrdersScreen() {
   const { user } = useAuth();
   const { orders, loading, fetchOrders } = useOrders(supabase);
   const [refreshing, setRefreshing] = useState(false);
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
+  const locale = i18n.language;
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -42,30 +46,30 @@ export default function OrdersScreen() {
       style={styles.orderCard}
       onPress={() => navigation.navigate('OrderDetail', { orderId: item.id })}
     >
-      <View style={styles.orderHeader}>
-        <View>
-          <Text style={styles.orderNumber}>Order #{item.order_number || item.id.slice(0, 8)}</Text>
+      <View style={[styles.orderHeader, isRTL && { flexDirection: 'row-reverse' }]}>
+        <View style={isRTL && { alignItems: 'flex-end' }}>
+          <Text style={styles.orderNumber}>{t('orders:order_number', { number: item.order_number || item.id.slice(0, 8) })}</Text>
           <Text style={styles.orderDate}>
-            {new Date(item.created_at).toLocaleDateString()}
+            {new Date(item.created_at).toLocaleDateString(locale)}
           </Text>
         </View>
         <View style={[styles.statusBadge, { backgroundColor: (STATUS_COLORS[item.status] || STATUS_COLORS.pending) + '20' }]}>
           <Text style={[styles.statusText, { color: STATUS_COLORS[item.status] || STATUS_COLORS.pending }]}>
-            {item.status.toUpperCase()}
+            {t(`orders:statuses.${item.status}`).toUpperCase()}
           </Text>
         </View>
       </View>
 
-      <View style={styles.orderFooter}>
+      <View style={[styles.orderFooter, isRTL && { flexDirection: 'row-reverse' }]}>
         <Text style={styles.itemCount}>
-          Order Total
+          {t('orders:order_total')}
         </Text>
-        <Text style={styles.totalAmount}>${item.total_amount.toFixed(2)}</Text>
+        <Text style={styles.totalAmount}>{formatCurrency(item.total_amount, locale)}</Text>
       </View>
       
-      <View style={styles.viewDetails}>
-        <Text style={styles.viewDetailsText}>View Details</Text>
-        <Ionicons name="chevron-forward" size={12} color="#f4c025" />
+      <View style={[styles.viewDetails, isRTL && { flexDirection: 'row-reverse' }]}>
+        <Text style={styles.viewDetailsText}>{t('orders:view_details')}</Text>
+        <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={12} color="#f4c025" />
       </View>
     </TouchableOpacity>
   );
@@ -80,11 +84,11 @@ export default function OrdersScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, isRTL && { flexDirection: 'row-reverse' }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={28} color="#FFF" />
+          <Ionicons name={isRTL ? "chevron-forward" : "chevron-back"} size={28} color="#FFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Orders</Text>
+        <Text style={styles.headerTitle}>{t('orders:order_history')}</Text>
         <View style={{ width: 28 }} />
       </View>
 
@@ -99,12 +103,12 @@ export default function OrdersScreen() {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Ionicons name="receipt-outline" size={64} color="rgba(255,255,255,0.1)" />
-            <Text style={styles.emptyText}>No orders found</Text>
+            <Text style={styles.emptyText}>{t('orders:no_orders')}</Text>
             <TouchableOpacity 
               style={styles.shopButton}
               onPress={() => navigation.navigate('Home')}
             >
-              <Text style={styles.shopButtonText}>START SHOPPING</Text>
+              <Text style={styles.shopButtonText}>{t('orders:start_shopping').toUpperCase()}</Text>
             </TouchableOpacity>
           </View>
         }
@@ -216,6 +220,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 20,
     marginBottom: 30,
+    textAlign: 'center',
   },
   shopButton: {
     backgroundColor: '#f4c025',

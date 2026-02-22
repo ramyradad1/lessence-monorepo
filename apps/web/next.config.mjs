@@ -1,5 +1,10 @@
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin();
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    // ... existing config
     transpilePackages: ["@lessence/core", "@lessence/supabase", "@lessence/ui"],
     images: {
         remotePatterns: [
@@ -37,4 +42,4 @@ const nextConfig = {
     }
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

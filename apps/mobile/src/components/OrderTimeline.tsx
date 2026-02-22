@@ -2,19 +2,20 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { OrderStatus } from '@lessence/core';
+import { useTranslation } from 'react-i18next';
 
 type TimelineStep = {
   status: OrderStatus;
-  label: string;
+  labelKey: string;
   icon: keyof typeof MaterialIcons.glyphMap;
 };
 
 const STEPS: TimelineStep[] = [
-  { status: 'pending', label: 'Placed', icon: 'shopping-bag' },
-  { status: 'paid', label: 'Paid', icon: 'payments' },
-  { status: 'processing', label: 'Processing', icon: 'sync' },
-  { status: 'shipped', label: 'Shipped', icon: 'local-shipping' },
-  { status: 'delivered', label: 'Delivered', icon: 'home' },
+  { status: 'pending', labelKey: 'orders:timeline.pending', icon: 'shopping-bag' },
+  { status: 'paid', labelKey: 'orders:timeline.paid', icon: 'payments' },
+  { status: 'processing', labelKey: 'orders:timeline.processing', icon: 'sync' },
+  { status: 'shipped', labelKey: 'orders:timeline.shipped', icon: 'local-shipping' },
+  { status: 'delivered', labelKey: 'orders:timeline.delivered', icon: 'home' },
 ];
 
 interface OrderTimelineProps {
@@ -23,6 +24,9 @@ interface OrderTimelineProps {
 }
 
 export default function OrderTimeline({ currentStatus, history = [] }: OrderTimelineProps) {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
+  const locale = i18n.language;
   const isCancelled = currentStatus === 'cancelled';
   const isRefunded = currentStatus === 'refunded';
 
@@ -43,9 +47,11 @@ export default function OrderTimeline({ currentStatus, history = [] }: OrderTime
     return 'upcoming';
   };
 
+  const progress = Math.max(0, (STEPS.findIndex(s => s.status === currentStatus)) / (STEPS.length - 1)) * 68;
+
   return (
     <View className="py-6">
-      <View className="flex-row justify-between items-start relative px-2">
+      <View className={`flex-row justify-between items-start relative px-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
         {/* Line */}
         <View 
           className="absolute top-5 left-8 right-8 h-[2px] bg-white/5" 
@@ -55,10 +61,11 @@ export default function OrderTimeline({ currentStatus, history = [] }: OrderTime
         {/* Progress Line */}
         {!isCancelled && !isRefunded && (
             <View 
-            className="absolute top-5 left-8 h-[2px] bg-primary"
-            style={{ 
-                width: `${Math.max(0, (STEPS.findIndex(s => s.status === currentStatus)) / (STEPS.length - 1)) * 68}%` 
-            }}
+            className="absolute top-5 h-[2px] bg-primary"
+            style={[
+              isRTL ? { right: 32 } : { left: 32 },
+              { width: `${progress}%` }
+            ]}
             pointerEvents="none"
             />
         )}
@@ -93,11 +100,11 @@ export default function OrderTimeline({ currentStatus, history = [] }: OrderTime
                   stepStatus === 'upcoming' ? 'text-white/20' : 'text-white'
                 }`}
               >
-                {step.label}
+                {t(step.labelKey)}
               </Text>
               {date && (
                 <Text className="text-[6px] text-white/30 mt-0.5">
-                  {new Date(date).toLocaleDateString()}
+                  {new Date(date).toLocaleDateString(locale)}
                 </Text>
               )}
             </View>
@@ -112,10 +119,10 @@ export default function OrderTimeline({ currentStatus, history = [] }: OrderTime
             name={isCancelled ? "cancel" : "undo"} 
             size={12} 
             color={isCancelled ? "#fb7185" : "#9ca3af"} 
-            style={{ marginRight: 6 }}
+            style={isRTL ? { marginLeft: 6 } : { marginRight: 6 }}
           />
           <Text className={`text-[10px] font-bold uppercase tracking-widest ${isCancelled ? 'text-red-400' : 'text-gray-400'}`}>
-            Order {currentStatus}
+            {t('orders:order_number', { number: '' }).replace('#', '').trim()} {t(`orders:statuses.${currentStatus}`)}
           </Text>
         </View>
       )}

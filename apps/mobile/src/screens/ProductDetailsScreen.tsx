@@ -5,13 +5,14 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Product } from '@lessence/core';
 import { useCart } from '../context/CartContext';
 import { useFavorites } from '../hooks/useFavorites';
-import { useAuth, useBackInStock } from '@lessence/supabase';
+import { useAuth, useBackInStock, usePerformanceTracking, useRecentlyViewed } from '@lessence/supabase';
 import { ProductReviews } from '../components/ProductReviews';
 import { supabase } from '../lib/supabase';
-import { useRecentlyViewed } from '@lessence/supabase';
 import { mobileRecentlyViewedStorage } from '../lib/recentlyViewedStorage';
 import { RecentlyViewed } from '../components/RecentlyViewed';
 import { RelatedProducts } from '../components/RelatedProducts';
+import { useTranslation } from 'react-i18next';
+import { formatCurrency } from '@lessence/core';
 
 const DEFAULT_PRODUCT: Product = {
   id: '4', name: 'Noire Essence', subtitle: 'Eau de Parfum',
@@ -42,6 +43,11 @@ export default function ProductDetailsScreen() {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { addRecentlyViewed } = useRecentlyViewed(supabase, user?.id, mobileRecentlyViewedStorage);
   const { isSubscribed, subscribe, loading: bisLoading } = useBackInStock(supabase, user?.id);
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
+  const locale = i18n.language;
+
+  usePerformanceTracking(supabase, 'mobile_product_load', 'mobile-client', { productId: product?.id });
 
   React.useEffect(() => {
     if (product?.id) {
@@ -75,16 +81,21 @@ export default function ProductDetailsScreen() {
     return stars;
   };
 
+  // Localized Strings
+  const productName = locale === 'ar' ? (product.name_ar || product.name) : (product.name_en || product.name);
+  const productSubtitle = locale === 'ar' ? (product.subtitle_ar || product.subtitle) : (product.subtitle_en || product.subtitle);
+  const productDesc = locale === 'ar' ? (product.description_ar || product.description) : (product.description_en || product.description);
+
   // === DESKTOP LAYOUT ===
   if (isDesktop) {
     return (
       <SafeAreaView className="flex-1 bg-background-dark">
         <View className="flex-1 w-full mx-auto" style={{ maxWidth: 1200 }}>
           {/* Header */}
-          <View className="flex-row items-center px-6 py-4 border-b border-white/5">
-            <TouchableOpacity onPress={() => navigation.goBack()} className="flex-row items-center gap-2 mr-6">
-              <MaterialIcons name="arrow-back" size={24} color="white" />
-              <Text className="text-sm text-gray-400">Back</Text>
+          <View className={`flex-row items-center px-6 py-4 border-b border-white/5 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <TouchableOpacity onPress={() => navigation.goBack()} className={`flex-row items-center gap-2 ${isRTL ? 'ml-6' : 'mr-6'} ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <MaterialIcons name={isRTL ? "arrow-forward" : "arrow-back"} size={24} color="white" />
+              <Text className="text-sm text-gray-400">{t('common.back')}</Text>
             </TouchableOpacity>
             <Text className="text-xl font-bold tracking-[0.2em] text-white uppercase flex-1 text-center">L'Essence</Text>
             <TouchableOpacity className="p-2" onPress={() => toggleFavorite(product.id)}>
@@ -93,17 +104,17 @@ export default function ProductDetailsScreen() {
           </View>
 
           <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 40 }}>
-            <View className="flex-row px-8 pt-8 gap-8">
+            <View className={`flex-row px-8 pt-8 gap-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
               {/* Left: Image */}
               <View className="flex-1">
                 <View className="relative aspect-[4/5] w-full rounded-2xl overflow-hidden bg-slate-800">
                   <Image source={{ uri: product.image_url }} className="w-full h-full" resizeMode="cover" />
                   <View className="absolute inset-0 bg-black/10" />
                   {(product.is_new || product.is_limited) && (
-                    <View className="absolute bottom-4 left-4">
+                    <View className={`absolute bottom-4 ${isRTL ? 'right-4' : 'left-4'}`}>
                       <View className="bg-black/80 px-3 py-1 rounded-full">
                         <Text className="text-xs font-bold uppercase tracking-widest text-white">
-                          {product.is_limited ? 'Limited Edition' : 'New Arrival'}
+                          {product.is_limited ? t('common.limited_edition') : t('common.new_arrival')}
                         </Text>
                       </View>
                     </View>
@@ -113,31 +124,30 @@ export default function ProductDetailsScreen() {
 
               {/* Right: Details */}
               <View className="flex-1 flex-col gap-6 pt-4">
-                <View>
-                  <Text className="text-4xl font-normal text-white italic leading-tight" style={{ fontFamily: 'Newsreader_400Regular_Italic' }}>
-                    {product.name.split(' ')[0]}{' '}
+                <View className={isRTL ? 'items-end' : 'items-start'}>
+                  <Text className={`text-4xl font-normal text-white italic leading-tight ${isRTL ? 'text-right' : 'text-left'}`} style={{ fontFamily: 'Newsreader_400Regular_Italic' }}>
+                    {productName.split(' ')[0]}{' '}
                     <Text className="not-italic font-medium text-primary" style={{ fontFamily: 'Newsreader_400Regular' }}>
-                      {product.name.split(' ').slice(1).join(' ') || ''}
+                      {productName.split(' ').slice(1).join(' ') || ''}
                     </Text>
                   </Text>
-                  <Text className="text-slate-400 text-lg font-light italic mt-1" style={{ fontFamily: 'Newsreader_400Regular_Italic' }}>{product.subtitle}</Text>
+                  <Text className={`text-slate-400 text-lg font-light italic mt-1 ${isRTL ? 'text-right' : 'text-left'}`} style={{ fontFamily: 'Newsreader_400Regular_Italic' }}>{productSubtitle}</Text>
                 </View>
 
-                <View className="flex-row items-center gap-4">
-                  <Text className="text-3xl font-medium text-white">${currentPrice.toFixed(2)}</Text>
-                  <View className="flex-row items-center gap-1">
+                <View className={`flex-row items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <Text className="text-3xl font-medium text-white">{formatCurrency(currentPrice, locale)}</Text>
+                  <View className={`flex-row items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     {renderStars()}
                     <Text className="ml-1 text-slate-500 text-sm">({product.review_count})</Text>
                   </View>
                 </View>
 
-                {/* Variant / Size Selector */}
-                <View>
-                  <Text className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Select Variant</Text>
-                  <View className="flex-row flex-wrap p-1 gap-2 rounded-lg bg-surface-dark border border-white/10">
+                <View className={isRTL ? 'items-end' : 'items-start'}>
+                  <Text className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">{t('product.select_variant')}</Text>
+                  <View className={`flex-row flex-wrap p-1 gap-2 rounded-lg bg-surface-dark border border-white/10 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     {variants ? variants.map((v, i) => (
                       <TouchableOpacity key={i} onPress={() => setSelectedVariantIdx(i)} className={`py-3 px-4 items-center justify-center rounded-md ${selectedVariantIdx === i ? 'bg-primary shadow-sm' : 'bg-transparent'} ${v.stock_qty <= 0 ? 'opacity-50' : ''}`}>
-                        <Text className={`text-sm font-bold ${selectedVariantIdx === i ? 'text-black' : 'text-slate-400'} ${v.stock_qty <= 0 ? 'line-through' : ''}`}>{v.size_ml}ml {v.concentration}</Text>
+                        <Text className={`text-sm font-bold ${selectedVariantIdx === i ? 'text-black' : 'text-slate-400'} ${v.stock_qty <= 0 ? 'line-through' : ''}`}>{v.size_ml}ml {locale === 'ar' ? (v.concentration_ar || v.concentration) : v.concentration}</Text>
                       </TouchableOpacity>
                     )) : sizes.map((s, i) => (
                       <TouchableOpacity key={i} onPress={() => setSelectedVariantIdx(i)} className={`py-3 px-4 items-center justify-center rounded-md ${selectedVariantIdx === i ? 'bg-primary shadow-sm' : 'bg-transparent'}`}>
@@ -149,13 +159,13 @@ export default function ProductDetailsScreen() {
 
                 {/* Scent Profiles */}
                 {profiles.length > 0 && (
-                  <View>
-                    <Text className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Scent Profile</Text>
-                    <View className="flex-row gap-3">
+                  <View className={isRTL ? 'items-end' : 'items-start'}>
+                    <Text className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">{t('product.scent_profile')}</Text>
+                    <View className={`flex-row gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       {profiles.map((p, i) => (
                         <View key={i} className="flex-1 flex-col items-center justify-center py-4 bg-surface-dark rounded-xl border border-white/5">
                           <MaterialIcons name={(ICON_MAP[p.icon || ''] || p.icon || 'park') as any} size={32} color="#f4c025" />
-                          <Text className="text-sm font-medium text-slate-200 mt-2">{p.name}</Text>
+                          <Text className="text-sm font-medium text-slate-200 mt-2">{locale === 'ar' ? (p.name_ar || p.name) : p.name}</Text>
                         </View>
                       ))}
                     </View>
@@ -163,11 +173,11 @@ export default function ProductDetailsScreen() {
                 )}
 
                 {/* Description */}
-                <Text className="text-slate-300 leading-relaxed text-sm">{product.description}</Text>
+                <Text className={`text-slate-300 leading-relaxed text-sm ${isRTL ? 'text-right' : 'text-left'}`}>{productDesc}</Text>
 
                 {/* Add to Bag */}
                 <TouchableOpacity 
-                  className={`w-full py-4 px-6 rounded-xl shadow-lg flex-row items-center justify-between mt-4 ${isAdding ? 'bg-green-500' : (variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'bg-white/10' : 'bg-primary'}`}
+                  className={`w-full py-4 px-6 rounded-xl shadow-lg flex-row items-center justify-between mt-4 ${isRTL ? 'flex-row-reverse' : ''} ${isAdding ? 'bg-green-500' : (variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'bg-white/10' : 'bg-primary'}`}
                   disabled={isAdding || (variants && variants[selectedVariantIdx]?.stock_qty <= 0)}
                    onPress={() => {
                      setIsAdding(true);
@@ -180,12 +190,12 @@ export default function ProductDetailsScreen() {
                      setTimeout(() => setIsAdding(false), 1500);
                    }}
                 >
-                  <Text className={`font-bold text-lg ${(variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'text-white/40' : 'text-black'}`}>{isAdding ? 'Added to Bag!' : (variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'Out of Stock' : 'Add to Bag'}</Text>
-                  <View className="flex-row items-center gap-2">
+                  <Text className={`font-bold text-lg ${(variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'text-white/40' : 'text-black'}`}>{isAdding ? t('product.added_to_bag') : (variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? t('product.out_of_stock') : t('product.add_to_bag')}</Text>
+                  <View className={`flex-row items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     {(!variants || variants[selectedVariantIdx]?.stock_qty > 0) && (
-                      <Text className="text-black/80 font-bold">${currentPrice.toFixed(2)}</Text>
+                      <Text className="text-black/80 font-bold">{formatCurrency(currentPrice, locale)}</Text>
                     )}
-                    <MaterialIcons name={isAdding ? "check" : "arrow-forward"} size={20} color={(variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'white' : 'black'} />
+                    <MaterialIcons name={isAdding ? "check" : (isRTL ? "arrow-back" : "arrow-forward")} size={20} color={(variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'white' : 'black'} />
                   </View>
                 </TouchableOpacity>
 
@@ -204,7 +214,7 @@ export default function ProductDetailsScreen() {
                   >
                     <MaterialIcons name="notifications-none" size={16} color={isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess ? '#4ade80' : 'white'} />
                     <Text className={`text-xs font-bold uppercase tracking-widest ${isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess ? 'text-green-400' : 'text-white'}`}>
-                      {isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess ? "You'll Be Notified ✓" : 'Notify Me When Available'}
+                      {isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess ? t('product.will_be_notified') : t('product.notify_me')}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -213,17 +223,17 @@ export default function ProductDetailsScreen() {
 
             {/* Fragrance Notes - Full width below */}
             <View className="px-8 mt-8">
-              <Text className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Fragrance Notes</Text>
-              <View className="flex-row gap-8">
+              <Text className={`text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>{t('product.fragrance_notes')}</Text>
+              <View className={`flex-row gap-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 {[
-                  { label: 'Top Notes', desc: 'The initial impression', items: notes.top, active: true },
-                  { label: 'Heart Notes', desc: 'The core of the fragrance', items: notes.heart, active: false },
-                  { label: 'Base Notes', desc: 'The lasting memory', items: notes.base, active: false },
+                  { label: t('product.top_notes'), desc: t('product.top_notes_desc'), items: notes.top, active: true },
+                  { label: t('product.heart_notes'), desc: t('product.heart_notes_desc'), items: notes.heart, active: false },
+                  { label: t('product.base_notes'), desc: t('product.base_notes_desc'), items: notes.base, active: false },
                 ].map((note, i) => (
-                  <View key={i} className="flex-1 bg-surface-dark rounded-xl p-5 border border-white/5">
+                  <View key={i} className={`flex-1 bg-surface-dark rounded-xl p-5 border border-white/5 ${isRTL ? 'items-end' : 'items-start'}`}>
                     <Text className="text-base font-semibold text-white mb-1">{note.label}</Text>
                     <Text className="text-slate-400 text-sm italic mb-3">{note.desc}</Text>
-                    <View className="flex-row flex-wrap gap-2">
+                    <View className={`flex-row flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       {note.items.map((item: string, j: number) => (
                         <View key={j} className="bg-slate-800 px-3 py-1 rounded-full">
                           <Text className="text-xs text-slate-300">{item}</Text>
@@ -258,11 +268,11 @@ export default function ProductDetailsScreen() {
       <View className="flex-1 w-full mx-auto relative">
 
         {/* Top Navigation */}
-        <View className="absolute top-0 left-0 right-0 z-50 flex-row items-center justify-between p-4 bg-background-dark/80">
+        <View className={`absolute top-0 left-0 right-0 z-50 flex-row items-center justify-between p-4 bg-background-dark/80 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <TouchableOpacity onPress={() => navigation.goBack()} className="flex h-10 w-10 items-center justify-center rounded-full">
-            <MaterialIcons name="arrow-back" size={24} color="white" />
+            <MaterialIcons name={isRTL ? "arrow-forward" : "arrow-back"} size={24} color="white" />
           </TouchableOpacity>
-          <Text className="text-sm font-semibold tracking-widest uppercase text-white/0">Noire Essence</Text>
+          <Text className="text-sm font-semibold tracking-widest uppercase text-white/0">{productName}</Text>
           <TouchableOpacity className="flex h-10 w-10 items-center justify-center rounded-full" onPress={() => toggleFavorite(product.id)}>
             <MaterialIcons name={isFavorite(product.id) ? "favorite" : "favorite-border"} size={24} color={isFavorite(product.id) ? "#ef4444" : "white"} />
           </TouchableOpacity>
@@ -277,10 +287,10 @@ export default function ProductDetailsScreen() {
               <View className="absolute inset-0 bg-black/20 z-10" />
               <Image source={{ uri: product.image_url }} className="w-full h-full" resizeMode="cover" />
               {(product.is_new || product.is_limited) && (
-                <View className="absolute bottom-4 left-4 z-20">
+                <View className={`absolute bottom-4 ${isRTL ? 'right-4' : 'left-4'} z-20`}>
                   <View className="bg-black/80 px-3 py-1 rounded-full">
                     <Text className="text-xs font-bold uppercase tracking-widest text-white">
-                      {product.is_limited ? 'Limited Edition' : 'New Arrival'}
+                      {product.is_limited ? t('common.limited_edition') : t('common.new_arrival')}
                     </Text>
                   </View>
                 </View>
@@ -291,33 +301,33 @@ export default function ProductDetailsScreen() {
           <View className="px-6 flex-col gap-6">
             {/* Header & Price */}
             <View className="flex-col gap-1">
-              <View className="flex-row justify-between items-start">
+              <View className={`flex-row justify-between items-start ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <View className="flex-1">
-                  <Text className="text-4xl font-normal text-white italic leading-tight" style={{ fontFamily: 'Newsreader_400Regular_Italic' }}>
-                    {product.name.split(' ')[0]}{' '}
+                  <Text className={`text-4xl font-normal text-white italic leading-tight ${isRTL ? 'text-right' : 'text-left'}`} style={{ fontFamily: 'Newsreader_400Regular_Italic' }}>
+                    {productName.split(' ')[0]}{' '}
                     <Text className="not-italic font-medium text-primary" style={{ fontFamily: 'Newsreader_400Regular' }}>
-                      {product.name.split(' ').slice(1).join(' ') || ''}
+                      {productName.split(' ').slice(1).join(' ') || ''}
                     </Text>
                   </Text>
                 </View>
-                <View className="flex-col items-end pt-2">
-                  <Text className="text-2xl font-medium text-white">${currentPrice.toFixed(2)}</Text>
-                  <View className="flex-row items-center mt-1">
+                <View className={`flex-col ${isRTL ? 'items-start' : 'items-end'} pt-2`}>
+                  <Text className="text-2xl font-medium text-white">{formatCurrency(currentPrice, locale)}</Text>
+                  <View className={`flex-row items-center mt-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     {renderStars()}
-                    <Text className="ml-1 text-slate-500 text-xs">({product.review_count})</Text>
+                    <Text className={`text-slate-500 text-xs ${isRTL ? 'mr-1' : 'ml-1'}`}>({product.review_count})</Text>
                   </View>
                 </View>
               </View>
-              <Text className="text-slate-400 text-lg font-light italic" style={{ fontFamily: 'Newsreader_400Regular_Italic' }}>{product.subtitle}</Text>
+              <Text className={`text-slate-400 text-lg font-light italic ${isRTL ? 'text-right' : 'text-left'}`} style={{ fontFamily: 'Newsreader_400Regular_Italic' }}>{productSubtitle}</Text>
             </View>
 
             {/* Variant / Size Selection */}
             <View className="py-2 mt-4">
-              <Text className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Select Variant</Text>
-              <View className="flex-row flex-wrap gap-2 p-1 rounded-lg bg-surface-dark border border-white/10 w-full">
+              <Text className={`text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 ${isRTL ? 'text-right' : 'text-left'}`}>{t('product.select_variant')}</Text>
+              <View className={`flex-row flex-wrap gap-2 p-1 rounded-lg bg-surface-dark border border-white/10 w-full ${isRTL ? 'flex-row-reverse' : ''}`}>
                 {variants ? variants.map((v, i) => (
                   <TouchableOpacity key={i} onPress={() => setSelectedVariantIdx(i)} className={`py-3 px-4 flex-grow items-center justify-center rounded-md ${selectedVariantIdx === i ? 'bg-primary shadow-sm' : 'bg-transparent'} ${v.stock_qty <= 0 ? 'opacity-50' : ''}`}>
-                    <Text className={`text-sm font-bold ${selectedVariantIdx === i ? 'text-black' : 'text-slate-400'} ${v.stock_qty <= 0 ? 'line-through' : ''}`}>{v.size_ml}ml {v.concentration}</Text>
+                    <Text className={`text-sm font-bold ${selectedVariantIdx === i ? 'text-black' : 'text-slate-400'} ${v.stock_qty <= 0 ? 'line-through' : ''}`}>{v.size_ml}ml {locale === 'ar' ? (v.concentration_ar || v.concentration) : v.concentration}</Text>
                   </TouchableOpacity>
                 )) : sizes.map((s, i) => (
                   <TouchableOpacity key={i} onPress={() => setSelectedVariantIdx(i)} className={`flex-1 py-3 items-center justify-center rounded-md ${selectedVariantIdx === i ? 'bg-primary shadow-sm' : 'bg-transparent'}`}>
@@ -332,12 +342,12 @@ export default function ProductDetailsScreen() {
             {/* Scent Profile Icons */}
             {profiles.length > 0 && (
               <View>
-                <Text className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Scent Profile</Text>
-                <View className="flex-row justify-between">
+                <Text className={`text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>{t('product.scent_profile')}</Text>
+                <View className={`flex-row justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   {profiles.map((p, i) => (
-                    <View key={i} className={`flex-1 ${i === 0 ? 'mr-2' : i === profiles.length - 1 ? 'ml-2' : 'mx-2'} flex-col items-center justify-center py-4 bg-surface-dark rounded-xl border border-white/5 shadow-sm`}>
+                    <View key={i} className={`flex-1 ${isRTL ? (i === 0 ? 'ml-2' : i === profiles.length - 1 ? 'mr-2' : 'mx-2') : (i === 0 ? 'mr-2' : i === profiles.length - 1 ? 'ml-2' : 'mx-2')} flex-col items-center justify-center py-4 bg-surface-dark rounded-xl border border-white/5 shadow-sm`}>
                       <MaterialIcons name={(ICON_MAP[p.icon || ''] || p.icon || 'park') as any} size={32} color="#f4c025" />
-                      <Text className="text-sm font-medium text-slate-200 mt-2">{p.name}</Text>
+                      <Text className="text-sm font-medium text-slate-200 mt-2">{locale === 'ar' ? (p.name_ar || p.name) : p.name}</Text>
                     </View>
                   ))}
                 </View>
@@ -346,18 +356,18 @@ export default function ProductDetailsScreen() {
 
             {/* Fragrance Notes Timeline */}
             <View className="pb-8 mt-6">
-              <Text className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Fragrance Notes</Text>
-              <View className="ml-3 border-l border-slate-700 pl-6 flex-col gap-8">
+              <Text className={`text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>{t('product.fragrance_notes')}</Text>
+              <View className={`${isRTL ? 'mr-3 border-r pr-6' : 'ml-3 border-l pl-6'} border-slate-700 flex-col gap-8`}>
                 {[
-                  { label: 'Top Notes', desc: 'The initial impression', items: notes.top, active: true },
-                  { label: 'Heart Notes', desc: 'The core of the fragrance', items: notes.heart, active: false },
-                  { label: 'Base Notes', desc: 'The lasting memory', items: notes.base, active: false },
+                  { label: t('product.top_notes'), desc: t('product.top_notes_desc'), items: notes.top, active: true },
+                  { label: t('product.heart_notes'), desc: t('product.heart_notes_desc'), items: notes.heart, active: false },
+                  { label: t('product.base_notes'), desc: t('product.base_notes_desc'), items: notes.base, active: false },
                 ].map((note, i) => (
-                  <View key={i} className="relative">
-                    <View className={`absolute -left-[32.5px] top-0.5 w-4 h-4 rounded-full bg-background-dark border-2 ${note.active ? 'border-primary' : 'border-slate-600'}`} />
+                  <View key={i} className={`relative ${isRTL ? 'items-end' : 'items-start'}`}>
+                    <View className={`absolute ${isRTL ? '-right-[32.5px]' : '-left-[32.5px]'} top-0.5 w-4 h-4 rounded-full bg-background-dark border-2 ${note.active ? 'border-primary' : 'border-slate-600'}`} />
                     <Text className="text-base font-semibold text-white leading-none mb-1">{note.label}</Text>
-                    <Text className="text-slate-400 text-sm italic mb-3">{note.desc}</Text>
-                    <View className="flex-row flex-wrap gap-2">
+                    <Text className={`text-slate-400 text-sm italic mb-3 ${isRTL ? 'text-right' : 'text-left'}`}>{note.desc}</Text>
+                    <View className={`flex-row flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       {note.items.map((item: string, j: number) => (
                         <View key={j} className="bg-slate-800 px-3 py-1 rounded-full">
                           <Text className="text-xs text-slate-300">{item}</Text>
@@ -371,7 +381,7 @@ export default function ProductDetailsScreen() {
 
             {/* Description */}
             <View className="pb-4">
-              <Text className="text-slate-300 leading-relaxed text-sm">{product.description}</Text>
+              <Text className={`text-slate-300 leading-relaxed text-sm ${isRTL ? 'text-right' : 'text-left'}`}>{productDesc}</Text>
             </View>
 
             <View className="pb-8">
@@ -391,7 +401,7 @@ export default function ProductDetailsScreen() {
         {/* Sticky Bottom CTA */}
         <View className="absolute bottom-0 left-0 right-0 p-4 bg-background-dark/95 border-t border-white/10 z-40">
           <TouchableOpacity 
-            className={`w-full py-4 px-6 rounded-xl shadow-lg flex-row items-center justify-between ${isAdding ? 'bg-green-500' : (variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'bg-white/10' : 'bg-primary'}`}
+            className={`w-full py-4 px-6 rounded-xl shadow-lg flex-row items-center justify-between ${isRTL ? 'flex-row-reverse' : ''} ${isAdding ? 'bg-green-500' : (variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'bg-white/10' : 'bg-primary'}`}
             disabled={isAdding || (variants && variants[selectedVariantIdx]?.stock_qty <= 0)}
             onPress={() => {
               setIsAdding(true);
@@ -404,12 +414,12 @@ export default function ProductDetailsScreen() {
               setTimeout(() => setIsAdding(false), 1500);
             }}
           >
-            <Text className={`font-bold text-lg ${(variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'text-white/40' : 'text-black'}`}>{isAdding ? 'Added to Bag!' : (variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'Out of Stock' : 'Add to Bag'}</Text>
-            <View className="flex-row items-center gap-2">
+            <Text className={`font-bold text-lg ${(variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'text-white/40' : 'text-black'}`}>{isAdding ? t('product.added_to_bag') : (variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? t('product.out_of_stock') : t('product.add_to_bag')}</Text>
+            <View className={`flex-row items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
               {(!variants || variants[selectedVariantIdx]?.stock_qty > 0) && (
-                <Text className="text-black/80 font-bold">${currentPrice.toFixed(2)}</Text>
+                <Text className="text-black/80 font-bold">{formatCurrency(currentPrice, locale)}</Text>
               )}
-              <MaterialIcons name={isAdding ? "check" : "arrow-forward"} size={20} color={(variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'white' : 'black'} />
+              <MaterialIcons name={isAdding ? "check" : (isRTL ? "arrow-back" : "arrow-forward")} size={20} color={(variants && variants[selectedVariantIdx]?.stock_qty <= 0) ? 'white' : 'black'} />
             </View>
           </TouchableOpacity>
 
@@ -428,7 +438,7 @@ export default function ProductDetailsScreen() {
             >
               <MaterialIcons name="notifications-none" size={16} color={isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess ? '#4ade80' : 'white'} />
               <Text className={`text-xs font-bold uppercase tracking-widest ${isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess ? 'text-green-400' : 'text-white'}`}>
-                {isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess ? "You'll Be Notified ✓" : 'Notify Me When Available'}
+                {isSubscribed(product.id, variants[selectedVariantIdx]?.id) || notifySuccess ? t('product.will_be_notified') : t('product.notify_me')}
               </Text>
             </TouchableOpacity>
           )}

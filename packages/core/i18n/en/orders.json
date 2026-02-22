@@ -1,0 +1,40 @@
+{
+  "order_history": "Order History",
+  "timeline": {
+    "pending": "Placed",
+    "paid": "Paid",
+    "processing": "Processing",
+    "shipped": "Shipped",
+    "delivered": "Delivered"
+  },
+  "order_number": "Order #{{number}}",
+  "order_total": "Order Total",
+  "view_details": "View Details",
+  "no_orders": "You haven't placed any orders yet.",
+  "start_shopping": "Start Shopping",
+  "order_details": "Order Details",
+  "order_id": "Order ID",
+  "date": "Date",
+  "status": "Status",
+  "payment": "Payment",
+  "total": "Total",
+  "items": "Items",
+  "shipping_address": "Shipping Address",
+  "back_to_profile": "Back to Profile",
+  "status_progress": "Status Progress",
+  "return": "Return",
+  "requested_on": "Requested on {{date}}",
+  "payment_summary": "Payment Summary",
+  "shipping_details": "Shipping Details",
+  "shipping_not_available": "Shipping details not available.",
+  "return_request": "Return Request",
+  "statuses": {
+    "pending": "Pending",
+    "paid": "Paid",
+    "processing": "Processing",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled",
+    "refunded": "Refunded"
+  }
+}

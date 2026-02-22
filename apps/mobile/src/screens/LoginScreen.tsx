@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useAuth } from '@lessence/supabase';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginScreen({ onLoginSuccess }: { onLoginSuccess?: () => void }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -9,6 +10,9 @@ export default function LoginScreen({ onLoginSuccess }: { onLoginSuccess?: () =>
   const [fullName, setFullName] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const { signIn, signUp, isLoading } = useAuth();
+
+  const { t, i18n } = useTranslation('auth');
+  const isRTL = i18n.dir() === 'rtl';
 
   const handleSubmit = async () => {
     setErrorMsg('');
@@ -31,8 +35,8 @@ export default function LoginScreen({ onLoginSuccess }: { onLoginSuccess?: () =>
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24 }}>
         <View className="items-center mb-10">
           <Text className="font-display text-4xl text-white mb-2">L'ESSENCE</Text>
-          <Text className="text-white/40 text-[10px] tracking-[2px] uppercase">
-            {isLogin ? "Welcome Back" : "Discover the Collection"}
+          <Text className="text-white/40 text-[10px] tracking-[2px] uppercase text-center">
+            {isLogin ? t('welcome_back') : t('discover_collection')}
           </Text>
         </View>
 
@@ -45,31 +49,34 @@ export default function LoginScreen({ onLoginSuccess }: { onLoginSuccess?: () =>
         <View className="space-y-4 mb-6">
           {!isLogin && (
             <TextInput
-              placeholder="FULL NAME"
+              placeholder={t('full_name').toUpperCase()}
               placeholderTextColor="rgba(255,255,255,0.2)"
               value={fullName}
               onChangeText={setFullName}
-              className="w-full bg-white/5 border border-white/10 rounded-full px-6 py-4 text-xs tracking-[1px] text-white"
+              className={`w-full bg-white/5 border border-white/10 rounded-full px-6 py-4 text-xs tracking-[1px] text-white ${isRTL ? 'text-right' : 'text-left'}`}
+              textAlign={isRTL ? 'right' : 'left'}
             />
           )}
 
           <TextInput
-            placeholder="EMAIL ADDRESS"
+            placeholder={t('email').toUpperCase()}
             placeholderTextColor="rgba(255,255,255,0.2)"
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
             keyboardType="email-address"
-            className="w-full bg-white/5 border border-white/10 rounded-full px-6 py-4 text-xs tracking-[1px] text-white"
+            className={`w-full bg-white/5 border border-white/10 rounded-full px-6 py-4 text-xs tracking-[1px] text-white ${isRTL ? 'text-right' : 'text-left'}`}
+            textAlign={isRTL ? 'right' : 'left'}
           />
 
           <TextInput
-            placeholder="PASSWORD"
+            placeholder={t('password').toUpperCase()}
             placeholderTextColor="rgba(255,255,255,0.2)"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            className="w-full bg-white/5 border border-white/10 rounded-full px-6 py-4 text-xs tracking-[1px] text-white"
+            className={`w-full bg-white/5 border border-white/10 rounded-full px-6 py-4 text-xs tracking-[1px] text-white ${isRTL ? 'text-right' : 'text-left'}`}
+            textAlign={isRTL ? 'right' : 'left'}
           />
         </View>
 
@@ -79,7 +86,7 @@ export default function LoginScreen({ onLoginSuccess }: { onLoginSuccess?: () =>
           className={`w-full bg-primary py-4 rounded-full items-center ${isLoading ? 'opacity-50' : ''}`}
         >
           <Text className="text-black font-bold uppercase tracking-[2px] text-xs">
-            {isLoading ? "Authenticating..." : isLogin ? "Sign In" : "Create Account"}
+            {isLoading ? t('authenticating') : isLogin ? t('sign_in') : t('create_account')}
           </Text>
         </TouchableOpacity>
 
@@ -87,8 +94,8 @@ export default function LoginScreen({ onLoginSuccess }: { onLoginSuccess?: () =>
           onPress={() => { setIsLogin(!isLogin); setErrorMsg(''); }}
           className="mt-8 self-center"
         >
-          <Text className="text-white/40 text-[10px] tracking-[1px] uppercase">
-            {isLogin ? "Need an account? Sign up" : "Already have an account? Sign in"}
+          <Text className="text-white/40 text-[10px] tracking-[1px] uppercase text-center">
+            {isLogin ? t('need_account') : t('sign_in_msg')}
           </Text>
         </TouchableOpacity>
       </ScrollView>

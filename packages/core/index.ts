@@ -3,6 +3,8 @@ export type ProductVariant = {
   product_id: string;
   size_ml: number;
   concentration: string;
+  concentration_en?: string;
+  concentration_ar?: string;
   price: number;
   stock_qty: number;
   sku?: string;
@@ -15,9 +17,15 @@ export type ProductVariant = {
 export type Product = {
   id: string;
   name: string;
+  name_en?: string;
+  name_ar?: string;
   slug?: string;
   subtitle: string;
+  subtitle_en?: string;
+  subtitle_ar?: string;
   description: string;
+  description_en?: string;
+  description_ar?: string;
   price: number;
   sku?: string;
   image_url: string;
@@ -25,7 +33,7 @@ export type Product = {
   category_id: string;
   size_options: { size: string; price: number }[];
   variants?: ProductVariant[];
-  scent_profiles: { name: string; icon?: string }[];
+  scent_profiles: { name: string; name_en?: string; name_ar?: string; icon?: string }[];
   fragrance_notes?: { top: string[]; heart: string[]; base: string[] };
   rating: number;
   review_count: number;
@@ -41,8 +49,12 @@ export type Product = {
 export type Category = {
   id: string;
   name: string;
+  name_en?: string;
+  name_ar?: string;
   slug: string;
   description?: string;
+  description_en?: string;
+  description_ar?: string;
   image_url?: string;
   icon?: string;
   sort_order?: number;
@@ -151,11 +163,21 @@ export type Address = {
 export type HeroBanner = {
   id: string;
   title: string;
+  title_en?: string;
+  title_ar?: string;
   subtitle: string;
+  subtitle_en?: string;
+  subtitle_ar?: string;
   description: string;
+  description_en?: string;
+  description_ar?: string;
   image_url: string;
   cta_text: string;
+  cta_text_en?: string;
+  cta_text_ar?: string;
   badge_text: string;
+  badge_text_en?: string;
+  badge_text_ar?: string;
 };
 
 export interface CartItem extends Partial<Product> {
@@ -222,8 +244,12 @@ export type NotificationPreferences = {
 export type Bundle = {
   id: string;
   name: string;
+  name_en?: string;
+  name_ar?: string;
   slug: string;
   description?: string;
+  description_en?: string;
+  description_ar?: string;
   price: number;
   image_url?: string;
   is_active: boolean;
@@ -323,3 +349,7 @@ export type ReturnRequestItem = {
   selected_size?: string;
   price?: number;
 };
+
+// Export utilities
+export * from './utils/currency';
+export * from './i18n';

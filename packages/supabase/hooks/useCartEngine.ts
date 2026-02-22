@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Product, CartItem } from '@lessence/core';
+import { TelemetryLogger, withRetryAndLog } from '../src/utils/telemetry';
 
 // ── Storage adapter interface ──
 export interface CartStorage {
@@ -31,6 +32,9 @@ export function useCartEngine(
   const [stockErrors, setStockErrors] = useState<StockCheckResult[]>([]);
   const prevUserIdRef = useRef<string | undefined>(undefined);
   const initialized = useRef(false);
+
+  // Initialize logger
+  const logger = useRef(new TelemetryLogger(supabase, 'web-client')).current;
 
   // ── Persist to local storage on every change (debounced) ──
   const persistLocally = useCallback(async (items: CartItem[]) => {
@@ -291,6 +295,7 @@ export function useCartEngine(
     try {
       if (!userId) throw new Error('You must be logged in to place an order.');
 
+      return await withRetryAndLog('place_order', logger, async () => {
       // Stock validation
       const checks = await validateStock();
       const outOfStock = checks.filter(c => !c.ok);
@@ -369,10 +374,11 @@ export function useCartEngine(
 
       clearCart();
       return { success: true, orderNumber };
+    });
     } catch (error: any) {
       return { success: false, error: error.message || error };
     }
-  }, [supabase, userId, cart, validateStock, clearCart]);
+  }, [supabase, userId, cart, validateStock, clearCart, logger]);
 
   // ── Computed ──
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);

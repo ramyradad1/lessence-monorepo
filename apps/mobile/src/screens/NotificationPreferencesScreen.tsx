@@ -5,10 +5,14 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth, useNotificationPreferences } from '@lessence/supabase';
 import { supabase } from '../lib/supabase';
+import { useTranslation } from 'react-i18next';
 
 export default function NotificationPreferencesScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { user } = useAuth();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
+
   const { preferences, loading, updatePreferences } = useNotificationPreferences(supabase, user?.id);
 
   const togglePreference = (key: string, value: boolean) => {
@@ -26,75 +30,80 @@ export default function NotificationPreferencesScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background-dark">
       {/* Header */}
-      <View className="flex-row items-center px-4 py-4 border-b border-white/5">
-        <TouchableOpacity onPress={() => navigation.goBack()} className="mr-3">
-          <MaterialIcons name="arrow-back" size={22} color="white" />
+      <View className={`flex-row items-center px-4 py-4 border-b border-white/5 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <TouchableOpacity onPress={() => navigation.goBack()} className={isRTL ? 'ml-3' : 'mr-3'}>
+          <MaterialIcons name={isRTL ? "arrow-forward" : "arrow-back"} size={22} color="white" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold tracking-[0.2em] text-white uppercase flex-1">
-          Preferences
+        <Text className={`text-xl font-bold tracking-[0.2em] text-white uppercase flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+          {t('preferences')}
         </Text>
       </View>
 
       <ScrollView className="flex-1 px-4 py-6">
-        <Text className="text-white/40 text-[10px] uppercase tracking-widest font-bold mb-4 ml-2">
-          Push Notifications
+        <Text className={`text-white/40 text-[10px] uppercase tracking-widest font-bold mb-4 ml-2 ${isRTL ? 'text-right mr-2' : ''}`}>
+          {t('push_notifications')}
         </Text>
         
         <View className="bg-surface-dark border border-white/5 rounded-2xl overflow-hidden mb-8">
           <PreferenceItem 
-            title="Enable Push Notifications"
-            description="Receive alerts directly on your device"
+            title={t('enable_push')}
+            description={t('enable_push_desc')}
             value={preferences?.push_enabled ?? false}
             onToggle={(val) => togglePreference('push_enabled', val)}
             icon="notifications-active"
+            isRTL={isRTL}
           />
         </View>
 
-        <Text className="text-white/40 text-[10px] uppercase tracking-widest font-bold mb-4 ml-2">
-          Alert Categories
+        <Text className={`text-white/40 text-[10px] uppercase tracking-widest font-bold mb-4 ml-2 ${isRTL ? 'text-right mr-2' : ''}`}>
+          {t('alert_categories')}
         </Text>
 
         <View className="bg-surface-dark border border-white/5 rounded-2xl overflow-hidden mb-8">
           <PreferenceItem 
-            title="Order Updates"
-            description="Status changes, shipping, and delivery"
+            title={t('order_updates')}
+            description={t('order_updates_desc')}
             value={preferences?.order_updates ?? false}
             onToggle={(val) => togglePreference('order_updates', val)}
             icon="local-shipping"
             disabled={!preferences?.push_enabled}
+            isRTL={isRTL}
           />
           <View className="h-[1px] bg-white/5 mx-4" />
           <PreferenceItem 
-            title="Back in Stock"
-            description="When items you subscribed to return"
+            title={t('back_in_stock')}
+            description={t('back_in_stock_desc')}
             value={preferences?.back_in_stock ?? false}
             onToggle={(val) => togglePreference('back_in_stock', val)}
             icon="inventory"
             disabled={!preferences?.push_enabled}
+            isRTL={isRTL}
           />
           <View className="h-[1px] bg-white/5 mx-4" />
           <PreferenceItem 
-            title="Price Drops"
-            description="When prices drop on your favorites"
+            title={t('price_drops')}
+            description={t('price_drops_desc')}
             value={preferences?.price_drop ?? false}
             onToggle={(val) => togglePreference('price_drop', val)}
             icon="trending-down"
             disabled={!preferences?.push_enabled}
+            isRTL={isRTL}
           />
           <View className="h-[1px] bg-white/5 mx-4" />
           <PreferenceItem 
-            title="Promotions"
-            description="Exclusive offers and new arrivals"
+            title={t('promotions')}
+            description={t('promotions_desc')}
             value={preferences?.promotions ?? false}
             onToggle={(val) => togglePreference('promotions', val)}
             icon="local-offer"
             disabled={!preferences?.push_enabled}
+            isRTL={isRTL}
           />
         </View>
 
         <View className="mt-4 px-2">
           <Text className="text-white/20 text-[10px] text-center italic">
-            Note: You can also manage granular notification permissions in your device system settings.
+            {t('granular_note')}
           </Text>
         </View>
       </ScrollView>
@@ -108,7 +117,8 @@ function PreferenceItem({
   value, 
   onToggle, 
   icon,
-  disabled = false
+  disabled = false,
+  isRTL
 }: { 
   title: string; 
   description: string; 
@@ -116,15 +126,16 @@ function PreferenceItem({
   onToggle: (val: boolean) => void;
   icon: string;
   disabled?: boolean;
+    isRTL: boolean;
 }) {
   return (
-    <View className={`flex-row items-center p-5 ${disabled ? 'opacity-40' : ''}`}>
-      <View className="w-10 h-10 rounded-full bg-white/5 items-center justify-center mr-4">
+    <View className={`flex-row items-center p-5 ${disabled ? 'opacity-40' : ''} ${isRTL ? 'flex-row-reverse' : ''}`}>
+      <View className={`w-10 h-10 rounded-full bg-white/5 items-center justify-center ${isRTL ? 'ml-4' : 'mr-4'}`}>
         <MaterialIcons name={icon as any} size={20} color={value ? "#f4c025" : "rgba(255,255,255,0.4)"} />
       </View>
       <View className="flex-1">
-        <Text className="text-white font-display text-base mb-0.5">{title}</Text>
-        <Text className="text-white/40 text-[10px] leading-relaxed">{description}</Text>
+        <Text className={`text-white font-display text-base mb-0.5 ${isRTL ? 'text-right' : 'text-left'}`}>{title}</Text>
+        <Text className={`text-white/40 text-[10px] leading-relaxed ${isRTL ? 'text-right' : 'text-left'}`}>{description}</Text>
       </View>
       <Switch 
         value={value} 

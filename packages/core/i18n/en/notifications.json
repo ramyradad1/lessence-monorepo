@@ -1,0 +1,16 @@
+{
+  "preferences": "Preferences",
+  "push_notifications": "Push Notifications",
+  "enable_push": "Enable Push Notifications",
+  "enable_push_desc": "Receive alerts directly on your device",
+  "alert_categories": "Alert Categories",
+  "order_updates": "Order Updates",
+  "order_updates_desc": "Status changes, shipping, and delivery",
+  "back_in_stock": "Back in Stock",
+  "back_in_stock_desc": "When items you subscribed to return",
+  "price_drops": "Price Drops",
+  "price_drops_desc": "When prices drop on your favorites",
+  "promotions": "Promotions",
+  "promotions_desc": "Exclusive offers and new arrivals",
+  "granular_note": "Note: You can also manage granular notification permissions in your device system settings."
+}

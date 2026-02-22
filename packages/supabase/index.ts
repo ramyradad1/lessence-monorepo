@@ -61,5 +61,10 @@ export * from './hooks/useAdminCustomers';
 export * from './hooks/useAdminReports';
 export * from './hooks/useAdminBundles';
 export * from './hooks/useAdminNotifications';
+export * from './hooks/useAdminDiagnostics';
+// Monitoring
+export * from './hooks/usePerformanceTracking';
 // Providers
 export * from './providers/QueryProvider';
+// Utils
+export * from './src/utils/telemetry';
