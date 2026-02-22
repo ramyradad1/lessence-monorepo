@@ -5,9 +5,12 @@ import { useEffect, useState } from "react";
 import { User, LogOut, Package, MapPin, Shield } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
+import { signOutAction } from "../auth/actions";
+
 export default function ProfilePage() {
   const { user, profile, isLoading, signOut } = useAuth();
   const router = useRouter();
+  const [isSignOutLoading, setIsSignOutLoading] = useState(false);
 
   // Redirect to login if not loading and no user
   useEffect(() => {
@@ -17,9 +20,29 @@ export default function ProfilePage() {
   }, [user, isLoading, router]);
 
   const handleSignOut = async () => {
-    await signOut();
-    router.push("/");
+    try {
+      setIsSignOutLoading(true);
+    // 1. Clear local state
+      await signOut();
+      // 2. Call server action to clear cookies
+      await signOutAction();
+    } catch (error) {
+      console.error("Sign out error:", error);
+      setIsSignOutLoading(false);
+    }
   };
+
+  // Sign out in progress
+  if (isSignOutLoading) {
+    return (
+      <div className="min-h-screen bg-[#181611] flex flex-col items-center justify-center p-4 gap-4">
+        <div className="h-8 w-8 border-2 border-[#f4c025] border-t-transparent rounded-full animate-spin mb-2" />
+        <p className="text-white/40 uppercase tracking-widest text-[10px]">
+          Signing out safely...
+        </p>
+      </div>
+    );
+  }
 
   // Loading state
   if (isLoading) {
@@ -69,10 +92,11 @@ export default function ProfilePage() {
               
               <button
                 onClick={handleSignOut}
-                className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-xs uppercase tracking-widest"
+                  disabled={isSignOutLoading}
+                  className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-xs uppercase tracking-widest disabled:opacity-50"
               >
                 <LogOut size={14} />
-                Sign Out
+                  {isSignOutLoading ? "Exiting..." : "Sign Out"}
               </button>
             </div>
 

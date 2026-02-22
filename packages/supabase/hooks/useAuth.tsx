@@ -154,11 +154,37 @@ export const AuthProvider = ({
   };
 
   const signOut = async () => {
-    try { await supabase.auth.signOut(); } catch { }
-    setUser(null);
-    setSession(null);
-    setProfile(null);
-    setIsLoading(false);
+    console.log('useAuth: SignOut started');
+    try {
+      // Clear session from Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) console.error('useAuth: Supabase signOut error', error);
+
+      // Manual cleanup of cookies and storage as fallback
+      if (typeof window !== 'undefined') {
+        // Clear all cookies starting with sb- (Supabase auth cookies)
+        document.cookie.split(";").forEach((c) => {
+          const cookieName = c.split("=")[0].trim();
+          if (cookieName.startsWith("sb-")) {
+            document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+          }
+        });
+
+        // Clear local storage items for good measure
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('sb-')) localStorage.removeItem(key);
+        });
+      }
+    } catch (err) {
+      console.error('useAuth: SignOut exception', err);
+    } finally {
+      // ALWAYS clear local state regardless of Supabase result
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setIsLoading(false);
+      console.log('useAuth: SignOut completed, state cleared');
+    }
   };
 
   return (
