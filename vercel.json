@@ -1,5 +1,4 @@
 {
   "buildCommand": "next build",
-  "outputDirectory": ".next",
-  "rootDirectory": "apps/web"
+  "outputDirectory": ".next"
 }
