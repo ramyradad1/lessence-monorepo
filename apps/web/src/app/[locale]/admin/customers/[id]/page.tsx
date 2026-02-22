@@ -1,13 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAdminCustomers, CustomerDetail } from '@lessence/supabase';
-import { OrderStatus } from '@lessence/core';
 import {
   ArrowLeft, User as UserIcon, Mail, Phone, Calendar, ShoppingBag,
-  DollarSign, MapPin, StickyNote, Loader2, Plus, Trash2, Send
+  MapPin, StickyNote, Loader2, Trash2, Send
 } from 'lucide-react';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -31,15 +30,15 @@ export default function CustomerDetailPage() {
   const [submittingNote, setSubmittingNote] = useState(false);
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
 
-  const loadCustomer = async () => {
+  const loadCustomer = useCallback(async () => {
     const data = await fetchCustomerDetail(customerId);
     setCustomer(data);
     setLoading(false);
-  };
+  }, [customerId, fetchCustomerDetail]);
 
   useEffect(() => {
     loadCustomer();
-  }, [customerId]);
+  }, [loadCustomer]);
 
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();

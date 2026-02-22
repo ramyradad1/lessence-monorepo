@@ -1,6 +1,7 @@
 import "./global.css";
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
@@ -149,42 +150,44 @@ export default function App() {
   };
 
   return (
-    <I18nextProvider i18n={i18n}>
-      <SafeAreaProvider>
-        <QueryProvider>
-          <AuthProvider supabase={supabase}>
-            <PushNotificationManager />
-            <FavoritesProvider>
-              <CartProvider>
-                <StatusBar style="light" />
-                <NavigationContainer linking={linking}>
-                  <Stack.Navigator screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="Main" component={CustomerTabs} />
-                    <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} />
-                    <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
-                    <Stack.Screen name="AdminReviews" component={AdminReviewsScreen} />
-                    <Stack.Screen name="Checkout" component={CheckoutScreen} />
-                    <Stack.Screen name="OrderConfirmation" component={OrderConfirmationScreen} />
-                    <Stack.Screen name="Notifications" component={NotificationsScreen} />
-                    <Stack.Screen name="NotificationPreferences" component={NotificationPreferencesScreen} />
-                    <Stack.Screen name="Orders" component={OrdersScreen} />
-                    <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
-                    <Stack.Screen name="NewReturn" component={NewReturnScreen} />
-                    <Stack.Screen name="AdminOrderDetail" component={AdminOrderDetailScreen} />
-                    <Stack.Screen name="Journal" component={JournalScreen} />
-                    <Stack.Screen name="About" component={AboutScreen} />
-                    <Stack.Screen name="AdminCustomers" component={AdminCustomersScreen} />
-                    <Stack.Screen name="AdminCustomerDetail" component={AdminCustomerDetailScreen} />
-                    <Stack.Screen name="AdminReturns" component={AdminReturnsScreen} />
-                    <Stack.Screen name="AdminReturnDetail" component={AdminReturnDetailScreen} />
-                    <Stack.Screen name="AdminOrders" component={AdminOrdersScreen} />
-                  </Stack.Navigator>
-                </NavigationContainer>
-              </CartProvider>
-            </FavoritesProvider>
-          </AuthProvider>
-        </QueryProvider>
-      </SafeAreaProvider>
-    </I18nextProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <I18nextProvider i18n={i18n}>
+        <SafeAreaProvider>
+          <QueryProvider>
+            <AuthProvider supabase={supabase}>
+              <PushNotificationManager />
+              <FavoritesProvider>
+                <CartProvider>
+                  <StatusBar style="light" />
+                  <NavigationContainer linking={linking}>
+                    <Stack.Navigator screenOptions={{ headerShown: false }}>
+                      <Stack.Screen name="Main" component={CustomerTabs} />
+                      <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} />
+                      <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
+                      <Stack.Screen name="AdminReviews" component={AdminReviewsScreen} />
+                      <Stack.Screen name="Checkout" component={CheckoutScreen} />
+                      <Stack.Screen name="OrderConfirmation" component={OrderConfirmationScreen} />
+                      <Stack.Screen name="Notifications" component={NotificationsScreen} />
+                      <Stack.Screen name="NotificationPreferences" component={NotificationPreferencesScreen} />
+                      <Stack.Screen name="Orders" component={OrdersScreen} />
+                      <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
+                      <Stack.Screen name="NewReturn" component={NewReturnScreen} />
+                      <Stack.Screen name="AdminOrderDetail" component={AdminOrderDetailScreen} />
+                      <Stack.Screen name="Journal" component={JournalScreen} />
+                      <Stack.Screen name="About" component={AboutScreen} />
+                      <Stack.Screen name="AdminCustomers" component={AdminCustomersScreen} />
+                      <Stack.Screen name="AdminCustomerDetail" component={AdminCustomerDetailScreen} />
+                      <Stack.Screen name="AdminReturns" component={AdminReturnsScreen} />
+                      <Stack.Screen name="AdminReturnDetail" component={AdminReturnDetailScreen} />
+                      <Stack.Screen name="AdminOrders" component={AdminOrdersScreen} />
+                    </Stack.Navigator>
+                  </NavigationContainer>
+                </CartProvider>
+              </FavoritesProvider>
+            </AuthProvider>
+          </QueryProvider>
+        </SafeAreaProvider>
+      </I18nextProvider>
+    </GestureHandlerRootView>
   );
 }

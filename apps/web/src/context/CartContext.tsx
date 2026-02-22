@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useMemo, ReactNode } from "react";
+import React, { createContext, useContext, useMemo, useCallback, ReactNode } from "react";
 import { Product, CartItem, Bundle } from "@lessence/core";
 import { supabase } from "@/lib/supabase";
 import { useAuth, useCartEngine, CartStorage } from "@lessence/supabase";
@@ -48,10 +48,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const setIsCartOpen = (open: boolean) => setIsCartOpenState(open);
 
   // Auto-open cart on add
-  const addToCart = (product: Product | Bundle, selectedSize?: string, variantId?: string, isBundle?: boolean) => {
+  const addToCart = useCallback((product: Product | Bundle, selectedSize?: string, variantId?: string, isBundle?: boolean) => {
     engine.addToCart(product, selectedSize, variantId, isBundle);
     setIsCartOpenState(true);
-  };
+  }, [engine]);
 
   const value = useMemo(() => ({
     cart: engine.cart,
@@ -65,7 +65,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     isCartOpen,
     setIsCartOpen,
     stockErrors: engine.stockErrors,
-  }), [engine.cart, engine.cartCount, engine.cartTotal, engine.stockErrors, isCartOpen]);
+  }), [
+    engine.cart,
+    engine.cartCount,
+    engine.cartTotal,
+    engine.stockErrors,
+    engine.removeFromCart,
+    engine.updateQuantity,
+    engine.clearCart,
+    engine.placeOrder,
+    isCartOpen,
+    addToCart
+  ]);
 
   return (
     <CartContext.Provider value={value}>
