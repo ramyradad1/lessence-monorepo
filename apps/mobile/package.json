@@ -2,7 +2,7 @@
   "name": "lessenceapp",
   "version": "1.0.0",
   "main": "index.ts",
-  "homepage": "https://ramyradad1.github.io/Perfumes/",
+  "homepage": "",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
