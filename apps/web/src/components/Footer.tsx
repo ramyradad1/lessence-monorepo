@@ -14,7 +14,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div className="md:col-span-1">
             <div className="mb-6">
-              <Image src="/logo.png" alt="L'Essence" width={160} height={40} className="object-contain" />
+              <Image src="/logo.png" alt="L'Essence" width={200} height={50} className="object-contain" />
+
 
             </div>
 

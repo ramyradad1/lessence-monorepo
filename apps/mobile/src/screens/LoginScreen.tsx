@@ -77,7 +77,8 @@ export default function LoginScreen({
         <View className="items-center mb-10">
           <Image
             source={require("../../assets/logo.png")}
-            className="w-48 h-24"
+            className="w-64 h-32"
+
             resizeMode="contain"
           />
 

@@ -317,7 +317,8 @@ export default function HomeScreen() {
           </View>
           <Image
             source={require("../../assets/logo.png")}
-            className="w-32 h-10"
+            className="w-44 h-14"
+
             resizeMode="contain"
           />
 

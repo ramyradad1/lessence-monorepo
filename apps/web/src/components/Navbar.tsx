@@ -161,7 +161,8 @@ export default function Navbar() {
     <>
       <nav className="fixed top-0 w-full z-[100] bg-background-dark/80 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-          <Link href="/" onClick={closeMenu} className="relative w-40 h-12 z-[110]">
+          <Link href="/" onClick={closeMenu} className="relative w-56 h-16 z-[110]">
+
             <Image src="/logo.png" alt="L'Essence" fill className="object-contain" />
 
           </Link>
