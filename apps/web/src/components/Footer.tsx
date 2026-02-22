@@ -2,6 +2,8 @@
 import { Link } from "@/navigation";
 import { Facebook, Instagram, Twitter, Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
+
 
 export default function Footer() {
   const t = useTranslations('common');
@@ -12,7 +14,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div className="md:col-span-1">
             <div className="mb-6">
-              <img src="/logo.png" alt="L'Essence" className="h-10 w-auto object-contain" />
+              <Image src="/logo.png" alt="L'Essence" width={160} height={40} className="object-contain" />
+
             </div>
 
             <p className="text-white/40 leading-relaxed mb-6 font-light">
