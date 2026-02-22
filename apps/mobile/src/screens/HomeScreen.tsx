@@ -315,11 +315,12 @@ export default function HomeScreen() {
               )}
             </TouchableOpacity>
           </View>
-          <Text
-            className={`text-xl font-bold tracking-[0.2em] text-white uppercase ${isRTL ? "mr-4" : "ml-4"}`}
-          >
-            {t("common:brand_name")}
-          </Text>
+          <Image
+            source={require("../assets/logo.png")}
+            className="w-32 h-10"
+            resizeMode="contain"
+          />
+
           <View
             className={`flex-row items-center ${isRTL ? "flex-row-reverse" : ""}`}
           >

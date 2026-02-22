@@ -8,7 +8,9 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Image,
 } from "react-native";
+
 import { useAuth } from "@lessence/supabase";
 import { useTranslation } from "react-i18next";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -73,9 +75,12 @@ export default function LoginScreen({
         </View>
 
         <View className="items-center mb-10">
-          <Text className="font-display text-4xl text-white mb-2">
-            L'ESSENCE
-          </Text>
+          <Image
+            source={require("../../assets/logo.png")}
+            className="w-48 h-24"
+            resizeMode="contain"
+          />
+
 
           <Text className="text-white/40 text-[10px] tracking-[2px] uppercase text-center">
             {isLogin ? t("welcome_back") : t("discover_collection")}

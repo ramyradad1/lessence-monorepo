@@ -2,6 +2,8 @@
   "cli": {
     "version": ">= 7.0.0"
   },
+
+
   "build": {
     "development": {
       "developmentClient": true,
@@ -10,8 +12,13 @@
     "preview": {
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://mdlceagbdodmpgdfocrz.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kbGNlYWdiZG9kbXBnZGZvY3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1ODM4MTEsImV4cCI6MjA4NzE1OTgxMX0.ZSKteQSLGlHKLatY62swXdtTSRRjLYwbiDwSW9ICaTY"
       }
     },
+
     "production": {
       "android": {
         "buildType": "app-bundle"

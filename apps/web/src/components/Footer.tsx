@@ -11,7 +11,10 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div className="md:col-span-1">
-            <h2 className="text-2xl font-display text-primary uppercase tracking-widest mb-6">L&apos;Essence</h2>
+            <div className="mb-6">
+              <img src="/logo.png" alt="L'Essence" className="h-10 w-auto object-contain" />
+            </div>
+
             <p className="text-white/40 leading-relaxed mb-6 font-light">
               {t('footer_description')}
             </p>

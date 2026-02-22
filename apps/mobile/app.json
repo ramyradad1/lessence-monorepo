@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "LEssenceApp",
-    "slug": "LEssenceApp",
+    "slug": "lessence",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,7 +13,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lessence.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.lessence.app",
@@ -25,14 +29,18 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
-
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "experiments": {
-    },
+    "experiments": {},
     "plugins": [
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b5366a5a-9077-4596-8c01-9362ffe2b3fc"
+      }
+    },
+    "owner": "ramyradads-organization"
   }
 }
