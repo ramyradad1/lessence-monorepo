@@ -7,7 +7,7 @@ import { Profile } from '@lessence/core';
 import { Mail, Shield, User as UserIcon, Calendar, Loader2, Plus, Trash2, Edit2, X } from 'lucide-react';
 
 export default function AdminUsersPage() {
-  const { users, loading, error, createUser, deleteUser, updateUser } = useAdminUsers(supabase);
+  const { users, loading, createUser, deleteUser, updateUser } = useAdminUsers(supabase);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<Profile | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -15,7 +15,7 @@ export default function AdminUsersPage() {
     email: '',
     password: '',
     full_name: '',
-    role: 'user' as string
+    role: 'user' as Profile['role']
   });
 
   const resetForm = () => {
@@ -30,7 +30,7 @@ export default function AdminUsersPage() {
     if (editingUser) {
       const { success, error: err } = await updateUser(editingUser.id, {
         full_name: form.full_name,
-        role: form.role as any
+        role: form.role
       });
       if (success) {
         setIsModalOpen(false);
@@ -39,7 +39,12 @@ export default function AdminUsersPage() {
         alert(err);
       }
     } else {
-      const { success, error: err } = await createUser(form.email, form.password, form.full_name, form.role as any);
+      const { success, error: err } = await createUser(
+        form.email,
+        form.password,
+        form.full_name,
+        form.role as unknown as Parameters<typeof createUser>[3]
+      );
       if (success) {
         setIsModalOpen(false);
         resetForm();
@@ -232,7 +237,7 @@ export default function AdminUsersPage() {
                 <select 
                   title="Role"
                   value={form.role} 
-                  onChange={e => setForm({ ...form, role: e.target.value as any })} 
+                  onChange={e => setForm({ ...form, role: e.target.value as Profile['role'] })} 
                   className={inputClass}
                 >
                   <option value="user" className="bg-[#1e1b16]">Standard User</option>

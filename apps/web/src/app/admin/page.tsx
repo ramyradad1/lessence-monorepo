@@ -4,7 +4,6 @@ import React from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useAdminDashboard, useAdminNotifications } from '@lessence/supabase';
-import { OrderStatus, AdminNotification } from '@lessence/core';
 
 const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-orange-500/10 text-orange-400 border-orange-500/20',

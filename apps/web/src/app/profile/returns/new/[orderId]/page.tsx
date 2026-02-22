@@ -3,10 +3,10 @@
 import { useAuth, useCreateReturnRequest } from "@lessence/supabase";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ChevronLeft, Package, Camera, X, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, Camera, X, AlertCircle, CheckCircle2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { supabase } from "@/lib/supabase";
-import { Order, OrderItem } from "@lessence/core";
+import { Order } from "@lessence/core";
 
 const RETURN_REASONS = [
   "Wrong size/fit",
@@ -18,7 +18,7 @@ const RETURN_REASONS = [
 ];
 
 export default function NewReturnPage() {
-  const { user, profile, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const params = useParams();
   const router = useRouter();
   const orderId = params.orderId as string;
@@ -69,8 +69,9 @@ export default function NewReturnPage() {
   const handleItemToggle = (itemId: string, maxQty: number) => {
     setSelectedItems(prev => {
       if (prev[itemId]) {
-        const { [itemId]: _, ...rest } = prev;
-        return rest;
+        const next = { ...prev };
+        delete next[itemId];
+        return next;
       }
       return { ...prev, [itemId]: maxQty };
     });

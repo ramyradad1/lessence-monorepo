@@ -52,7 +52,7 @@ export default function LoginPage() {
         <div className="absolute -top-32 -right-32 w-64 h-64 bg-primary/20 rounded-full blur-[100px] pointer-events-none" />
         
         <div className="mb-10 text-center relative z-10">
-          <h1 className="font-display text-4xl text-white mb-3">L'ESSENCE</h1>
+          <h1 className="font-display text-4xl text-white mb-3">L&apos;ESSENCE</h1>
           <p className="text-white/40 text-xs tracking-[0.2em] uppercase">
             {isLogin ? "Welcome Back to Luxury" : "Discover the Collection"}
           </p>

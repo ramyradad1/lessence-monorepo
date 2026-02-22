@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useAdminProducts } from '@lessence/supabase';
-import { Product } from '@lessence/core';
 
 export default function AdminProductsPage() {
   const { products, categories, loading, fetchProducts, createProduct, toggleProductActive, toggleProductNew } = useAdminProducts(supabase);

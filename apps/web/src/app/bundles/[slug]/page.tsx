@@ -7,7 +7,8 @@ import { useRouter } from 'next/navigation';
 import { useBundleBySlug } from '@lessence/supabase';
 import { useCart } from '@/context/CartContext';
 import { supabase } from '@/lib/supabase';
-import { ShoppingBag, ChevronLeft, Check, AlertCircle } from 'lucide-react';
+import { ShoppingBag, ChevronLeft, Check } from 'lucide-react';
+import type { BundleItem } from '@lessence/core';
 
 export default function BundlePage({ params }: { params: { slug: string } }) {
   const router = useRouter();
@@ -28,7 +29,7 @@ export default function BundlePage({ params }: { params: { slug: string } }) {
     return (
       <div className="min-h-screen bg-[#181611] flex flex-col pt-32 pb-24 items-center justify-center text-center px-4">
         <h1 className="text-3xl font-bold text-white mb-4">Gift Set Not Found</h1>
-        <p className="text-white/60 mb-8 max-w-md">We couldn't find the gift set you're looking for. It may have been removed or the URL is incorrect.</p>
+        <p className="text-white/60 mb-8 max-w-md">We couldn&apos;t find the gift set you&apos;re looking for. It may have been removed or the URL is incorrect.</p>
         <Link href="/" className="bg-[#f4c025] text-black px-8 py-3 rounded-full font-bold tracking-widest uppercase hover:bg-white transition-colors">
           Return Home
         </Link>
@@ -114,7 +115,7 @@ export default function BundlePage({ params }: { params: { slug: string } }) {
                  This set includes:
              </h3>
              <ul className="space-y-4">
-                 {bundle.items?.map((item: any, index: number) => (
+                 {bundle.items?.map((item: BundleItem, index: number) => (
                      <li key={item.id || index} className="flex items-start gap-4">
                          <div className="w-16 h-16 bg-black/40 rounded-xl flex items-center justify-center shrink-0 border border-white/5 overflow-hidden relative">
                              {item.product?.image_url ? (
@@ -135,7 +136,7 @@ export default function BundlePage({ params }: { params: { slug: string } }) {
                                  {item.variant && (
                                      <>
                                          <span>•</span>
-                                         <span>Size: {item.variant.size}</span>
+                                         <span>Size: {item.variant.size_ml}ml</span>
                                          {item.variant.concentration && (
                                             <>
                                                 <span>•</span>

@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAdminReturnRequests } from '@lessence/supabase';
 import { RotateCcw, Search, Filter, Eye, Clock, CheckCircle, XCircle, Package, Landmark } from 'lucide-react';
 import { ReturnRequestStatus, ReturnRequest } from '@lessence/core';
 
-const STATUS_ICONS: Record<string, any> = {
+const STATUS_ICONS: Record<ReturnRequestStatus, ReactNode> = {
   requested: <Clock className="text-amber-500" size={16} />,
   approved: <CheckCircle className="text-blue-500" size={16} />,
   received: <Package className="text-indigo-500" size={16} />,
@@ -15,7 +16,7 @@ const STATUS_ICONS: Record<string, any> = {
   rejected: <XCircle className="text-rose-500" size={16} />,
 };
 
-const STATUS_LABELS: Record<string, string> = {
+const STATUS_LABELS: Record<ReturnRequestStatus, string> = {
   requested: 'New Request',
   approved: 'Approved',
   received: 'Items Received',
@@ -23,7 +24,7 @@ const STATUS_LABELS: Record<string, string> = {
   rejected: 'Rejected',
 };
 
-const STATUS_COLORS: Record<string, string> = {
+const STATUS_COLORS: Record<ReturnRequestStatus, string> = {
   requested: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
   approved: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
   received: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20',
@@ -80,7 +81,7 @@ export default function AdminReturnsPage() {
               title="Filter by Status"
               className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 focus:outline-none focus:border-primary/50 transition-colors appearance-none"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
+              onChange={(e) => setStatusFilter(e.target.value as ReturnRequestStatus | 'all')}
             >
               <option value="all">All Statuses</option>
               <option value="requested">Requested</option>

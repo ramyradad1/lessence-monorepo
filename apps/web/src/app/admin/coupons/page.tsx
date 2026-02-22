@@ -42,7 +42,7 @@ export default function AdminCouponsPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    const payload: any = {
+    const payload = {
       code: form.code.toUpperCase(),
       discount_type: form.discount_type,
       discount_amount: parseFloat(form.discount_amount) || 0,
@@ -95,7 +95,7 @@ export default function AdminCouponsPage() {
             </div>
             <div>
               <label className="text-xs text-white/40 mb-1 block">Discount Type</label>
-              <select title="Discount Type" value={form.discount_type} onChange={e => setForm({ ...form, discount_type: e.target.value as any })} className={inputClass}>
+              <select title="Discount Type" value={form.discount_type} onChange={e => setForm({ ...form, discount_type: e.target.value as Coupon['discount_type'] })} className={inputClass}>
                 <option value="percentage" className="bg-[#1e1b16]">Percentage (%)</option>
                 <option value="fixed" className="bg-[#1e1b16]">Fixed ($)</option>
                 <option value="free_shipping" className="bg-[#1e1b16]">Free Shipping</option>

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useAdminCustomers } from '@lessence/supabase';
-import { Search, ArrowUpDown, User as UserIcon, Mail, Phone, ShoppingBag, DollarSign, Calendar, Loader2 } from 'lucide-react';
+import { Search, ArrowUpDown, User as UserIcon, Mail, Phone, ShoppingBag, Loader2 } from 'lucide-react';
 
 const SORT_OPTIONS = [
   { value: 'created_at:desc', label: 'Newest First' },
@@ -16,6 +16,9 @@ const SORT_OPTIONS = [
   { value: 'full_name:desc', label: 'Name Z–A' },
 ] as const;
 
+type CustomerSortBy = 'created_at' | 'total_spend' | 'total_orders' | 'full_name';
+type CustomerSortOrder = 'asc' | 'desc';
+
 export default function AdminCustomersPage() {
   const { customers, loading, totalCount, fetchCustomers } = useAdminCustomers(supabase);
   const [search, setSearch] = useState('');
@@ -23,7 +26,7 @@ export default function AdminCustomersPage() {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    const [sortBy, sortOrder] = sort.split(':') as [any, any];
+    const [sortBy, sortOrder] = sort.split(':') as [CustomerSortBy, CustomerSortOrder];
     const timer = setTimeout(() => {
       fetchCustomers({ search: search || undefined, sortBy, sortOrder, page });
     }, 300);

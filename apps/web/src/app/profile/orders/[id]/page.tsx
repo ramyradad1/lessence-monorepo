@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { ChevronLeft, Package, MapPin, CreditCard, RotateCcw } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { supabase } from "@/lib/supabase";
-import { Order, Address, OrderItem, OrderStatusHistory } from "@lessence/core";
+import { Order, Address, OrderItem, OrderStatusHistory, ReturnRequest } from "@lessence/core";
 import OrderTimeline from "@/components/OrderTimeline";
 
 type DetailedOrder = Order & {
@@ -26,14 +26,14 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function OrderDetailPage() {
-  const { user, profile, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const params = useParams();
   const router = useRouter();
   const orderId = params.id as string;
   
   const [order, setOrder] = useState<DetailedOrder | null>(null);
   const [loading, setLoading] = useState(true);
-  const [returnRequest, setReturnRequest] = useState<any>(null);
+  const [returnRequest, setReturnRequest] = useState<ReturnRequest | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {

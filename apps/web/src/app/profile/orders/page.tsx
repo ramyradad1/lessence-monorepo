@@ -60,7 +60,7 @@ export default function OrderHistoryPage() {
             ) : orders.length === 0 ? (
               <div className="glass-effect p-12 rounded-3xl border border-white/5 text-center">
                 <Package size={48} className="text-white/10 mx-auto mb-4" />
-                <p className="text-white/40 mb-6">You haven't placed any orders yet.</p>
+                <p className="text-white/40 mb-6">You haven&apos;t placed any orders yet.</p>
                 <button 
                   onClick={() => router.push('/shop')}
                   className="bg-[#f4c025] text-black px-8 py-3 rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-white transition-all"

@@ -1,6 +1,6 @@
 "use client";
 import React, { createContext, useContext, useMemo, ReactNode } from "react";
-import { Product, CartItem } from "@lessence/core";
+import { Product, CartItem, Bundle } from "@lessence/core";
 import { supabase } from "@/lib/supabase";
 import { useAuth, useCartEngine, CartStorage } from "@lessence/supabase";
 
@@ -25,11 +25,11 @@ const webCartStorage: CartStorage = {
 // ── Context type ──
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product | any, selectedSize?: string, variantId?: string, isBundle?: boolean) => void;
+  addToCart: (product: Product | Bundle, selectedSize?: string, variantId?: string, isBundle?: boolean) => void;
   removeFromCart: (productId: string, selectedSize?: string, variantId?: string, isBundle?: boolean) => void;
   updateQuantity: (productId: string, selectedSize: string | undefined, quantity: number, variantId?: string, isBundle?: boolean) => void;
   clearCart: () => void;
-  placeOrder: () => Promise<{ success: boolean; orderNumber?: string; error?: any }>;
+  placeOrder: () => Promise<{ success: boolean; orderNumber?: string; error?: unknown }>;
   cartCount: number;
   cartTotal: number;
   isCartOpen: boolean;
@@ -48,7 +48,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const setIsCartOpen = (open: boolean) => setIsCartOpenState(open);
 
   // Auto-open cart on add
-  const addToCart = (product: Product | any, selectedSize?: string, variantId?: string, isBundle?: boolean) => {
+  const addToCart = (product: Product | Bundle, selectedSize?: string, variantId?: string, isBundle?: boolean) => {
     engine.addToCart(product, selectedSize, variantId, isBundle);
     setIsCartOpenState(true);
   };

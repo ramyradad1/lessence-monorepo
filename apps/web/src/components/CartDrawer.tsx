@@ -3,23 +3,16 @@ import { useCart } from "@/context/CartContext";
 import { X, Plus, Minus, ShoppingBag, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@lessence/supabase";
+import type { CartItem } from "@lessence/core";
+
+type CartOrderResult = { success: boolean; orderNumber?: string; error?: unknown };
+type CartDrawerItem = CartItem & { product_id?: string };
 
 export default function CartDrawer() {
-  const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, cartTotal, cartCount, placeOrder } = useCart();
+  const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();
   const [isCheckout, setIsCheckout] = useState(false);
-  const [orderResult, setOrderResult] = useState<{ success: boolean; orderNumber?: string; error?: any } | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [orderResult, setOrderResult] = useState<CartOrderResult | null>(null);
   const { user } = useAuth();
-
-  const handlePlaceOrder = async () => {
-    setLoading(true);
-    const result = await placeOrder();
-    setOrderResult(result);
-    setLoading(false);
-    if (result.success) {
-      setIsCheckout(false);
-    }
-  };
 
   if (!isCartOpen) return null;
 
@@ -69,12 +62,12 @@ export default function CartDrawer() {
           <>
             {/* Cart Items */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                  {cart.map((item: any, index: number) => {
+                  {cart.map((item: CartDrawerItem, index: number) => {
                     let sizePrice = item.price || 0;
                     if (item.variant) {
                       sizePrice = item.variant.price;
                     } else if (item.size_options && item.selectedSize) {
-                      sizePrice = item.size_options.find((s: { size: string; price: number }) => s.size === item.selectedSize)?.price || item.price;
+                      sizePrice = item.size_options.find((s: { size: string; price: number }) => s.size === item.selectedSize)?.price ?? item.price ?? 0;
                     }
                     const itemId = item.bundle_id || item.id || item.product_id || '';
                     const isBundle = !!item.bundle_id;
@@ -82,7 +75,7 @@ export default function CartDrawer() {
 
                 return (
                   <div key={key} className="flex gap-4 bg-surface-dark/40 rounded-xl p-4 border border-white/5">
-                    <img src={item.image_url} alt={item.name} className="w-20 h-20 object-cover rounded-lg" />
+                    <img src={item.image_url || item.bundle?.image_url || ""} alt={item.name || item.bundle?.name || "Cart item"} className="w-20 h-20 object-cover rounded-lg" />
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start">
                         <div>

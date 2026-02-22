@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAdminReturnRequests } from '@lessence/supabase';
@@ -19,9 +20,9 @@ import {
   ShoppingBag,
   ExternalLink
 } from 'lucide-react';
-import { ReturnRequest, ReturnRequestStatus } from '@lessence/core';
+import { ReturnRequest, ReturnRequestStatus, ReturnRequestItem } from '@lessence/core';
 
-const STATUS_ICONS: Record<string, any> = {
+const STATUS_ICONS: Record<ReturnRequestStatus, ReactNode> = {
   requested: <Clock size={20} />,
   approved: <CheckCircle size={20} />,
   received: <Package size={20} />,
@@ -29,7 +30,7 @@ const STATUS_ICONS: Record<string, any> = {
   rejected: <XCircle size={20} />,
 };
 
-const STATUS_LABELS: Record<string, string> = {
+const STATUS_LABELS: Record<ReturnRequestStatus, string> = {
   requested: 'Requested',
   approved: 'Approved',
   received: 'Items Received',
@@ -37,7 +38,7 @@ const STATUS_LABELS: Record<string, string> = {
   rejected: 'Rejected',
 };
 
-const STATUS_COLORS: Record<string, string> = {
+const STATUS_COLORS: Record<ReturnRequestStatus, string> = {
   requested: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
   approved: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
   received: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20',
@@ -174,7 +175,7 @@ export default function AdminReturnDetailPage() {
                   <div>
                     <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mb-2">Customer Comment</p>
                     <div className="bg-black/30 p-4 rounded-xl border border-white/5 italic text-zinc-300">
-                      "{request.comment}"
+                      &ldquo;{request.comment}&rdquo;
                     </div>
                   </div>
                 )}
@@ -190,7 +191,7 @@ export default function AdminReturnDetailPage() {
                 </h2>
               </div>
               <div className="divide-y divide-white/[0.05]">
-                {request.items?.map((item: any) => (
+                {request.items?.map((item: ReturnRequestItem) => (
                   <div key={item.id} className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-white/5 rounded-lg flex items-center justify-center">

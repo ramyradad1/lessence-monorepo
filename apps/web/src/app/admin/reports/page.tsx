@@ -1,17 +1,27 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
   useAdminReports, 
   useCategories,
-  SalesReportData,
-  BestSellingProduct,
-  BestCategory,
   OrdersSummary,
-  TopCustomer
 } from '@lessence/supabase';
-import { OrderStatus } from '@lessence/core';
+
+type ReportRow = {
+  report_date?: string;
+  revenue?: number;
+  orders_count?: number;
+  product_name?: string;
+  total_quantity?: number;
+  total_revenue?: number;
+  category_name?: string;
+  customer_name?: string;
+  email?: string;
+  order_count?: number;
+  total_spend?: number;
+  [key: string]: string | number | null | undefined;
+};
 
 type ReportType = 'sales' | 'products' | 'categories' | 'orders' | 'customers';
 
@@ -42,7 +52,7 @@ export default function ReportsPage() {
     categoryId: '',
   });
 
-  const [reportData, setReportData] = useState<any[] | null>(null);
+  const [reportData, setReportData] = useState<ReportRow[] | null>(null);
   const [summaryData, setSummaryData] = useState<OrdersSummary | null>(null);
 
   const fetchReport = async () => {
@@ -53,7 +63,7 @@ export default function ReportsPage() {
       categoryId: filters.categoryId || undefined,
     };
 
-    let data: any = null;
+    let data: unknown = null;
     switch (activeReport) {
       case 'sales':
         data = await getSalesReport(filterParams);
@@ -71,9 +81,9 @@ export default function ReportsPage() {
         data = await getTopCustomers(filterParams);
         break;
     }
-    setReportData(Array.isArray(data) ? data : null);
+    setReportData(Array.isArray(data) ? (data as ReportRow[]) : null);
     if (activeReport === 'orders') {
-      setSummaryData(data);
+      setSummaryData((data as OrdersSummary) || null);
     }
   };
 
@@ -298,31 +308,31 @@ export default function ReportsPage() {
                         <tr key={i} className="hover:bg-white/[0.02] transition-colors">
                           {activeReport === 'sales' && (
                             <>
-                              <td className="py-4 text-sm font-medium text-white">{new Date(row.report_date).toLocaleDateString()}</td>
-                              <td className="py-4 text-right text-sm font-bold text-[#f4c025]">${row.revenue.toLocaleString()}</td>
-                              <td className="py-4 text-right text-sm text-white/50">{row.orders_count}</td>
+                              <td className="py-4 text-sm font-medium text-white">{row.report_date ? new Date(row.report_date).toLocaleDateString() : '-'}</td>
+                              <td className="py-4 text-right text-sm font-bold text-[#f4c025]">${Number(row.revenue ?? 0).toLocaleString()}</td>
+                              <td className="py-4 text-right text-sm text-white/50">{Number(row.orders_count ?? 0)}</td>
                             </>
                           )}
                           {activeReport === 'products' && (
                             <>
-                              <td className="py-4 text-sm font-medium text-white">{row.product_name}</td>
-                              <td className="py-4 text-right text-sm text-white/50">{row.total_quantity}</td>
-                              <td className="py-4 text-right text-sm font-bold text-[#f4c025]">${row.total_revenue.toLocaleString()}</td>
+                              <td className="py-4 text-sm font-medium text-white">{row.product_name || '-'}</td>
+                              <td className="py-4 text-right text-sm text-white/50">{Number(row.total_quantity ?? 0)}</td>
+                              <td className="py-4 text-right text-sm font-bold text-[#f4c025]">${Number(row.total_revenue ?? 0).toLocaleString()}</td>
                             </>
                           )}
                           {activeReport === 'categories' && (
                             <>
-                              <td className="py-4 text-sm font-medium text-white">{row.category_name}</td>
-                              <td className="py-4 text-right text-sm text-white/50">{row.total_quantity}</td>
-                              <td className="py-4 text-right text-sm font-bold text-[#f4c025]">${row.total_revenue.toLocaleString()}</td>
+                              <td className="py-4 text-sm font-medium text-white">{row.category_name || '-'}</td>
+                              <td className="py-4 text-right text-sm text-white/50">{Number(row.total_quantity ?? 0)}</td>
+                              <td className="py-4 text-right text-sm font-bold text-[#f4c025]">${Number(row.total_revenue ?? 0).toLocaleString()}</td>
                             </>
                           )}
                           {activeReport === 'customers' && (
                             <>
-                              <td className="py-4 text-sm font-medium text-white">{row.customer_name}</td>
-                              <td className="py-4 text-sm text-white/40">{row.email}</td>
-                              <td className="py-4 text-right text-sm text-white/50">{row.order_count}</td>
-                              <td className="py-4 text-right text-sm font-bold text-[#f4c025]">${row.total_spend.toLocaleString()}</td>
+                              <td className="py-4 text-sm font-medium text-white">{row.customer_name || '-'}</td>
+                              <td className="py-4 text-sm text-white/40">{row.email || '-'}</td>
+                              <td className="py-4 text-right text-sm text-white/50">{Number(row.order_count ?? 0)}</td>
+                              <td className="py-4 text-right text-sm font-bold text-[#f4c025]">${Number(row.total_spend ?? 0).toLocaleString()}</td>
                             </>
                           )}
                         </tr>

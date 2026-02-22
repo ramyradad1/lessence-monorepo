@@ -6,6 +6,10 @@ import { supabase } from '@/lib/supabase';
 import { Button, Input, Label } from '@lessence/ui';
 import { Trash2, Loader2, ArrowRight } from 'lucide-react';
 
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
 export default function CheckoutPage() {
   const { cart, cartTotal, removeFromCart, updateQuantity } = useCart();
   const [loading, setLoading] = useState(false);
@@ -52,8 +56,6 @@ export default function CheckoutPage() {
     setError(null);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
       const response = await supabase.functions.invoke('create-cod-order', {
         body: {
           cartItems: cart,
@@ -72,7 +74,7 @@ export default function CheckoutPage() {
           try {
             const errorObj = JSON.parse(body);
             throw new Error(errorObj.error || 'Error initiating checkout');
-          } catch (e) {
+          } catch {
             throw new Error(body);
           }
         }
@@ -86,9 +88,9 @@ export default function CheckoutPage() {
       } else {
         throw new Error('Failed to create order');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || 'An unexpected error occurred during checkout');
+      setError(getErrorMessage(err, 'An unexpected error occurred during checkout'));
     } finally {
       setLoading(false);
     }
@@ -129,7 +131,7 @@ export default function CheckoutPage() {
           try {
             const errorObj = JSON.parse(body);
             throw new Error(errorObj.error || 'Invalid coupon.');
-          } catch (e) {
+          } catch {
             throw new Error(body);
           }
         }
@@ -145,8 +147,8 @@ export default function CheckoutPage() {
         throw new Error('Invalid coupon response.');
       }
 
-    } catch (err: any) {
-      setCouponError(err.message);
+    } catch (err: unknown) {
+      setCouponError(getErrorMessage(err, 'Failed to validate coupon.'));
       setDiscountAmount(0);
       setDiscountType(null);
     } finally {

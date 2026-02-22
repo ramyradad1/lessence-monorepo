@@ -9,6 +9,8 @@ import ProductCard from "@/components/ProductCard";
 import { Search, X, SlidersHorizontal, ChevronDown } from "lucide-react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
+type ProductSort = "newest" | "price_asc" | "price_desc" | "best_rated" | "most_popular";
+
 // Extract the actual shop content to a child component to wrap in Suspense
 function ShopContent() {
   const router = useRouter();
@@ -42,7 +44,7 @@ function ShopContent() {
     minPrice: minPrice,
     maxPrice: maxPrice,
     inStockOnly: inStockOnly,
-    sortBy: sortBy as any,
+    sortBy: sortBy as ProductSort,
   });
 
   const { categories } = useCategories(supabase);

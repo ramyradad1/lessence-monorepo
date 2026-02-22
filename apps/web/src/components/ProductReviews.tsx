@@ -31,10 +31,10 @@ export default function ProductReviews({ productId }: { productId: string }) {
     setSubmitting(true);
     try {
       if (isEditing && userReview) {
-        await updateReview(userReview.id, rating, comment);
+        await updateReview({ reviewId: userReview.id, rating, comment });
         setIsEditing(false);
       } else {
-        await submitReview(rating, comment);
+        await submitReview({ rating, comment });
         setIsWriting(false);
       }
       setRating(5);

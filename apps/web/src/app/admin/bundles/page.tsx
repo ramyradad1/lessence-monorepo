@@ -3,10 +3,15 @@
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAdminBundles, useAdminProducts } from '@lessence/supabase';
-import { Bundle, BundleItem } from '@lessence/core';
+import { Bundle } from '@lessence/core';
+
+type BundleFormItem = { product_id: string; variant_id?: string; quantity: number };
+type BundleItemField = 'product_id' | 'variant_id' | 'quantity';
+type ProductVariantOption = { id: string; size?: string | null; concentration?: string | null };
+type ProductWithVariants = { variants?: ProductVariantOption[] };
 
 export default function AdminBundlesPage() {
-  const { bundles, loading, createBundle, updateBundle, deleteBundle, refresh } = useAdminBundles(supabase);
+  const { bundles, loading, createBundle, updateBundle, deleteBundle } = useAdminBundles(supabase);
   const { products } = useAdminProducts(supabase);
   const [selectedBundle, setSelectedBundle] = useState<Bundle | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,7 +22,7 @@ export default function AdminBundlesPage() {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [isActive, setIsActive] = useState(true);
-  const [bundleItems, setBundleItems] = useState<{product_id: string, variant_id?: string, quantity: number}[]>([]);
+  const [bundleItems, setBundleItems] = useState<BundleFormItem[]>([]);
 
   const handleOpenModal = (bundle?: Bundle) => {
     if (bundle) {
@@ -48,12 +53,20 @@ export default function AdminBundlesPage() {
     setBundleItems([...bundleItems, { product_id: '', quantity: 1 }]);
   };
 
-  const updateItem = (index: number, field: string, value: any) => {
+  const updateItem = (index: number, field: BundleItemField, value: string | number) => {
     const newItems = [...bundleItems];
-    newItems[index] = { ...newItems[index], [field]: value };
-    // If product changed, reset variant
-    if (field === 'product_id') {
-       newItems[index].variant_id = undefined;
+    const currentItem = newItems[index];
+    if (!currentItem) return;
+
+    if (field === 'quantity') {
+      currentItem.quantity = typeof value === 'number' ? value : parseInt(String(value), 10) || 1;
+    } else if (field === 'variant_id') {
+      const nextValue = String(value);
+      currentItem.variant_id = nextValue || undefined;
+    } else {
+      currentItem.product_id = String(value);
+      // If product changed, reset variant
+      currentItem.variant_id = undefined;
     }
     setBundleItems(newItems);
   };
@@ -274,7 +287,7 @@ export default function AdminBundlesPage() {
                      <div className="space-y-3">
                          {bundleItems.map((item, index) => {
                              const product = products.find(p => p.id === item.product_id);
-                             const variants = (product as any)?.variants || [];
+                             const variants = ((product as ProductWithVariants | undefined)?.variants ?? []) as ProductVariantOption[];
 
                              return (
                                  <div key={index} className="flex gap-3 items-start bg-black/20 p-3 rounded-xl border border-white/5">
@@ -299,7 +312,7 @@ export default function AdminBundlesPage() {
                                                 className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#f4c025]"
                                             >
                                                 <option value="">Select Variant (Optional)</option>
-                                                {variants.map((v: any) => (
+                                                {variants.map((v) => (
                                                     <option key={v.id} value={v.id}>{v.size} {v.concentration ? `- ${v.concentration}` : ''}</option>
                                                 ))}
                                             </select>
