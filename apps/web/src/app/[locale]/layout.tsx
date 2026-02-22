@@ -7,7 +7,7 @@ import WebAuthProvider from "@/components/AuthProvider";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { locales } from '@/i18n/request';
+import { routing } from '@/i18n/routing';
 
 const sans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -42,7 +42,7 @@ export default async function RootLayout({
   params: { locale: string };
 }) {
   // Validate that the incoming `locale` parameter is valid
-  if (!locales.includes(locale)) {
+  if (!routing.locales.includes(locale as any)) {
     notFound();
   }
 
