@@ -27,13 +27,11 @@ export default function LoginPage() {
     if (isLogin) {
       const { error: signInError } = await signIn(email, password);
       if (signInError) setError(signInError.message);
-      else router.push("/profile");
+      // Don't redirect here — let useEffect handle it once auth state resolves
     } else {
       const { error: signUpError } = await signUp(email, fullName, password);
       if (signUpError) setError(signUpError.message);
-      else {
-        router.push("/profile");
-      }
+      // Don't redirect here — let useEffect handle it once auth state resolves
     }
   };
 
