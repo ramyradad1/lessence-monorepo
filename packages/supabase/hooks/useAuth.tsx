@@ -35,73 +35,64 @@ export const AuthProvider = ({
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const mountedRef = useRef(true);
-  const profileFetchRef = useRef<string | null>(null); // track in-flight profile fetch
 
-  const fetchProfile = useCallback(async (userId: string) => {
-    // Prevent duplicate parallel fetches for the same user
-    if (profileFetchRef.current === userId) return;
-    profileFetchRef.current = userId;
-
+  const fetchProfile = useCallback(async (userId: string): Promise<Profile | null> => {
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
-        
-      if (!mountedRef.current) return;
 
-      if (!error && data) {
-        setProfile(data);
-      } else if (error && error.code === 'PGRST116') {
-        // No profile found, create a stub
-        const { data: userResp } = await supabase.auth.getUser();
-        const newProfile = { 
-          id: userId,
-          email: userResp?.user?.email || '',
-          role: 'user' 
-        };
-        const { data: inserted, error: insertError } = await supabase
-          .from('profiles')
-          .insert([newProfile])
-          .select()
-          .single();
-          
-        if (!insertError && inserted && mountedRef.current) {
-          setProfile(inserted as Profile);
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No profile found, create one
+          const { data: userResp } = await supabase.auth.getUser();
+          const newProfile = {
+            id: userId,
+            email: userResp?.user?.email || '',
+            role: 'user'
+          };
+          const { data: inserted, error: insertError } = await supabase
+            .from('profiles')
+            .insert([newProfile])
+            .select()
+            .single();
+
+          if (!insertError && inserted) {
+            return inserted as Profile;
+          }
         }
-      } else {
-        console.error('[Auth] Error fetching profile:', error?.message);
+        return null;
       }
-    } catch (err) {
-      console.error('[Auth] Exception fetching profile:', err);
-    } finally {
-      profileFetchRef.current = null;
-      if (mountedRef.current) setIsLoading(false);
+      return data as Profile;
+    } catch {
+      return null;
     }
   }, [supabase]);
 
   useEffect(() => {
     mountedRef.current = true;
 
-    // Safety timeout: force loading to false after 10s no matter what
+    // Safety timeout
     const safetyTimer = setTimeout(() => {
-      if (mountedRef.current) {
-        setIsLoading(false);
-      }
+      if (mountedRef.current) setIsLoading(false);
     }, 10000);
 
-    // Use onAuthStateChange as the SINGLE source of truth
-    // This handles both initial session and subsequent changes
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
+      async (_event, currentSession) => {
         if (!mountedRef.current) return;
 
         if (currentSession?.user) {
           setSession(currentSession);
           setUser(currentSession.user);
-          // Fetch profile (the function handles dedup)
-          await fetchProfile(currentSession.user.id);
+
+          // Fetch profile
+          const p = await fetchProfile(currentSession.user.id);
+          if (mountedRef.current) {
+            setProfile(p);
+            setIsLoading(false);
+          }
         } else {
           setSession(null);
           setUser(null);
@@ -121,15 +112,13 @@ export const AuthProvider = ({
   const signIn = async (email: string, password?: string) => {
     try {
       setIsLoading(true);
-      setProfile(null); // Clear old profile
-      const { data, error } = password 
+      setProfile(null);
+      const { error } = password
         ? await supabase.auth.signInWithPassword({ email, password })
         : await supabase.auth.signInWithOtp({ email });
 
-      if (error) {
-        setIsLoading(false);
-      }
-      // Don't set isLoading=false on success — let onAuthStateChange → fetchProfile handle it
+      if (error) setIsLoading(false);
+      // On success, onAuthStateChange will fire and handle the rest
       return { error };
     } catch (err: any) {
       setIsLoading(false);
@@ -141,15 +130,13 @@ export const AuthProvider = ({
     try {
       setIsLoading(true);
       const { data, error } = password
-        ? await supabase.auth.signUp({ 
-            email, 
+        ? await supabase.auth.signUp({
+          email,
             password,
-            options: {
-              data: { full_name }
-            }
+          options: { data: { full_name } }
           })
         : await supabase.auth.signInWithOtp({ email });
-        
+
       if (!error && data?.user) {
         await supabase.from('profiles').upsert({
           id: data.user.id,
@@ -158,9 +145,7 @@ export const AuthProvider = ({
         });
       }
 
-      if (error) {
-        setIsLoading(false);
-      }
+      if (error) setIsLoading(false);
       return { error };
     } catch (err: any) {
       setIsLoading(false);
@@ -169,10 +154,7 @@ export const AuthProvider = ({
   };
 
   const signOut = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch { }
-    // Explicitly clear state regardless of signOut result
+    try { await supabase.auth.signOut(); } catch { }
     setUser(null);
     setSession(null);
     setProfile(null);

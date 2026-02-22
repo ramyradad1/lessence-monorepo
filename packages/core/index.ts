@@ -171,7 +171,7 @@ export type Profile = {
   id: string;
   email: string;
   full_name?: string;
-  role: 'user' | 'super_admin' | 'order_manager' | 'inventory_manager' | 'content_manager';
+  role: 'user' | 'admin' | 'super_admin' | 'order_manager' | 'inventory_manager' | 'content_manager';
   avatar_url?: string;
   phone?: string;
   created_at?: string;
