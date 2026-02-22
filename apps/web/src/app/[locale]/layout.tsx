@@ -7,7 +7,7 @@ import WebAuthProvider from "@/components/AuthProvider";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { locales } from '@/i18n';
+import { locales } from '@/i18n/request';
 
 const sans = Plus_Jakarta_Sans({
   subsets: ["latin"],
