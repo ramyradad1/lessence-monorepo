@@ -316,10 +316,11 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
           <Image
-            source={require("../assets/logo.png")}
+            source={require("../../assets/logo.png")}
             className="w-32 h-10"
             resizeMode="contain"
           />
+
 
           <View
             className={`flex-row items-center ${isRTL ? "flex-row-reverse" : ""}`}
