@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,14 +10,14 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialIcons, Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
-import { useAuth, useCreateReturnRequest } from '@lessence/supabase';
-import { supabase } from '../lib/supabase';
-import { Order } from '@lessence/core';
-import { useTranslation } from 'react-i18next';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { useAuth, useCreateReturnRequest } from "@lessence/supabase";
+import { supabase } from "../lib/supabase";
+import { Order } from "@lessence/core";
+import { useTranslation } from "react-i18next";
 
 const REASON_KEYS = [
   "wrong_size",
@@ -25,7 +25,7 @@ const REASON_KEYS = [
   "not_as_described",
   "defective",
   "changed_mind",
-  "other"
+  "other",
 ];
 
 export default function NewReturnScreen({ route, navigation }: any) {
@@ -33,14 +33,16 @@ export default function NewReturnScreen({ route, navigation }: any) {
   const { user } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedItems, setSelectedItems] = useState<Record<string, number>>({});
+  const [selectedItems, setSelectedItems] = useState<Record<string, number>>(
+    {},
+  );
   const [reason, setReason] = useState("");
   const [comment, setComment] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const { t, i18n } = useTranslation();
-  const isRTL = i18n.dir() === 'rtl';
+  const isRTL = i18n.dir() === "rtl";
   const locale = i18n.language;
 
   const { createRequest, submitting } = useCreateReturnRequest(supabase);
@@ -48,12 +50,14 @@ export default function NewReturnScreen({ route, navigation }: any) {
   useEffect(() => {
     const fetchOrder = async () => {
       const { data, error } = await supabase
-        .from('orders')
-        .select(`
+        .from("orders")
+        .select(
+          `
           *,
           items:order_items (*)
-        `)
-        .eq('id', orderId)
+        `,
+        )
+        .eq("id", orderId)
         .single();
 
       if (!error && data) {
@@ -65,7 +69,7 @@ export default function NewReturnScreen({ route, navigation }: any) {
   }, [orderId]);
 
   const toggleItem = (itemId: string, maxQty: number) => {
-    setSelectedItems(prev => {
+    setSelectedItems((prev) => {
       if (prev[itemId]) {
         const { [itemId]: _, ...rest } = prev;
         return rest;
@@ -76,12 +80,12 @@ export default function NewReturnScreen({ route, navigation }: any) {
 
   const updateQty = (itemId: string, qty: number, maxQty: number) => {
     if (qty < 1 || qty > maxQty) return;
-    setSelectedItems(prev => ({ ...prev, [itemId]: qty }));
+    setSelectedItems((prev) => ({ ...prev, [itemId]: qty }));
   };
 
   const pickImage = async () => {
     if (images.length >= 5) {
-      Alert.alert(t('limit_reached'), t('limit_desc'));
+      Alert.alert(t("limit_reached"), t("limit_desc"));
       return;
     }
 
@@ -102,11 +106,11 @@ export default function NewReturnScreen({ route, navigation }: any) {
 
   const handleSubmit = async () => {
     if (Object.keys(selectedItems).length === 0) {
-      setError(t('select_one_item'));
+      setError(t("select_one_item"));
       return;
     }
     if (!reason) {
-      setError(t('select_reason'));
+      setError(t("select_reason"));
       return;
     }
     if (!user) return;
@@ -114,13 +118,13 @@ export default function NewReturnScreen({ route, navigation }: any) {
     setError(null);
 
     const mediaFiles = images.map((uri, index) => {
-      const filename = uri.split('/').pop();
-      const match = /\.(\w+)$/.exec(filename || '');
+      const filename = uri.split("/").pop();
+      const match = /\.(\w+)$/.exec(filename || "");
       const type = match ? `image/${match[1]}` : `image`;
       return {
         uri,
         name: filename || `image_${index}.jpg`,
-        type
+        type,
       } as any;
     });
 
@@ -131,17 +135,17 @@ export default function NewReturnScreen({ route, navigation }: any) {
       comment,
       items: Object.entries(selectedItems).map(([orderItemId, quantity]) => ({
         orderItemId,
-        quantity
+        quantity,
       })),
-      mediaFiles
+      mediaFiles,
     });
 
     if (result.success) {
-      Alert.alert(t('success'), t('return_success'), [
-        { text: t('common:ok'), onPress: () => navigation.goBack() }
+      Alert.alert(t("success"), t("return_success"), [
+        { text: t("common:ok"), onPress: () => navigation.goBack() },
       ]);
     } else {
-      setError(t('return_failed'));
+      setError(t("return_failed"));
     }
   };
 
@@ -155,56 +159,124 @@ export default function NewReturnScreen({ route, navigation }: any) {
 
   return (
     <SafeAreaView className="flex-1 bg-background-dark">
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <View className={`flex-row items-center justify-between px-6 py-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <View
+          className={`flex-row items-center justify-between px-6 py-4 ${isRTL ? "flex-row-reverse" : ""}`}
+        >
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <MaterialIcons name={isRTL ? "close" : "close"} size={24} color="white" />
+            <MaterialIcons
+              name={isRTL ? "close" : "close"}
+              size={24}
+              color="white"
+            />
           </TouchableOpacity>
-          <Text className="text-xl font-display text-white">{t('return_request')}</Text>
+          <Text className="text-xl font-display text-white">
+            {t("return_request")}
+          </Text>
           <View className="w-8" />
         </View>
 
-        <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false}>
-          <Text className={`text-white/40 text-[10px] uppercase font-bold tracking-widest mb-6 ${isRTL ? 'text-right' : 'text-left'}`}>
-            {t('order_no', { number: order.order_number || order.id.slice(0, 8) })}
+        <ScrollView
+          className="flex-1 px-6"
+          showsVerticalScrollIndicator={false}
+        >
+          <Text
+            className={`text-white/40 text-[10px] uppercase font-bold tracking-widest mb-6 ${isRTL ? "text-right" : "text-left"}`}
+          >
+            {t("order_no", {
+              number: order.order_number || order.id.slice(0, 8),
+            })}
           </Text>
 
           {/* Items Section */}
           <View className="mb-8">
-            <Text className={`text-white font-bold uppercase tracking-widest text-[10px] mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>{t('select_items')}</Text>
+            <Text
+              className={`text-white font-bold uppercase tracking-widest text-[10px] mb-4 ${isRTL ? "text-right" : "text-left"}`}
+            >
+              {t("select_items")}
+            </Text>
             <View className="space-y-3">
               {(order as any).items?.map((item: any) => {
-                const localizedName = locale === 'ar' ? (item.product_name_ar || item.product_name) : (item.product_name_en || item.product_name);
+                const localizedName =
+                  locale === "ar"
+                    ? item.product_name_ar || item.product_name
+                    : item.product_name_en || item.product_name;
                 return (
                   <TouchableOpacity
                     key={item.id}
                     onPress={() => toggleItem(item.id, item.quantity)}
                     className={`flex-row items-center p-4 rounded-2xl border ${
-                      isRTL ? 'flex-row-reverse' : ''
-                      } ${
-                      selectedItems[item.id] ? 'border-primary bg-primary/5' : 'border-white/5 bg-surface-dark/50'
-                      }`}
+                      isRTL ? "flex-row-reverse" : ""
+                    } ${
+                      selectedItems[item.id]
+                        ? "border-primary bg-primary/5"
+                        : "border-white/5 bg-surface-dark/50"
+                    }`}
                   >
-                    <View className={`w-5 h-5 rounded border items-center justify-center ${isRTL ? 'ml-3' : 'mr-3'
-                      } ${selectedItems[item.id] ? 'bg-primary border-primary' : 'border-white/20'
-                      }`}>
-                      {selectedItems[item.id] && <MaterialIcons name="check" size={14} color="black" />}
+                    <View
+                      className={`w-5 h-5 rounded border items-center justify-center ${
+                        isRTL ? "ml-3" : "mr-3"
+                      } ${
+                        selectedItems[item.id]
+                          ? "bg-primary border-primary"
+                          : "border-white/20"
+                      }`}
+                    >
+                      {selectedItems[item.id] && (
+                        <MaterialIcons name="check" size={14} color="black" />
+                      )}
                     </View>
                     <View className="flex-1">
-                      <Text className={`text-white font-bold text-sm ${isRTL ? 'text-right' : 'text-left'}`}>{localizedName}</Text>
-                      <Text className={`text-white/40 text-[10px] ${isRTL ? 'text-right' : 'text-left'}`}>{item.selected_size}</Text>
+                      <Text
+                        className={`text-white font-bold text-sm ${isRTL ? "text-right" : "text-left"}`}
+                      >
+                        {localizedName}
+                      </Text>
+                      <Text
+                        className={`text-white/40 text-[10px] ${isRTL ? "text-right" : "text-left"}`}
+                      >
+                        {item.selected_size}
+                      </Text>
                     </View>
                     {selectedItems[item.id] && item.quantity > 1 && (
-                      <View className={`flex-row items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <TouchableOpacity onPress={() => updateQty(item.id, selectedItems[item.id] - 1, item.quantity)}>
-                          <MaterialIcons name="remove-circle-outline" size={20} color="white" />
+                      <View
+                        className={`flex-row items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
+                      >
+                        <TouchableOpacity
+                          onPress={() =>
+                            updateQty(
+                              item.id,
+                              selectedItems[item.id] - 1,
+                              item.quantity,
+                            )
+                          }
+                        >
+                          <MaterialIcons
+                            name="remove-circle-outline"
+                            size={20}
+                            color="white"
+                          />
                         </TouchableOpacity>
-                        <Text className="text-white font-bold w-4 text-center">{selectedItems[item.id]}</Text>
-                        <TouchableOpacity onPress={() => updateQty(item.id, selectedItems[item.id] + 1, item.quantity)}>
-                          <MaterialIcons name="add-circle-outline" size={20} color="white" />
+                        <Text className="text-white font-bold w-4 text-center">
+                          {selectedItems[item.id]}
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() =>
+                            updateQty(
+                              item.id,
+                              selectedItems[item.id] + 1,
+                              item.quantity,
+                            )
+                          }
+                        >
+                          <MaterialIcons
+                            name="add-circle-outline"
+                            size={20}
+                            color="white"
+                          />
                         </TouchableOpacity>
                       </View>
                     )}
@@ -216,23 +288,34 @@ export default function NewReturnScreen({ route, navigation }: any) {
 
           {/* Reason Section */}
           <View className="mb-8">
-            <Text className={`text-white font-bold uppercase tracking-widest text-[10px] mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>{t('reason')}</Text>
+            <Text
+              className={`text-white font-bold uppercase tracking-widest text-[10px] mb-4 ${isRTL ? "text-right" : "text-left"}`}
+            >
+              {t("reason")}
+            </Text>
             <View className="bg-surface-dark/50 border border-white/5 rounded-2xl overflow-hidden">
               {REASON_KEYS.map((rk, idx) => (
-                <TouchableOpacity 
+                <TouchableOpacity
                   key={rk}
                   onPress={() => setReason(rk)}
                   className={`flex-row items-center px-4 py-3 border-b border-white/5 last:border-b-0 ${
-                    isRTL ? 'flex-row-reverse' : ''
-                    } ${reason === rk ? 'bg-primary/10' : ''
-                  }`}
+                    isRTL ? "flex-row-reverse" : ""
+                  } ${reason === rk ? "bg-primary/10" : ""}`}
                 >
-                  <View className={`w-4 h-4 rounded-full border items-center justify-center ${isRTL ? 'ml-3' : 'mr-3'
-                    } ${reason === rk ? 'border-primary' : 'border-white/20'
-                  }`}>
-                    {reason === rk && <View className="w-2 h-2 rounded-full bg-primary" />}
+                  <View
+                    className={`w-4 h-4 rounded-full border items-center justify-center ${
+                      isRTL ? "ml-3" : "mr-3"
+                    } ${reason === rk ? "border-primary" : "border-white/20"}`}
+                  >
+                    {reason === rk && (
+                      <View className="w-2 h-2 rounded-full bg-primary" />
+                    )}
                   </View>
-                  <Text className={`text-sm ${isRTL ? 'text-right' : 'text-left'} ${reason === rk ? 'text-white font-bold' : 'text-white/60'}`}>{t(`reasons.${rk}`)}</Text>
+                  <Text
+                    className={`text-sm ${isRTL ? "text-right" : "text-left"} ${reason === rk ? "text-white font-bold" : "text-white/60"}`}
+                  >
+                    {t(`reasons.${rk}`)}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -240,36 +323,58 @@ export default function NewReturnScreen({ route, navigation }: any) {
 
           {/* Comment Section */}
           <View className="mb-8">
-            <Text className={`text-white font-bold uppercase tracking-widest text-[10px] mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>{t('additional_comments')}</Text>
-            <TextInput 
+            <Text
+              className={`text-white font-bold uppercase tracking-widest text-[10px] mb-4 ${isRTL ? "text-right" : "text-left"}`}
+            >
+              {t("additional_comments")}
+            </Text>
+            <TextInput
               autoCapitalize="none"
-              placeholder={t('tell_us_more')}
+              placeholder={t("tell_us_more")}
               placeholderTextColor="rgba(255,255,255,0.2)"
               multiline
               numberOfLines={4}
               value={comment}
               onChangeText={setComment}
-              className={`bg-surface-dark/50 border border-white/5 rounded-2xl p-4 text-white text-sm min-h-[100] ${isRTL ? 'text-right' : 'text-left'}`}
+              className={`bg-surface-dark/50 border border-white/5 rounded-2xl p-4 text-white text-sm min-h-[100] ${isRTL ? "text-right" : "text-left"}`}
               textAlignVertical="top"
-              textAlign={isRTL ? 'right' : 'left'}
+              textAlign={isRTL ? "right" : "left"}
             />
           </View>
 
           {/* Media Section */}
           <View className="mb-10">
-            <View className={`flex-row items-center justify-between mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <Text className="text-white font-bold uppercase tracking-widest text-[10px]">{t('photos', { count: images.length })}</Text>
-              <TouchableOpacity onPress={pickImage} className={`flex-row items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <View
+              className={`flex-row items-center justify-between mb-4 ${isRTL ? "flex-row-reverse" : ""}`}
+            >
+              <Text className="text-white font-bold uppercase tracking-widest text-[10px]">
+                {t("photos", { count: images.length })}
+              </Text>
+              <TouchableOpacity
+                onPress={pickImage}
+                className={`flex-row items-center ${isRTL ? "flex-row-reverse" : ""}`}
+              >
                 <MaterialIcons name="add-a-photo" size={16} color="#f4c025" />
-                <Text className={`text-primary text-[10px] font-bold uppercase tracking-widest ${isRTL ? 'mr-1' : 'ml-1'}`}>{t('add_photo')}</Text>
+                <Text
+                  className={`text-primary text-[10px] font-bold uppercase tracking-widest ${isRTL ? "mr-1" : "ml-1"}`}
+                >
+                  {t("add_photo")}
+                </Text>
               </TouchableOpacity>
             </View>
-            
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} className={`flex-row gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className={`flex-row gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
+            >
               {images.map((uri, index) => (
-                <View key={index} className={`w-20 h-20 rounded-xl bg-surface-dark overflow-hidden relative ${isRTL ? 'ml-3' : 'mr-3'}`}>
+                <View
+                  key={index}
+                  className={`w-20 h-20 rounded-xl bg-surface-dark overflow-hidden relative ${isRTL ? "ml-3" : "mr-3"}`}
+                >
                   <Image source={{ uri }} className="w-full h-full" />
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     onPress={() => removeImage(index)}
                     className="absolute top-1 right-1 bg-black/60 rounded-full p-1"
                   >
@@ -279,30 +384,42 @@ export default function NewReturnScreen({ route, navigation }: any) {
               ))}
               {images.length === 0 && (
                 <View className="w-20 h-20 rounded-xl border border-dashed border-white/10 items-center justify-center">
-                  <MaterialIcons name="image" size={24} color="rgba(255,255,255,0.1)" />
+                  <MaterialIcons
+                    name="image"
+                    size={24}
+                    color="rgba(255,255,255,0.1)"
+                  />
                 </View>
               )}
             </ScrollView>
           </View>
 
           {error && (
-            <View className={`bg-red-500/10 border border-red-500/20 p-4 rounded-2xl mb-6 flex-row items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <View
+              className={`bg-red-500/10 border border-red-500/20 p-4 rounded-2xl mb-6 flex-row items-center ${isRTL ? "flex-row-reverse" : ""}`}
+            >
               <MaterialIcons name="error-outline" size={18} color="#FF4444" />
-              <Text className={`text-red-500 text-[10px] font-bold uppercase tracking-widest ${isRTL ? 'mr-2 text-right' : 'ml-2 text-left'}`}>{error}</Text>
+              <Text
+                className={`text-red-500 text-[10px] font-bold uppercase tracking-widest ${isRTL ? "mr-2 text-right" : "ml-2 text-left"}`}
+              >
+                {error}
+              </Text>
             </View>
           )}
 
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={handleSubmit}
             disabled={submitting}
             className={`bg-primary h-14 rounded-full items-center justify-center mb-10 shadow-lg shadow-primary/20 ${
-              submitting ? 'opacity-50' : ''
+              submitting ? "opacity-50" : ""
             }`}
           >
             {submitting ? (
               <ActivityIndicator color="black" />
             ) : (
-                <Text className="text-black font-bold uppercase tracking-widest text-xs">{t('submit_request')}</Text>
+              <Text className="text-black font-bold uppercase tracking-widest text-xs">
+                {t("submit_request")}
+              </Text>
             )}
           </TouchableOpacity>
         </ScrollView>

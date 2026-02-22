@@ -25,13 +25,6 @@ import OrdersScreen from './src/screens/OrdersScreen';
 import OrderDetailScreen from './src/screens/OrderDetailScreen';
 import NewReturnScreen from './src/screens/NewReturnScreen';
 import AdminOrderDetailScreen from './src/screens/AdminOrderDetailScreen';
-import JournalScreen from './src/screens/JournalScreen';
-import AboutScreen from './src/screens/AboutScreen';
-import AdminCustomersScreen from './src/screens/AdminCustomersScreen';
-import AdminCustomerDetailScreen from './src/screens/AdminCustomerDetailScreen';
-import AdminReturnsScreen from './src/screens/AdminReturnsScreen';
-import AdminReturnDetailScreen from './src/screens/AdminReturnDetailScreen';
-import AdminOrdersScreen from './src/screens/AdminOrdersScreen';
 import { CartProvider } from './src/context/CartContext';
 import { FavoritesProvider } from './src/context/FavoritesContext';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -45,7 +38,8 @@ import * as Linking from 'expo-linking';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-import SearchScreen from './src/screens/SearchScreen';
+const SearchScreen = () => <View className="flex-1 bg-background-dark" />;
+
 import { useTranslation } from 'react-i18next';
 
 // Customer-facing bottom tabs (Home, Search, Favorites, Profile)
@@ -171,13 +165,6 @@ export default function App() {
                     <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
                     <Stack.Screen name="NewReturn" component={NewReturnScreen} />
                     <Stack.Screen name="AdminOrderDetail" component={AdminOrderDetailScreen} />
-                    <Stack.Screen name="Journal" component={JournalScreen} />
-                    <Stack.Screen name="About" component={AboutScreen} />
-                    <Stack.Screen name="AdminCustomers" component={AdminCustomersScreen} />
-                    <Stack.Screen name="AdminCustomerDetail" component={AdminCustomerDetailScreen} />
-                    <Stack.Screen name="AdminReturns" component={AdminReturnsScreen} />
-                    <Stack.Screen name="AdminReturnDetail" component={AdminReturnDetailScreen} />
-                    <Stack.Screen name="AdminOrders" component={AdminOrdersScreen} />
                   </Stack.Navigator>
                 </NavigationContainer>
               </CartProvider>
