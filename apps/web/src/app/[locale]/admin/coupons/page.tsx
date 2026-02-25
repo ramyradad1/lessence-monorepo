@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAdminCoupons } from '@lessence/supabase';
 import { Coupon } from '@lessence/core';
+import { useLocale } from 'next-intl';
+import { formatCurrency } from '@lessence/core';
 
 const EMPTY_COUPON = { code: '', discount_type: 'percentage' as 'percentage' | 'fixed' | 'free_shipping', discount_amount: '', valid_from: '', valid_until: '', usage_limit: '' };
 
@@ -17,9 +19,11 @@ export default function AdminCouponsPage() {
     discount_amount: string;
     valid_from: string;
     valid_until: string;
+    valid_until: string;
     usage_limit: string;
   }>(EMPTY_COUPON);
   const [saving, setSaving] = useState(false);
+  const locale = useLocale();
 
   const openCreate = () => {
     setEditingId(null);
@@ -157,7 +161,7 @@ export default function AdminCouponsPage() {
                     <tr key={coupon.id} className="hover:bg-white/[0.02] transition-colors">
                       <td className="px-6 py-4 text-sm font-mono font-bold text-white">{coupon.code}</td>
                       <td className="px-6 py-4 text-sm text-white">
-                        {coupon.discount_type === 'percentage' ? `${coupon.discount_amount}%` : coupon.discount_type === 'free_shipping' ? 'Free Shipping' : `$${coupon.discount_amount}`}
+                        {coupon.discount_type === 'percentage' ? `${coupon.discount_amount}%` : coupon.discount_type === 'free_shipping' ? 'Free Shipping' : formatCurrency(Number(coupon.discount_amount), locale)}
                       </td>
                       <td className="px-6 py-4 text-sm text-white/40">
                         {coupon.times_used}{coupon.usage_limit ? ` / ${coupon.usage_limit}` : ''}

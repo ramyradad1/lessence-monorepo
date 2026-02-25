@@ -15,7 +15,11 @@ const STATUS_COLORS: Record<string, string> = {
   refunded: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
 };
 
+import { useLocale } from 'next-intl';
+import { formatCurrency } from '@lessence/core';
+
 export default function AdminDashboard() {
+  const locale = useLocale();
   const { kpis, chartData, recentOrders, loading: dashboardLoading } = useAdminDashboard(supabase);
   const { notifications, unreadCount, loading: notificationsLoading, markAsRead, markAllAsRead } = useAdminNotifications(supabase);
 
@@ -134,7 +138,7 @@ export default function AdminDashboard() {
                       {order.status}
                     </span>
                   </td>
-                  <td className="py-3 text-right text-sm font-semibold text-white">${(order.total || order.total_amount || 0).toFixed(2)}</td>
+                  <td className="py-3 text-right text-sm font-semibold text-white">{formatCurrency((order.total || order.total_amount || 0), locale)}</td>
                   <td className="py-3 text-right text-xs text-white/30">{order.created_at ? new Date(order.created_at).toLocaleDateString() : '-'}</td>
                 </tr>
               ))}

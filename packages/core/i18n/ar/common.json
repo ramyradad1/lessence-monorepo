@@ -107,5 +107,20 @@
   "hero_subtitle_fallback": "الأناقة",
   "hero_desc_fallback": "اكتشف مجموعتنا الصيفية الحصرية المصممة للحظات من الفخامة المطلقة.",
   "hero_badge_fallback": "إصدار محدود",
-  "hero_cta_fallback": "تسوق المجموعة"
+  "hero_cta_fallback": "تسوق المجموعة",
+  "olfactory_families": "عائلات العطور",
+  "the_collections": "المجموعات",
+  "explore_collection": "استكشف المجموعة",
+  "scent_collection": "مجموعة العطور",
+  "no_fragrances_in_collection": "لا توجد عطور في هذه المجموعة بعد.",
+  "explore_all_scents": "استكشف جميع العطور",
+  "home": "الرئيسية",
+  "you_may_also_like": "قد يعجبك أيضاً",
+  "in_stock": "متوفر",
+  "low_stock": "مخزون محدود",
+  "out_of_stock_label": "غير متوفر",
+  "load_more": "تحميل المزيد",
+  "showing_of": "عرض {count} من {total}",
+  "toggle_favorite": "تبديل المفضلة",
+  "error_occurred": "حدث خطأ"
 }

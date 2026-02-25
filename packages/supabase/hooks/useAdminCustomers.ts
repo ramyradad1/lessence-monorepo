@@ -1,6 +1,7 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CustomerAggregate, AdminNote, Order, Address } from '@lessence/core';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export type CustomerFilter = {
   search?: string;
@@ -17,19 +18,18 @@ export type CustomerDetail = CustomerAggregate & {
 };
 
 export function useAdminCustomers(supabase: SupabaseClient) {
-  const [customers, setCustomers] = useState<CustomerAggregate[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [totalCount, setTotalCount] = useState(0);
+  const queryClient = useQueryClient();
+  const [filterState, setFilterState] = useState<CustomerFilter | undefined>();
 
-  const fetchCustomers = useCallback(async (filter?: CustomerFilter) => {
-    setLoading(true);
-    try {
-      const page = filter?.page || 1;
-      const pageSize = filter?.pageSize || 25;
+  const { data = { customers: [], count: 0 }, isLoading: loading } = useQuery({
+    queryKey: ['admin-customers', filterState],
+    queryFn: async () => {
+      const page = filterState?.page || 1;
+      const pageSize = filterState?.pageSize || 25;
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
-      const sortBy = filter?.sortBy || 'created_at';
-      const sortOrder = filter?.sortOrder || 'desc';
+      const sortBy = filterState?.sortBy || 'created_at';
+      const sortOrder = filterState?.sortOrder || 'desc';
 
       let query = supabase
         .from('customer_aggregates')
@@ -38,61 +38,44 @@ export function useAdminCustomers(supabase: SupabaseClient) {
         .order(sortBy, { ascending: sortOrder === 'asc' })
         .range(from, to);
 
-      if (filter?.search) {
-        query = query.or(`full_name.ilike.%${filter.search}%,email.ilike.%${filter.search}%`);
+      if (filterState?.search) {
+        query = query.or(`full_name.ilike.%${filterState.search}%,email.ilike.%${filterState.search}%`);
       }
 
       const { data, count, error } = await query;
       if (error) throw error;
 
-      setCustomers((data || []) as CustomerAggregate[]);
-      setTotalCount(count || 0);
-    } catch (err) {
-      console.error('Fetch customers error:', err);
-    } finally {
-      setLoading(false);
+      return { customers: (data || []) as CustomerAggregate[], count: count || 0 };
     }
-  }, [supabase]);
+  });
+
+  const customers = data.customers;
+  const totalCount = data.count;
+
+  const fetchCustomers = useCallback((filter?: CustomerFilter) => {
+    setFilterState(filter);
+  }, []);
 
   const fetchCustomerDetail = useCallback(async (customerId: string): Promise<CustomerDetail | null> => {
     try {
       // Customer aggregate
-      const { data: customer, error } = await supabase
-        .from('customer_aggregates')
-        .select('*')
-        .eq('id', customerId)
-        .single();
+      const { data: customer, error } = await supabase.from('customer_aggregates').select('*').eq('id', customerId).single();
       if (error || !customer) return null;
 
       // Orders
-      const { data: orders } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('user_id', customerId)
-        .order('created_at', { ascending: false });
+      const { data: orders } = await supabase.from('orders').select('*').eq('user_id', customerId).order('created_at', { ascending: false });
 
       // Addresses
-      const { data: addresses } = await supabase
-        .from('addresses')
-        .select('*')
-        .eq('user_id', customerId)
-        .order('is_default', { ascending: false });
+      const { data: addresses } = await supabase.from('addresses').select('*').eq('user_id', customerId).order('is_default', { ascending: false });
 
       // Admin notes with admin profile name
-      const { data: notes } = await supabase
-        .from('admin_notes')
-        .select('*')
-        .eq('customer_id', customerId)
-        .order('created_at', { ascending: false });
+      const { data: notes } = await supabase.from('admin_notes').select('*').eq('customer_id', customerId).order('created_at', { ascending: false });
 
       // Enrich notes with admin names
       const enrichedNotes: AdminNote[] = [];
       if (notes && notes.length > 0) {
         const adminIds = Array.from(new Set(notes.map((n: any) => n.admin_id)));
-        const { data: adminProfiles } = await supabase
-          .from('profiles')
-          .select('id, full_name')
-          .in('id', adminIds);
+        const { data: adminProfiles } = await supabase.from('profiles').select('id, full_name').in('id', adminIds);
 
         const adminMap = new Map((adminProfiles || []).map((p: any) => [p.id, p.full_name]));
         for (const n of notes) {
@@ -115,39 +98,49 @@ export function useAdminCustomers(supabase: SupabaseClient) {
     }
   }, [supabase]);
 
-  const addNote = useCallback(async (customerId: string, note: string): Promise<{ success: boolean; error?: string }> => {
-    try {
+  const addNoteMutation = useMutation({
+    mutationFn: async ({ customerId, note }: { customerId: string, note: string }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { error } = await supabase
-        .from('admin_notes')
-        .insert({ customer_id: customerId, admin_id: user.id, note });
-
+      const { error } = await supabase.from('admin_notes').insert({ customer_id: customerId, admin_id: user.id, note });
       if (error) throw error;
+      return { customerId };
+    },
+    onSuccess: (data) => {
+      // Invalidate both lists and potential queries fetching notes somewhere else
+      queryClient.invalidateQueries({ queryKey: ['admin-customers'] });
+    }
+  });
+
+  const addNote = useCallback(async (customerId: string, note: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      await addNoteMutation.mutateAsync({ customerId, note });
       return { success: true };
     } catch (err: any) {
       return { success: false, error: err.message };
     }
-  }, [supabase]);
+  }, [addNoteMutation]);
+
+  const deleteNoteMutation = useMutation({
+    mutationFn: async (noteId: string) => {
+      const { error } = await supabase.from('admin_notes').delete().eq('id', noteId);
+      if (error) throw error;
+      return noteId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-customers'] });
+    }
+  });
 
   const deleteNote = useCallback(async (noteId: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      const { error } = await supabase
-        .from('admin_notes')
-        .delete()
-        .eq('id', noteId);
-
-      if (error) throw error;
+      await deleteNoteMutation.mutateAsync(noteId);
       return { success: true };
     } catch (err: any) {
       return { success: false, error: err.message };
     }
-  }, [supabase]);
-
-  useEffect(() => {
-    fetchCustomers();
-  }, [fetchCustomers]);
+  }, [deleteNoteMutation]);
 
   return {
     customers,

@@ -196,6 +196,7 @@ export type Profile = {
   role: 'user' | 'admin' | 'super_admin' | 'order_manager' | 'inventory_manager' | 'content_manager';
   avatar_url?: string;
   phone?: string;
+  preferred_language?: string;
   created_at?: string;
 };
 

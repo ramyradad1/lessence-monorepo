@@ -8,12 +8,15 @@ import { useBundleBySlug } from '@lessence/supabase';
 import { useCart } from '@/context/CartContext';
 import { supabase } from '@/lib/supabase';
 import { ShoppingBag, ChevronLeft, Check } from 'lucide-react';
+import { useLocale } from 'next-intl';
+import { formatCurrency } from '@lessence/core';
 import type { BundleItem } from '@lessence/core';
 
 export default function BundlePage({ params }: { params: { slug: string } }) {
   const router = useRouter();
   const { bundle, loading: bundleLoading, error } = useBundleBySlug(supabase, params.slug);
   const { addToCart } = useCart();
+  const locale = useLocale();
   const [addingToCart, setAddingToCart] = useState(false);
   const [added, setAdded] = useState(false);
 
@@ -100,7 +103,7 @@ export default function BundlePage({ params }: { params: { slug: string } }) {
               {bundle.name}
             </h1>
             <div className="text-3xl font-medium text-[#f4c025] mb-6">
-              ${bundle.price.toFixed(2)}
+              {formatCurrency(bundle.price, locale)}
             </div>
             {bundle.description && (
               <p className="text-lg text-white/60 leading-relaxed mb-8">

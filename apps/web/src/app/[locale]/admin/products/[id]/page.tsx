@@ -15,11 +15,17 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<{
-    name: string; subtitle: string; description: string; price: number; sku: string;
+    name: string; name_ar: string;
+    subtitle: string; subtitle_ar: string;
+    description: string; description_ar: string;
+    price: number; sku: string;
     image_url: string; is_active: boolean; is_new: boolean; category_id: string;
     low_stock_threshold: number;
   }>({
-    name: '', subtitle: '', description: '', price: 0, sku: '',
+    name: '', name_ar: '',
+    subtitle: '', subtitle_ar: '',
+    description: '', description_ar: '',
+    price: 0, sku: '',
     image_url: '', is_active: true, is_new: false, category_id: '',
     low_stock_threshold: 5
   });
@@ -30,7 +36,9 @@ export default function ProductDetailPage() {
       if (!error && data) {
         setProduct(data);
         setForm({
-          name: data.name, subtitle: data.subtitle || '', description: data.description || '',
+          name: data.name, name_ar: data.name_ar || '',
+          subtitle: data.subtitle || '', subtitle_ar: data.subtitle_ar || '',
+          description: data.description || '', description_ar: data.description_ar || '',
           price: data.price, sku: data.sku || '', image_url: data.image_url || '',
           is_active: data.is_active, is_new: data.is_new, category_id: data.category_id,
           low_stock_threshold: data.low_stock_threshold ?? 5
@@ -68,18 +76,39 @@ export default function ProductDetailPage() {
       <h1 className="text-2xl font-bold text-white">Edit Product</h1>
 
       <div className="bg-[#1e1b16] border border-white/5 rounded-2xl p-6 space-y-5">
-        <div>
-          <label className="text-xs text-white/40 mb-1 block uppercase tracking-wider">Name</label>
-          <input title="Product name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} className={inputClass} />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs text-white/40 mb-1 block uppercase tracking-wider">Name (EN)</label>
+            <input title="Product name (English)" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className={inputClass} />
+          </div>
+          <div>
+            <label className="text-xs text-white/40 mb-1 block uppercase tracking-wider text-right">Name (AR)</label>
+            <input dir="rtl" title="Product name (Arabic)" value={form.name_ar} onChange={e => setForm({ ...form, name_ar: e.target.value })} className={inputClass} />
+          </div>
         </div>
-        <div>
-          <label className="text-xs text-white/40 mb-1 block uppercase tracking-wider">Subtitle</label>
-          <input title="Product subtitle" value={form.subtitle} onChange={e => setForm({...form, subtitle: e.target.value})} className={inputClass} />
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs text-white/40 mb-1 block uppercase tracking-wider">Subtitle (EN)</label>
+            <input title="Product subtitle (English)" value={form.subtitle} onChange={e => setForm({ ...form, subtitle: e.target.value })} className={inputClass} />
+          </div>
+          <div>
+            <label className="text-xs text-white/40 mb-1 block uppercase tracking-wider text-right">Subtitle (AR)</label>
+            <input dir="rtl" title="Product subtitle (Arabic)" value={form.subtitle_ar} onChange={e => setForm({ ...form, subtitle_ar: e.target.value })} className={inputClass} />
+          </div>
         </div>
-        <div>
-          <label className="text-xs text-white/40 mb-1 block uppercase tracking-wider">Description</label>
-          <textarea title="Product description" value={form.description} onChange={e => setForm({...form, description: e.target.value})} rows={4} className={inputClass} />
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs text-white/40 mb-1 block uppercase tracking-wider">Description (EN)</label>
+            <textarea title="Product description (English)" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={4} className={inputClass} />
+          </div>
+          <div>
+            <label className="text-xs text-white/40 mb-1 block uppercase tracking-wider text-right">Description (AR)</label>
+            <textarea dir="rtl" title="Product description (Arabic)" value={form.description_ar} onChange={e => setForm({ ...form, description_ar: e.target.value })} rows={4} className={inputClass} />
+          </div>
         </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="text-xs text-white/40 mb-1 block uppercase tracking-wider">Price</label>

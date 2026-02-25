@@ -10,7 +10,11 @@ type BundleItemField = 'product_id' | 'variant_id' | 'quantity';
 type ProductVariantOption = { id: string; size?: string | null; concentration?: string | null };
 type ProductWithVariants = { variants?: ProductVariantOption[] };
 
+import { useLocale } from 'next-intl';
+import { formatCurrency } from '@lessence/core';
+
 export default function AdminBundlesPage() {
+  const locale = useLocale();
   const { bundles, loading, createBundle, updateBundle, deleteBundle } = useAdminBundles(supabase);
   const { products } = useAdminProducts(supabase);
   const [selectedBundle, setSelectedBundle] = useState<Bundle | null>(null);
@@ -165,7 +169,7 @@ export default function AdminBundlesPage() {
                         {bundle.items?.length || 0} component{(bundle.items?.length || 0) !== 1 ? 's' : ''}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-[#f4c025] font-medium">${bundle.price.toFixed(2)}</td>
+                  <td className="px-6 py-4 text-[#f4c025] font-medium">{formatCurrency(bundle.price, locale)}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${
                       bundle.is_active ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-white/40'

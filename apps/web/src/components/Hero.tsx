@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { ArrowRight } from "lucide-react";
 import { Link } from "@/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import Image from "next/image";
 
 export default function Hero() {
   const { banner, loading } = useHeroBanner(supabase);
@@ -24,10 +25,13 @@ export default function Hero() {
     <section className="relative h-screen flex items-center overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
-        <img 
+        <Image 
           src={banner.image_url} 
-          alt={title}
-          className="w-full h-full object-cover scale-105"
+          alt={title || ''}
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background-dark via-background-dark/40 to-transparent" />
       </div>

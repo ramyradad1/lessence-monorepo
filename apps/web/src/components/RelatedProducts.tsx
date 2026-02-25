@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { webFavoritesStorage } from "@/lib/favoritesStorage";
 import ProductCard from "./ProductCard";
 import { Product } from "@lessence/core";
+import { useTranslations } from "next-intl";
 
 interface RelatedProductsProps {
   currentProduct: Product;
@@ -12,7 +13,8 @@ interface RelatedProductsProps {
 export default function RelatedProducts({ currentProduct }: RelatedProductsProps) {
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites(supabase, user?.id, webFavoritesStorage);
-  
+  const tc = useTranslations('common');
+
   const { relatedProducts, loading } = useRelatedProducts(
     supabase,
     currentProduct.id,
@@ -28,8 +30,8 @@ export default function RelatedProducts({ currentProduct }: RelatedProductsProps
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-end mb-12">
             <div>
-              <span className="text-primary text-xs font-bold tracking-widest uppercase">Curated For You</span>
-              <h2 className="text-4xl font-display text-white mt-2">You may also like</h2>
+              <span className="text-primary text-xs font-bold tracking-widest uppercase">{tc('curated_for_you')}</span>
+              <h2 className="text-4xl font-display text-white mt-2">{tc('you_may_also_like')}</h2>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -51,8 +53,8 @@ export default function RelatedProducts({ currentProduct }: RelatedProductsProps
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-end mb-12">
           <div>
-            <span className="text-primary text-xs font-bold tracking-widest uppercase">Curated For You</span>
-            <h2 className="text-4xl font-display text-white mt-2">You may also like</h2>
+            <span className="text-primary text-xs font-bold tracking-widest uppercase">{tc('curated_for_you')}</span>
+            <h2 className="text-4xl font-display text-white mt-2">{tc('you_may_also_like')}</h2>
           </div>
         </div>
 

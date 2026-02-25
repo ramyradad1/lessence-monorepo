@@ -22,5 +22,18 @@
   "add_new_address": "Add New Address",
   "notification_settings": "Notification Settings",
   "order_history_desc": "View and track your previous purchases.",
-  "new_count": "{{count}} new"
+  "new_count": "{{count}} new",
+  "personal_info": "Personal Information",
+  "preferences": "Preferences",
+  "preferred_language": "Preferred Language",
+  "english": "English",
+  "arabic": "Arabic",
+  "language_saved": "Language saved successfully",
+  "full_name": "Full Name",
+  "save_changes": "Save Changes",
+  "saving": "Saving...",
+  "saved_successfully": "Saved successfully",
+  "my_favorites": "My Favorites",
+  "favorites_empty": "You haven't favorited any items yet.",
+  "view_favorites": "View Favorites"
 }

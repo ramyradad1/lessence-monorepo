@@ -5,11 +5,15 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useAdminProducts } from '@lessence/supabase';
 
+import { useLocale } from 'next-intl';
+import { formatCurrency } from '@lessence/core';
+
 export default function AdminProductsPage() {
+  const locale = useLocale();
   const { products, categories, loading, fetchProducts, createProduct, toggleProductActive, toggleProductNew } = useAdminProducts(supabase);
   const [search, setSearch] = useState('');
   const [showCreate, setShowCreate] = useState(false);
-  const [newProduct, setNewProduct] = useState({ name: '', subtitle: '', description: '', price: '', category_id: '', sku: '' });
+  const [newProduct, setNewProduct] = useState({ name: '', name_ar: '', subtitle: '', subtitle_ar: '', description: '', description_ar: '', price: '', category_id: '', sku: '' });
   const [creating, setCreating] = useState(false);
 
   const handleSearch = (val: string) => {
@@ -21,8 +25,11 @@ export default function AdminProductsPage() {
     setCreating(true);
     await createProduct({
       name: newProduct.name,
+      name_ar: newProduct.name_ar,
       subtitle: newProduct.subtitle,
+      subtitle_ar: newProduct.subtitle_ar,
       description: newProduct.description,
+      description_ar: newProduct.description_ar,
       price: parseFloat(newProduct.price) || 0,
       category_id: newProduct.category_id,
       sku: newProduct.sku,
@@ -33,7 +40,7 @@ export default function AdminProductsPage() {
       review_count: 0,
       is_new: false,
     });
-    setNewProduct({ name: '', subtitle: '', description: '', price: '', category_id: '', sku: '' });
+    setNewProduct({ name: '', name_ar: '', subtitle: '', subtitle_ar: '', description: '', description_ar: '', price: '', category_id: '', sku: '' });
     setShowCreate(false);
     setCreating(false);
   };
@@ -57,23 +64,37 @@ export default function AdminProductsPage() {
       {showCreate && (
         <div className="bg-[#1e1b16] border border-white/5 rounded-2xl p-6 space-y-4">
           <h2 className="text-sm font-semibold text-white/40 uppercase tracking-wider">Quick Create</h2>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input placeholder="Name *" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
+            <input placeholder="Name (EN) *" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
               className="bg-[#181611] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#f4c025]/40" />
-            <input placeholder="Subtitle" value={newProduct.subtitle} onChange={e => setNewProduct({ ...newProduct, subtitle: e.target.value })}
+            <input dir="rtl" placeholder="Name (AR) *" value={newProduct.name_ar} onChange={e => setNewProduct({ ...newProduct, name_ar: e.target.value })}
               className="bg-[#181611] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#f4c025]/40" />
+
+            <input placeholder="Subtitle (EN)" value={newProduct.subtitle} onChange={e => setNewProduct({ ...newProduct, subtitle: e.target.value })}
+              className="bg-[#181611] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#f4c025]/40" />
+            <input dir="rtl" placeholder="Subtitle (AR)" value={newProduct.subtitle_ar} onChange={e => setNewProduct({ ...newProduct, subtitle_ar: e.target.value })}
+              className="bg-[#181611] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#f4c025]/40" />
+
             <input placeholder="Price *" type="number" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })}
               className="bg-[#181611] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#f4c025]/40" />
             <input placeholder="SKU" value={newProduct.sku} onChange={e => setNewProduct({ ...newProduct, sku: e.target.value })}
               className="bg-[#181611] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#f4c025]/40" />
+
             <select title="Category" value={newProduct.category_id} onChange={e => setNewProduct({ ...newProduct, category_id: e.target.value })}
-              className="bg-[#181611] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#f4c025]/40">
+              className="col-span-1 sm:col-span-2 bg-[#181611] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#f4c025]/40">
               <option value="">Select Category</option>
               {categories.map(c => <option key={c.id} value={c.id} className="bg-[#1e1b16]">{c.name}</option>)}
             </select>
           </div>
-          <textarea placeholder="Description" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })}
-            rows={2} className="w-full bg-[#181611] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#f4c025]/40" />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <textarea placeholder="Description (EN)" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })}
+              rows={2} className="w-full bg-[#181611] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#f4c025]/40" />
+            <textarea dir="rtl" placeholder="Description (AR)" value={newProduct.description_ar} onChange={e => setNewProduct({ ...newProduct, description_ar: e.target.value })}
+              rows={2} className="w-full bg-[#181611] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#f4c025]/40" />
+          </div>
+
           <div className="flex gap-3 justify-end">
             <button onClick={() => setShowCreate(false)} className="text-sm text-white/40 hover:text-white px-4 py-2">Cancel</button>
             <button onClick={handleCreate} disabled={creating || !newProduct.name || !newProduct.price}
@@ -121,7 +142,7 @@ export default function AdminProductsPage() {
                   <p className="text-xs text-white/30 truncate">{product.subtitle}</p>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-[#f4c025]">${Number(product.price).toFixed(2)}</span>
+                  <span className="text-lg font-bold text-[#f4c025]">{formatCurrency(Number(product.price), locale)}</span>
                   <span className="text-[10px] text-white/20 font-mono">{product.sku}</span>
                 </div>
                 <div className="flex items-center gap-2 pt-2 border-t border-white/5">

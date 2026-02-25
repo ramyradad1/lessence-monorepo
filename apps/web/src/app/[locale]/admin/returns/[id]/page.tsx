@@ -45,7 +45,11 @@ const STATUS_COLORS: Record<ReturnRequestStatus, string> = {
   refunded: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
   rejected: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
 };
+import { useLocale } from 'next-intl';
+import { formatCurrency } from '@lessence/core';
+
 export default function AdminReturnDetailPage() {
+  const locale = useLocale();
   const { id } = useParams();
   const router = useRouter();
   const { fetchRequestDetail, updateRequestStatus, loading: updatingStatus } = useAdminReturnRequests(supabase);
@@ -203,7 +207,7 @@ export default function AdminReturnDetailPage() {
                       </div>
                     </div>
                     <p className="text-sm font-bold text-primary">
-                      ${((item.price || 0) * item.quantity).toFixed(2)}
+                      {formatCurrency(((item.price || 0) * item.quantity), locale)}
                     </p>
                   </div>
                 ))}

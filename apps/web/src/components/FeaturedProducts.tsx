@@ -12,6 +12,10 @@ export default function FeaturedProducts() {
   const { isFavorite, toggleFavorite } = useFavorites(supabase, user?.id, webFavoritesStorage);
   const t = useTranslations('common');
 
+  // Prefer new arrivals, fall back to latest products
+  const newArrivals = products.filter(p => p.is_new);
+  const featured = newArrivals.length > 0 ? newArrivals.slice(0, 4) : products.slice(0, 4);
+
   if (loading) return (
     <div className="max-w-7xl mx-auto px-4 py-24">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -27,7 +31,9 @@ export default function FeaturedProducts() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-end mb-12">
           <div>
-            <span className="text-primary text-xs font-bold tracking-widest uppercase">{t('curated_for_you')}</span>
+            <span className="text-primary text-xs font-bold tracking-widest uppercase">
+              {newArrivals.length > 0 ? t('new_arrivals') : t('curated_for_you')}
+            </span>
             <h2 className="text-4xl font-display text-white mt-2">{t('signature_scents')}</h2>
           </div>
           <Link href="/shop" className="text-white/60 hover:text-primary transition-colors uppercase text-xs tracking-widest font-bold">
@@ -36,7 +42,7 @@ export default function FeaturedProducts() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {products.slice(0, 4).map((product) => (
+          {featured.map((product) => (
             <ProductCard
               key={product.id}
               product={product}

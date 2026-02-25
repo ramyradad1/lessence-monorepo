@@ -9,6 +9,7 @@ import { useAuth } from "@lessence/supabase";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { useTranslations, useLocale } from 'next-intl';
+import { formatCurrency } from '@lessence/core';
 
 function formatRelativeTime(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -22,6 +23,7 @@ function formatRelativeTime(dateStr: string) {
 
 function NotificationBell({ userId }: { userId: string }) {
   const t = useTranslations('common');
+  const locale = useLocale();
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications(supabase, userId);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -98,10 +100,10 @@ function NotificationBell({ userId }: { userId: string }) {
                         {n.type === 'price_drop' && n.data?.new_price && (
                           <>
                             <span className="text-[10px] text-green-400 font-bold">
-                              ${n.data.new_price}
+                              {formatCurrency(n.data.new_price, locale)}
                             </span>
                             <span className="text-[10px] text-white/30 line-through">
-                              ${n.data.old_price}
+                              {formatCurrency(n.data.old_price, locale)}
                             </span>
                           </>
                         )}

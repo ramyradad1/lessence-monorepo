@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useReviews } from "@lessence/supabase";
 import { Star, Trash2, Edit2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 
 export default function ProductReviews({ productId }: { productId: string }) {
   const {
@@ -174,9 +175,9 @@ export default function ProductReviews({ productId }: { productId: string }) {
             <div key={review.id} className="p-6 md:p-8 rounded-2xl border border-white/5 glass-effect relative">
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold overflow-hidden">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold overflow-hidden relative">
                     {review.profiles?.avatar_url ? (
-                      <img src={review.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
+                      <Image src={review.profiles.avatar_url} alt="" fill sizes="40px" className="object-cover" />
                     ) : (
                       (review.profiles?.full_name || "A").charAt(0).toUpperCase()
                     )}

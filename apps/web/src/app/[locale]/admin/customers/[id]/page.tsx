@@ -19,7 +19,11 @@ const STATUS_COLORS: Record<string, string> = {
   refunded: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
 };
 
+import { useLocale } from 'next-intl';
+import { formatCurrency } from '@lessence/core';
+
 export default function CustomerDetailPage() {
+  const locale = useLocale();
   const params = useParams();
   const router = useRouter();
   const customerId = params.id as string;
@@ -109,7 +113,7 @@ export default function CustomerDetailPage() {
               <div className="text-[10px] text-white/30 uppercase tracking-wider font-semibold">Orders</div>
             </div>
             <div className="bg-[#f4c025]/10 rounded-xl px-4 py-2 text-center">
-              <div className="text-lg font-bold text-[#f4c025]">${Number(customer.total_spend).toFixed(2)}</div>
+              <div className="text-lg font-bold text-[#f4c025]">{formatCurrency(Number(customer.total_spend), locale)}</div>
               <div className="text-[10px] text-white/30 uppercase tracking-wider font-semibold">Total Spend</div>
             </div>
           </div>
@@ -150,7 +154,7 @@ export default function CustomerDetailPage() {
                             {order.status}
                           </span>
                         </td>
-                        <td className="py-3 text-right text-sm font-semibold text-white">${Number(order.total_amount).toFixed(2)}</td>
+                        <td className="py-3 text-right text-sm font-semibold text-white">{formatCurrency(Number(order.total_amount), locale)}</td>
                         <td className="py-3 text-right text-xs text-white/30">{new Date(order.created_at).toLocaleDateString()}</td>
                       </tr>
                     ))}

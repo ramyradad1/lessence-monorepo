@@ -58,7 +58,7 @@ export default async function ProductPage({ params }: Props) {
   const supabase = createClient();
   const { data: product } = await supabase
     .from("products")
-    .select("*")
+    .select("*, variants:product_variants(*)")
     .eq("slug", slug)
     .single();
 
@@ -85,7 +85,7 @@ export default async function ProductPage({ params }: Props) {
     offers: {
       "@type": "Offer",
       url: `${baseUrl}/${locale}/shop/${product.slug}`,
-      priceCurrency: "USD",
+      priceCurrency: "EGP",
       price: product.price,
       itemCondition: "https://schema.org/NewCondition",
       availability: product.stock_qty > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",

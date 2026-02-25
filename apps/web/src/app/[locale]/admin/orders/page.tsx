@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useAdminOrders } from '@lessence/supabase';
 import { OrderStatus } from '@lessence/core';
+import { useLocale } from 'next-intl';
+import { formatCurrency } from '@lessence/core';
 
 const ALL_STATUSES: OrderStatus[] = ['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
 const STATUS_COLORS: Record<string, string> = {
@@ -23,6 +25,7 @@ export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState<OrderStatus | ''>('');
   const [page, setPage] = useState(1);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const locale = useLocale();
 
   useEffect(() => {
     fetchOrders({ search: search || undefined, status: statusFilter || undefined, page });
@@ -98,7 +101,7 @@ export default function AdminOrdersPage() {
                         {order.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right text-sm font-semibold text-white">${(order.total || order.total_amount || 0).toFixed(2)}</td>
+                    <td className="px-6 py-4 text-right text-sm font-semibold text-white">{formatCurrency(order.total || order.total_amount || 0, locale)}</td>
                     <td className="px-6 py-4 text-right text-xs text-white/30">{order.created_at ? new Date(order.created_at).toLocaleDateString() : '-'}</td>
                     <td className="px-6 py-4 text-right">
                       <select

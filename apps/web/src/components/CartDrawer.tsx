@@ -4,6 +4,9 @@ import { X, Plus, Minus, ShoppingBag, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@lessence/supabase";
 import type { CartItem } from "@lessence/core";
+import { formatCurrency } from "@lessence/core";
+import { useLocale } from "next-intl";
+import Image from "next/image";
 
 type CartOrderResult = { success: boolean; orderNumber?: string; error?: unknown };
 type CartDrawerItem = CartItem & { product_id?: string };
@@ -13,6 +16,7 @@ export default function CartDrawer() {
   const [isCheckout, setIsCheckout] = useState(false);
   const [orderResult, setOrderResult] = useState<CartOrderResult | null>(null);
   const { user } = useAuth();
+  const locale = useLocale();
 
   if (!isCartOpen) return null;
 
@@ -75,7 +79,9 @@ export default function CartDrawer() {
 
                 return (
                   <div key={key} className="flex gap-4 bg-surface-dark/40 rounded-xl p-4 border border-white/5">
-                    <img src={item.image_url || item.bundle?.image_url || ""} alt={item.name || item.bundle?.name || "Cart item"} className="w-20 h-20 object-cover rounded-lg" />
+                    <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                      <Image src={item.image_url || item.bundle?.image_url || ""} alt={item.name || item.bundle?.name || "Cart item"} fill sizes="80px" className="object-cover" />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start">
                         <div>
@@ -98,7 +104,7 @@ export default function CartDrawer() {
                             <Plus size={12} />
                           </button>
                         </div>
-                        <p className="text-primary font-bold text-sm">${(Number(sizePrice) * item.quantity).toFixed(0)}</p>
+                        <p className="text-primary font-bold text-sm">{formatCurrency(Number(sizePrice) * item.quantity, locale)}</p>
                       </div>
                     </div>
                   </div>
@@ -110,7 +116,7 @@ export default function CartDrawer() {
             <div className="p-6 border-t border-white/10 space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-white/40 text-xs uppercase tracking-widest">Subtotal</span>
-                <span className="text-white font-bold text-lg">${cartTotal.toFixed(0)}</span>
+                    <span className="text-white font-bold text-lg">{formatCurrency(cartTotal, locale)}</span>
               </div>
 
               {isCheckout ? (

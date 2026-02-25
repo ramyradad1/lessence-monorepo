@@ -13,6 +13,7 @@ import { useRouter, usePathname } from "@/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
 type ProductSort = "newest" | "price_asc" | "price_desc" | "best_rated" | "most_popular";
+const PAGE_SIZE = 12;
 
 // Extract the actual shop content to a child component to wrap in Suspense
 function ShopContent() {
@@ -33,6 +34,12 @@ function ShopContent() {
 
   const [localSearch, setLocalSearch] = useState(searchQuery);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [searchQuery, activeCategory, minPrice, maxPrice, genderTarget, inStockOnly, sortBy]);
 
   // Local state for filters in the modal/sidebar before applying
   const [draftState, setDraftState] = useState({
@@ -227,7 +234,7 @@ function ShopContent() {
                 </p>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                      {products.map((product) => (
+                      {products.slice(0, visibleCount).map((product) => (
                   <ProductCard
                     key={product.id}
                     product={product}
@@ -236,6 +243,19 @@ function ShopContent() {
                   />
                 ))}
               </div>
+                    {visibleCount < products.length && (
+                      <div className="flex flex-col items-center mt-12 gap-3">
+                        <p className="text-white/30 text-xs tracking-widest uppercase">
+                          {tc('showing_of', { count: Math.min(visibleCount, products.length), total: products.length })}
+                        </p>
+                        <button
+                          onClick={() => setVisibleCount(prev => prev + PAGE_SIZE)}
+                          className="border border-white/20 text-white hover:border-primary hover:text-primary px-8 py-3 rounded-full text-xs font-bold tracking-widest uppercase transition-all"
+                        >
+                          {tc('load_more')}
+                        </button>
+                      </div>
+                    )}
             </>
           )}
         </div>

@@ -22,5 +22,18 @@
   "add_new_address": "إضافة عنوان جديد",
   "notification_settings": "إعدادات التنبيهات",
   "order_history_desc": "عرض وتتبع مشترياتك السابقة.",
-  "new_count": "{{count}} جديد"
+  "new_count": "{{count}} جديد",
+  "personal_info": "المعلومات الشخصية",
+  "preferences": "التفضيلات",
+  "preferred_language": "اللغة المفضلة",
+  "english": "الإنجليزية",
+  "arabic": "العربية",
+  "language_saved": "تم إعداد اللغة بنجاح",
+  "full_name": "الاسم الكامل",
+  "save_changes": "حفظ التغييرات",
+  "saving": "جاري الحفظ...",
+  "saved_successfully": "تم الحفظ بنجاح",
+  "my_favorites": "مفضلاتي",
+  "favorites_empty": "لم تقم بإضافة أي عناصر إلى المفضلة بعد.",
+  "view_favorites": "عرض المفضلة"
 }

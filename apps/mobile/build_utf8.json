@@ -1,0 +1,51 @@
+﻿{
+  "id": "22805fb2-6ea5-492c-8fa2-a3d29403ddef",
+  "status": "ERRORED",
+  "platform": "ANDROID",
+  "error": {
+    "errorCode": "EAS_BUILD_UNKNOWN_GRADLE_ERROR",
+    "message": "Gradle build failed with unknown error. See logs for the \"Run gradlew\" phase for more information."
+  },
+  "artifacts": {},
+  "fingerprint": {
+    "id": "019c871a-e4fb-77d7-bf88-1dc45a2e950a",
+    "hash": "0d134d79d0e062209324b1bfe330812cf158bf91"
+  },
+  "initiatingActor": {
+    "id": "dd0c5d63-e662-4d57-adb4-ac5e5cba424a",
+    "displayName": "ramyradad"
+  },
+  "logFiles": [
+    "https://job-logs.eascdn.net/production/22805fb2-6ea5-492c-8fa2-a3d29403ddef/1771793212847-c7f2f475-8817-41d7-a41a-776547e35b0b.txt?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260222%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260222T224313Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=1c3e0ebb5a5841b132a4f9d51f8469422f1635888121a22161eeba63791c6b9e78bd938752be0443f5851846818496f22c3d9e33563342996aebc5943deb9df39b9741679384ceee95ea35f9f86fd312db919abd7a30c0bf7a1561077a599c9b35c88dfa8eba29812cbfc5c4cf941c349e3eb3eb566f72b3be28d15762919627dd4fab6e86d0bef6ee44aa98b89543655774018f4f7c9eea34cfe87a7eeb1126ddf5fe971c0db9dccfbbb7f8b035df36eb9d839b2ab728df9cb9bdc8af74e8edfc556b06c3f39ae1a553e1d10f275d1d39acc2923402e8f1f554b8d3f61022a0271aec22d2dcf472928ee70adc36e302de8a529228dbd80864a67bf469c13425",
+    "https://job-logs.eascdn.net/production/22805fb2-6ea5-492c-8fa2-a3d29403ddef/1771793216427-21aae537-6144-4f40-8fec-1d0d16f26d71.txt?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260222%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260222T224313Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=a507755f03b32f7a89eb6af5fa77bce5878a7f12fad566bfa99fcefbde60f9a65f284730bed093a8ebd1f097c9fc7f37b8ecac760e7738fb37f44595718c4b2c99a66898d94a79991ee7e0931bbb97e8aac9e7acf91e01ad582d5c4d100172acb602dfaff99675caa300e695448982f872e5f283aa2610a96032f3b581e609e1dfff0b89714dcf1560a48658d40f199c7ad4cf66d930a8b8b11ac9d430d3868ce1ea5acd5cbd9669d97112284924890b4bd69ca3730f8bcf5fffef97cff099dc105678bb9227c8d4238556db460afd1b846eac0cee28acc31a8127f111f8b7070767836920519557f6835c3b9ac1f16806e656c67892e4ff49a1344267e45724",
+    "https://job-logs.eascdn.net/production/22805fb2-6ea5-492c-8fa2-a3d29403ddef/1771793216626-23f01113-b074-48b0-be82-6f1745b0043a.txt?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260222%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260222T224313Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=6380f6c53c6ce8f2f792922547b59de142fb5e30fce858049f7a42895c206ac51673a4b155c27d0628e6fb7c3a8b19f1f19edd9f312b4194b10a3e70491881673a0153b195e4584f699820c3f8a1d901e65184b2e65490d4d852ceeed6257eaa1bad7e0dc4521d3c56a4508f71467e042d82f6e58c59a13ccbbb55e9b735c41d190391c2e4f7339a53879fe796fb4c5b57aff9f3a5845cb0e203a3cba61e9a39cea13601da51fe753f07797c638f8836bcd758f6644f42d2e68303ae78dfb3290a4a8f95c5a5aa4237d207a7369bf2ac74327c03907ff34f17b465ff978b0ea437cdbe5fad0ccd2e287eb56ac726b39a5a0423cc7be12bd9c44d950e00875276",
+    "https://job-logs.eascdn.net/production/22805fb2-6ea5-492c-8fa2-a3d29403ddef/1771793216782-dd2f69cb-a95e-48cb-8736-039a8c92ad25.txt?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260222%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260222T224313Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=511430ba63290dca8405e5be141ad02f2b6669ce70eb5ef2fd3d3802354e2151151aa0763ee022d297ac99661f1a9c87adbcd8d22b2d29cbb75cb5189ddad417a3ef12b5aaffcc8b1b48e1a43a2960a6dba4f20dd5ffae69045756616c84b96739c45471add092790a5eeee755aaf9da98e9643ce29003ff9d24fbbdb2db11d74c2afa7aef8a160dcdfdad80e3fee2ac697931a06b087f1eee0cf1f8e4a37bde1bb74f07da4c33d2ff71e3cd247f8e34f15f7907a4ce4e239f5c99e9880f56f1e25f3e0fbf767fae0b7c9434b4c88f23b9f3e188327b9d921c9574eb8bb9a4233139a6d46eb9c828167f2788991fd4f67ad147e167fddefca1f797a0781d8b4c"
+  ],
+  "project": {
+    "id": "b5366a5a-9077-4596-8c01-9362ffe2b3fc",
+    "name": "lessence",
+    "slug": "lessence",
+    "ownerAccount": {
+      "id": "f7edcaf6-444b-41d7-b842-ef23771ad404",
+      "name": "ramyradads-organization"
+    }
+  },
+  "distribution": "STORE",
+  "buildProfile": "preview",
+  "sdkVersion": "54.0.0",
+  "appVersion": "1.0.0",
+  "appBuildVersion": "1",
+  "gitCommitHash": "84257a9fef8680f2dd48596259b251f128aa217f",
+  "gitCommitMessage": "chore: sync lockfile for react-native-gesture-handler",
+  "priority": "NORMAL",
+  "createdAt": "2026-02-22T20:46:52.569Z",
+  "updatedAt": "2026-02-22T20:50:56.769Z",
+  "completedAt": "2026-02-22T20:50:53.223Z",
+  "expirationDate": "2026-03-24T20:46:52.656Z",
+  "isForIosSimulator": false,
+  "metrics": {
+    "buildWaitTime": 174,
+    "buildQueueTime": 44826,
+    "buildDuration": 195336
+  }
+}

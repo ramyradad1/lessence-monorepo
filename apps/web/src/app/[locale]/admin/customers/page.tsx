@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useAdminCustomers } from '@lessence/supabase';
 import { Search, ArrowUpDown, User as UserIcon, Mail, Phone, ShoppingBag, Loader2 } from 'lucide-react';
+import { useLocale } from 'next-intl';
+import { formatCurrency } from '@lessence/core';
 
 const SORT_OPTIONS = [
   { value: 'created_at:desc', label: 'Newest First' },
@@ -24,6 +26,7 @@ export default function AdminCustomersPage() {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('created_at:desc');
   const [page, setPage] = useState(1);
+  const locale = useLocale();
 
   useEffect(() => {
     const [sortBy, sortOrder] = sort.split(':') as [CustomerSortBy, CustomerSortOrder];
@@ -123,7 +126,7 @@ export default function AdminCustomersPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className="text-sm font-semibold text-[#f4c025]">${Number(c.total_spend).toFixed(2)}</span>
+                      <span className="text-sm font-semibold text-[#f4c025]">{formatCurrency(Number(c.total_spend), locale)}</span>
                     </td>
                     <td className="px-6 py-4 text-right hidden sm:table-cell">
                       <span className="text-xs text-white/30">

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { webFavoritesStorage } from "@/lib/favoritesStorage";
 import { webRecentlyViewedStorage } from "@/lib/recentlyViewedStorage";
@@ -23,6 +24,7 @@ interface ProductDetailClientProps {
 
 export default function ProductDetailClient({ initialProduct: product }: ProductDetailClientProps) {
   const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
+  const [selectedImage, setSelectedImage] = useState(0);
   const [isAdding, setIsAdding] = useState(false);
   const { addToCart } = useCart();
   const { user } = useAuth();
@@ -76,6 +78,30 @@ export default function ProductDetailClient({ initialProduct: product }: Product
 
   const isOutOfStock = variants ? (variants[selectedVariantIdx]?.stock_qty <= 0) : false;
 
+  // Build image gallery from product.images or fallback to single image_url
+  const allImages = product.images && product.images.length > 0
+    ? product.images
+    : [product.image_url];
+
+  // Stock status helper
+  const getStockStatus = () => {
+    if (variants && variants.length > 0) {
+      const currentVariant = variants[selectedVariantIdx];
+      if (!currentVariant || currentVariant.stock_qty <= 0) return 'out_of_stock';
+      if (currentVariant.stock_qty <= (currentVariant.low_stock_threshold || 5)) return 'low_stock';
+      return 'in_stock';
+    }
+    // Fallback: check if product has stock_qty from server join
+    const productExt = product as Product & { stock_qty?: number };
+    if (productExt.stock_qty !== undefined) {
+      if (productExt.stock_qty <= 0) return 'out_of_stock';
+      if (productExt.stock_qty <= (product.low_stock_threshold || 5)) return 'low_stock';
+      return 'in_stock';
+    }
+    return 'in_stock';
+  };
+  const stockStatus = getStockStatus();
+
   return (
     <main className="bg-background-dark min-h-screen">
       <PerformanceTracker actionName="product_load" />
@@ -95,28 +121,48 @@ export default function ProductDetailClient({ initialProduct: product }: Product
 
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-            {/* Image */}
-            <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-surface-dark group">
-              <img
-                src={product.image_url}
-                alt={name}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-              />
-              {product.is_new && (
-                <div className={`absolute top-6 ${rtl ? 'right-6' : 'left-6'} bg-primary text-black text-[10px] font-bold px-3 py-1 rounded uppercase`}>
-                  {tc('new')}
+            {/* Image Gallery */}
+            <div className="space-y-3">
+              <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-surface-dark group">
+                <Image
+                  src={allImages[selectedImage]}
+                  alt={name}
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                {product.is_new && (
+                  <div className={`absolute top-6 ${rtl ? 'right-6' : 'left-6'} bg-primary text-black text-[10px] font-bold px-3 py-1 rounded uppercase`}>
+                    {tc('new')}
+                  </div>
+                )}
+                <button
+                  onClick={() => toggleFavorite(product.id)}
+                  className={`absolute top-6 ${rtl ? 'left-6' : 'right-6'} p-3 rounded-full bg-black/40 hover:bg-black/60 transition-colors`}
+                  aria-label={tc('toggle_favorite')}
+                >
+                  <Heart
+                    size={20}
+                    className={isFavorite(product.id) ? "text-red-500 fill-red-500" : "text-white"}
+                  />
+                </button>
+              </div>
+              {allImages.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                  {allImages.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedImage(i)}
+                      aria-label={`View image ${i + 1}`}
+                      className={`flex-shrink-0 w-16 h-20 rounded-lg overflow-hidden border-2 transition-all ${selectedImage === i ? 'border-primary' : 'border-white/10 hover:border-white/30'
+                        }`}
+                    >
+                      <Image src={img} alt={`${name} ${i + 1}`} fill sizes="64px" className="object-cover" />
+                    </button>
+                  ))}
                 </div>
               )}
-              <button
-                onClick={() => toggleFavorite(product.id)}
-                className={`absolute top-6 ${rtl ? 'left-6' : 'right-6'} p-3 rounded-full bg-black/40 hover:bg-black/60 transition-colors`}
-                aria-label="Toggle favorite"
-              >
-                <Heart
-                  size={20}
-                  className={isFavorite(product.id) ? "text-red-500 fill-red-500" : "text-white"}
-                />
-              </button>
             </div>
 
             {/* Details */}
@@ -128,14 +174,20 @@ export default function ProductDetailClient({ initialProduct: product }: Product
 
               <div className="flex items-center gap-6 rtl:flex-row-reverse">
                 <span className="text-3xl text-white font-bold">{formatCurrency(currentPrice, locale)}</span>
-                <div className="flex items-center gap-1 rtl:flex-row-reverse">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={14} className={i < product.rating ? "text-primary fill-primary" : "text-white/20"} />
-                  ))}
-                  <span className={`text-white/30 text-xs ${rtl ? 'mr-2' : 'ml-2'}`}>
-                    {t('reviews_count', { count: product.review_count })}
-                  </span>
-                </div>
+                <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border ${stockStatus === 'in_stock' ? 'text-green-400 border-green-400/30 bg-green-400/10'
+                  : stockStatus === 'low_stock' ? 'text-amber-400 border-amber-400/30 bg-amber-400/10'
+                    : 'text-red-400 border-red-400/30 bg-red-400/10'
+                  }`}>
+                  {tc(stockStatus === 'in_stock' ? 'in_stock' : stockStatus === 'low_stock' ? 'low_stock' : 'out_of_stock_label')}
+                </span>
+              </div>
+              <div className="flex items-center gap-1 rtl:flex-row-reverse">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={14} className={i < product.rating ? "text-primary fill-primary" : "text-white/20"} />
+                ))}
+                <span className={`text-white/30 text-xs ${rtl ? 'mr-2' : 'ml-2'}`}>
+                  {t('reviews_count', { count: product.review_count })}
+                </span>
               </div>
 
               {/* Variant / Size Selector */}

@@ -18,7 +18,11 @@ const STATUS_COLORS: Record<string, string> = {
   refunded: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
 };
 
+import { useLocale } from 'next-intl';
+import { formatCurrency } from '@lessence/core';
+
 export default function OrderDetailPage() {
+  const locale = useLocale();
   const params = useParams();
   const router = useRouter();
   const orderId = params.id as string;
@@ -121,13 +125,13 @@ export default function OrderDetailPage() {
                   <p className="text-sm text-white font-medium">{item.product_name}</p>
                   <p className="text-xs text-white/30">{item.selected_size} × {item.quantity}</p>
                 </div>
-                <p className="text-sm font-semibold text-white">${(item.price * item.quantity).toFixed(2)}</p>
+                <p className="text-sm font-semibold text-white">{formatCurrency((item.price * item.quantity), locale)}</p>
               </div>
             ))}
           </div>
           <div className="mt-4 pt-4 border-t border-white/5 flex justify-between">
             <span className="text-sm text-white/40">Total</span>
-            <span className="text-lg font-bold text-[#f4c025]">${Number(order.total_amount || 0).toFixed(2)}</span>
+            <span className="text-lg font-bold text-[#f4c025]">{formatCurrency(Number(order.total_amount || 0), locale)}</span>
           </div>
         </div>
 

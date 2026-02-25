@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { Order, OrderItem } from '@lessence/core';
+import { Order } from '@lessence/core';
 
 export type DashboardKpis = {
   totalRevenue: number;
@@ -31,52 +31,47 @@ export function useAdminDashboard(supabase: SupabaseClient) {
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch all orders for KPIs
+      // 1. Fetch KPIs and chartData via RPC
+      const { data: metricsData, error: metricsError } = await supabase.rpc('get_admin_dashboard_metrics');
+      
+      if (!metricsError && metricsData) {
+        setKpis({
+          totalRevenue: Number(metricsData.totalRevenue) || 0,
+          orderCount: Number(metricsData.orderCount) || 0,
+          newOrdersCount: Number(metricsData.newOrdersCount) || 0,
+          uniqueCustomers: Number(metricsData.uniqueCustomers) || 0,
+          visitorCount: Number(metricsData.visitorCount) || 0,
+        });
+
+        // Parse chart data and map to day labels
+        const rawChartData = Array.isArray(metricsData.chartData) ? metricsData.chartData : [];
+        const days: ChartDataPoint[] = [];
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        
+        // Fill last 7 days even if no sales
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          const dateStr = d.toISOString().split('T')[0];
+          
+          const existingData = rawChartData.find((raw: any) => raw.date === dateStr);
+          days.push({ 
+            date: dateStr, 
+            label: dayNames[d.getDay()], 
+            revenue: existingData ? Number(existingData.sales) : 0 
+          });
+        }
+        setChartData(days);
+      }
+
+      // 2. Fetch Recent Orders (just 10)
       const { data: orders } = await supabase
         .from('orders')
         .select('id, user_id, order_number, status, total_amount, created_at')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(10);
 
-      const allOrders = orders || [];
-
-      // KPIs
-      const totalRevenue = allOrders.reduce((acc, o) => acc + Number(o.total_amount || 0), 0);
-      const orderCount = allOrders.length;
-      const newOrdersCount = allOrders.filter(o => o.status === 'pending' || o.status === 'paid').length;
-      const uniqueCustomers = new Set(allOrders.map(o => o.user_id).filter(Boolean)).size;
-
-      // Visitor count from visitor_events (unique sessions in last 30 days)
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const { count: visitorCount } = await supabase
-        .from('visitor_events')
-        .select('session_id', { count: 'exact', head: true })
-        .gte('created_at', thirtyDaysAgo.toISOString());
-
-      setKpis({
-        totalRevenue,
-        orderCount,
-        newOrdersCount,
-        uniqueCustomers,
-        visitorCount: visitorCount || 0,
-      });
-
-      // Last 7 days chart data
-      const days: ChartDataPoint[] = [];
-      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
-        const dayRevenue = allOrders
-          .filter(o => o.created_at?.startsWith(dateStr))
-          .reduce((acc, o) => acc + Number(o.total_amount || 0), 0);
-        days.push({ date: dateStr, label: dayNames[d.getDay()], revenue: dayRevenue });
-      }
-      setChartData(days);
-
-      // Recent orders (first 10)
-      const recent = allOrders.slice(0, 10).map(o => ({
+      const recent = (orders || []).map(o => ({
         ...o,
         total: Number(o.total_amount || 0),
       }));

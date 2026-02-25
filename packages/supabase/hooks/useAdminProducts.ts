@@ -1,47 +1,46 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Product, Inventory, Category } from '@lessence/core';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export function useAdminProducts(supabase: SupabaseClient) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const [searchTerm, setSearchTerm] = useState<string | undefined>();
 
-  const fetchProducts = useCallback(async (search?: string) => {
-    setLoading(true);
-    try {
-      let query = supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
+  // Fetch Categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ['admin-categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('categories').select('*').order('name');
+      if (error) throw error;
+      return (data || []) as Category[];
+    }
+  });
 
-      if (search) {
-        query = query.ilike('name', `%${search}%`);
+  // Fetch Products
+  const { data: products = [], isLoading: loading } = useQuery({
+    queryKey: ['admin-products', searchTerm],
+    queryFn: async () => {
+      let query = supabase.from('products').select('*').order('created_at', { ascending: false });
+      if (searchTerm) {
+        query = query.ilike('name', `%${searchTerm}%`);
       }
-
       const { data, error } = await query;
       if (error) throw error;
-      setProducts(data || []);
-    } catch (err) {
-      console.error('Fetch products error:', err);
-    } finally {
-      setLoading(false);
+      return (data || []) as Product[];
     }
-  }, [supabase]);
+  });
 
-  const fetchCategories = useCallback(async () => {
-    const { data } = await supabase
-      .from('categories')
-      .select('*')
-      .order('name');
-    setCategories(data || []);
-  }, [supabase]);
+  // The UI calls fetchProducts(search) on input change
+  const fetchProducts = useCallback((search?: string) => {
+    setSearchTerm(search);
+  }, []);
 
-  const createProduct = useCallback(async (product: Partial<Product>) => {
-    try {
+  // Use Mutations for actions
+  const createProductMutation = useMutation({
+    mutationFn: async (product: Partial<Product>) => {
       const slug = product.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || '';
       const sku = product.sku || `SKU-${Date.now()}`;
-
       const { data, error } = await supabase
         .from('products')
         .insert({
@@ -53,33 +52,49 @@ export function useAdminProducts(supabase: SupabaseClient) {
         })
         .select()
         .single();
-
       if (error) throw error;
-      setProducts(prev => [data, ...prev]);
-      return { success: true, product: data };
-    } catch (err: any) {
-      console.error('Create product error:', err);
-      return { success: false, error: err.message };
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
     }
-  }, [supabase]);
+  });
 
-  const updateProduct = useCallback(async (id: string, updates: Partial<Product>) => {
-    try {
+  const updateProductMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Product> }) => {
       const { data, error } = await supabase
         .from('products')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
         .select()
         .single();
-
       if (error) throw error;
-      setProducts(prev => prev.map(p => p.id === id ? data : p));
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+    }
+  });
+
+  const createProduct = useCallback(async (product: Partial<Product>) => {
+    try {
+      const data = await createProductMutation.mutateAsync(product);
+      return { success: true, product: data };
+    } catch (err: any) {
+      console.error('Create product error:', err);
+      return { success: false, error: err.message };
+    }
+  }, [createProductMutation]);
+
+  const updateProduct = useCallback(async (id: string, updates: Partial<Product>) => {
+    try {
+      const data = await updateProductMutation.mutateAsync({ id, updates });
       return { success: true, product: data };
     } catch (err: any) {
       console.error('Update product error:', err);
       return { success: false, error: err.message };
     }
-  }, [supabase]);
+  }, [updateProductMutation]);
 
   const toggleProductActive = useCallback(async (id: string, is_active: boolean) => {
     return updateProduct(id, { is_active } as any);
@@ -91,18 +106,13 @@ export function useAdminProducts(supabase: SupabaseClient) {
 
   // Inventory management
   const fetchInventory = useCallback(async (productId: string): Promise<Inventory[]> => {
-    const { data } = await supabase
-      .from('inventory')
-      .select('*')
-      .eq('product_id', productId)
-      .order('size');
+    const { data } = await supabase.from('inventory').select('*').eq('product_id', productId).order('size');
     return data || [];
   }, [supabase]);
 
   const upsertInventory = useCallback(async (productId: string, size: string, quantity: number) => {
     try {
-      const { error } = await supabase
-        .from('inventory')
+      const { error } = await supabase.from('inventory')
         .upsert(
           { product_id: productId, size, quantity_available: quantity, updated_at: new Date().toISOString() },
           { onConflict: 'product_id,size' }
@@ -114,33 +124,21 @@ export function useAdminProducts(supabase: SupabaseClient) {
     }
   }, [supabase]);
 
-  // Image upload to Supabase Storage
+  // Image upload
   const uploadProductImage = useCallback(async (file: File, productId: string): Promise<string | null> => {
     try {
       const ext = file.name.split('.').pop();
       const filePath = `${productId}/${Date.now()}.${ext}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(filePath, file, { upsert: true });
-
+      const { error: uploadError } = await supabase.storage.from('product-images').upload(filePath, file, { upsert: true });
       if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(filePath);
-
-      return data.publicUrl;
+      const { data } = supabase.storage.from('product-images').getPublicUrl(filePath);
+      // Ensure image is cache-busted natively on edge
+      return `${data.publicUrl}?v=${Date.now()}`;
     } catch (err) {
       console.error('Upload image error:', err);
       return null;
     }
   }, [supabase]);
-
-  useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-  }, [fetchProducts, fetchCategories]);
 
   return {
     products,

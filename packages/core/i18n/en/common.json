@@ -107,5 +107,20 @@
   "hero_subtitle_fallback": "Elegance",
   "hero_desc_fallback": "Discover our exclusive summer collection crafted for moments of pure luxury.",
   "hero_badge_fallback": "Limited Edition",
-  "hero_cta_fallback": "Shop Collection"
+  "hero_cta_fallback": "Shop Collection",
+  "olfactory_families": "Olfactory Families",
+  "the_collections": "The Collections",
+  "explore_collection": "Explore Collection",
+  "scent_collection": "Scent Collection",
+  "no_fragrances_in_collection": "No fragrances found in this collection yet.",
+  "explore_all_scents": "Explore All Scents",
+  "home": "Home",
+  "you_may_also_like": "You May Also Like",
+  "in_stock": "In Stock",
+  "low_stock": "Low Stock",
+  "out_of_stock_label": "Out of Stock",
+  "load_more": "Load More",
+  "showing_of": "Showing {count} of {total}",
+  "toggle_favorite": "Toggle favorite",
+  "error_occurred": "An error occurred"
 }
