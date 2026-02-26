@@ -6,6 +6,7 @@ import { useCart } from "@/context/CartContext";
 import { useNotifications } from "@lessence/supabase";
 import { useAuth } from "@lessence/supabase";
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { supabase } from "@/lib/supabase";
 import { useTranslations, useLocale } from 'next-intl';
 import { formatCurrency } from '@lessence/core';
@@ -130,6 +131,7 @@ export default function Navbar() {
   const { cartCount, setIsCartOpen } = useCart();
   const { user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const t = useTranslations('common');
   const locale = useLocale();
   const pathname = usePathname();
@@ -149,6 +151,7 @@ export default function Navbar() {
 
   // Prevent background scroll when menu is open
   useEffect(() => {
+    setMounted(true);
     if (isMenuOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -305,56 +308,59 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Menu Overlay */}
-      <div
-        className={`fixed inset-0 z-[90] lg:hidden transition-all duration-500 ease-in-out bg-background/98 backdrop-blur-xl ${isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-          }`}
-      >
-        <div className="flex flex-col items-center justify-center h-full gap-6 px-4 overflow-y-auto w-full pt-20">
-          {dynNavLinks.map((link, index) => (
-            <Link
-              key={link.href + link.name}
-              href={link.href}
-              onClick={closeMenu}
-              className={`text-xl font-sans tracking-[0.15em] text-fg-muted hover:text-primary transition-all duration-500 uppercase transform ${isMenuOpen ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-                }`}
-              style={{ transitionDelay: `${index * 60}ms` }}
+      {/* Mobile Menu Overlay - Portaled to escape containing block filter traps */}
+      {mounted && document.body && createPortal(
+        <div
+          className={`fixed inset-0 z-[90] lg:hidden transition-all duration-500 ease-in-out bg-background/98 backdrop-blur-xl ${isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+            }`}
+        >
+          <div className="flex flex-col items-center justify-center h-full gap-6 px-4 overflow-y-auto w-full pt-20">
+            {dynNavLinks.map((link, index) => (
+              <Link
+                key={link.href + link.name}
+                href={link.href}
+                onClick={closeMenu}
+                className={`text-xl font-sans tracking-[0.15em] text-fg-muted hover:text-primary transition-all duration-500 uppercase transform ${isMenuOpen ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+                  }`}
+                style={{ transitionDelay: `${index * 60}ms` }}
+              >
+                {link.name}
+              </Link>
+            ))}
+
+            {/* Animated divider */}
+            <div className={`section-divider my-4 transition-all duration-700 delay-500 ${isMenuOpen ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"}`} />
+
+            <div className={`flex gap-12 transition-all duration-500 delay-500 ${isMenuOpen ? "opacity-100 scale-100" : "opacity-0 scale-90"
+              }`}>
+              <Link href="/shop" onClick={closeMenu} className="text-fg-faint hover:text-primary transition-all duration-300 flex flex-col items-center gap-2.5">
+                <Search size={22} strokeWidth={1.5} />
+                <span className="text-[9px] uppercase tracking-[0.2em]">{t('search')}</span>
+              </Link>
+              <Link href="/profile" className="text-fg-faint hover:text-primary transition-all duration-300 flex flex-col items-center gap-2.5">
+                <User size={22} strokeWidth={1.5} />
+                <span className="text-[9px] uppercase tracking-[0.2em]">{t('profile')}</span>
+              </Link>
+            </div>
+
+            <button
+              onClick={toggleLanguage}
+              className={`mt-4 px-8 py-2.5 rounded-full border border-primary/30 text-primary font-semibold uppercase tracking-[0.15em] text-xs transition-all duration-500 delay-700 hover:bg-primary/10 hover:border-primary/50 ${isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
-              {link.name}
-            </Link>
-          ))}
-
-          {/* Animated divider */}
-          <div className={`section-divider my-4 transition-all duration-700 delay-500 ${isMenuOpen ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"}`} />
-
-          <div className={`flex gap-12 transition-all duration-500 delay-500 ${isMenuOpen ? "opacity-100 scale-100" : "opacity-0 scale-90"
-            }`}>
-            <Link href="/shop" onClick={closeMenu} className="text-fg-faint hover:text-primary transition-all duration-300 flex flex-col items-center gap-2.5">
-              <Search size={22} strokeWidth={1.5} />
-              <span className="text-[9px] uppercase tracking-[0.2em]">{t('search')}</span>
-            </Link>
-            <Link href="/profile" className="text-fg-faint hover:text-primary transition-all duration-300 flex flex-col items-center gap-2.5">
-              <User size={22} strokeWidth={1.5} />
-              <span className="text-[9px] uppercase tracking-[0.2em]">{t('profile')}</span>
-            </Link>
+              {locale === 'ar' ? 'English' : 'العربية'}
+            </button>
           </div>
 
-          <button
-            onClick={toggleLanguage}
-            className={`mt-4 px-8 py-2.5 rounded-full border border-primary/30 text-primary font-semibold uppercase tracking-[0.15em] text-xs transition-all duration-500 delay-700 hover:bg-primary/10 hover:border-primary/50 ${isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-          >
-            {locale === 'ar' ? 'English' : 'العربية'}
-          </button>
-        </div>
-
-        {/* Background Decorative Elements */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[60%] pointer-events-none z-[-1]">
-          <div className="w-full h-full bg-primary/[0.03] rounded-full blur-[120px]" />
-        </div>
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-[30%] pointer-events-none z-[-1]">
-          <div className="w-full h-full bg-primary/[0.02] rounded-full blur-[80px]" />
-        </div>
-      </div>
+          {/* Background Decorative Elements */}
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[60%] pointer-events-none z-[-1]">
+            <div className="w-full h-full bg-primary/[0.03] rounded-full blur-[120px]" />
+          </div>
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-[30%] pointer-events-none z-[-1]">
+            <div className="w-full h-full bg-primary/[0.02] rounded-full blur-[80px]" />
+          </div>
+        </div>,
+        document.body
+      )}
     </>
   );
 }
