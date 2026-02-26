@@ -6,6 +6,7 @@ import { webFavoritesStorage } from "@/lib/favoritesStorage";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
+import RevealOnScroll from "@/components/RevealOnScroll";
 import { PerformanceTracker } from "@/components/PerformanceTracker";
 import { Search, X, SlidersHorizontal, ChevronDown } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -87,7 +88,7 @@ function ShopContent() {
 
   const allCategories = [
     { id: "all", name: t('all_scents'), name_en: "All Scents", name_ar: "كل العطور", slug: "all", icon: "", sort_order: 0 },
-    ...categories,
+    ...categories.filter(c => c.slug !== "all"),
   ];
 
   const applyFilters = () => {
@@ -126,24 +127,24 @@ function ShopContent() {
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
               <span className="text-primary text-xs font-bold tracking-widest uppercase">{t('collection_title')}</span>
-              <h1 className="text-4xl md:text-5xl font-display text-white mt-2">{t('our_fragrances')}</h1>
+              <h1 className="text-4xl md:text-5xl font-sans text-white mt-2">{t('our_fragrances')}</h1>
             </div>
 
             <div className="flex items-center gap-4 w-full md:w-auto">
               {/* Search */}
               <div className="relative w-full md:w-80">
-                <Search size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30 rtl:left-auto rtl:right-5" />
+                <Search size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-fg-faint rtl:left-auto rtl:right-5" />
                 <input
                   type="text"
                   placeholder={t('search_placeholder')}
                   value={localSearch}
                   onChange={(e) => setLocalSearch(e.target.value)}
-                  className="w-full bg-surface-dark border border-white/10 rounded-full pl-12 pr-10 py-3 text-xs tracking-widest text-white placeholder:text-white/20 focus:outline-none focus:border-primary transition-colors rtl:pl-10 rtl:pr-12"
+                  className="w-full bg-surface-dark border border-white/10 rounded-full pl-12 pr-10 py-3 text-xs tracking-widest text-white placeholder:text-fg-faint focus:outline-none focus:border-primary transition-colors rtl:pl-10 rtl:pr-12"
                 />
                 {localSearch && (
                   <button
                     onClick={() => setLocalSearch("")}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white rtl:right-auto rtl:left-4"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-fg-faint hover:text-white rtl:right-auto rtl:left-4"
                     title={t('clear_search')}
                   >
                     <X size={14} />
@@ -174,19 +175,33 @@ function ShopContent() {
           </div>
         </div>
 
-        {/* Category Tabs */}
         <div className="max-w-7xl mx-auto px-4 mb-10">
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
+          {/* Custom style for this specific scrollbar */}
+          <style dangerouslySetInnerHTML={{
+            __html: `
+            .categories-scrollbar::-webkit-scrollbar {
+              height: 4px;
+            }
+            .categories-scrollbar::-webkit-scrollbar-track {
+              background: rgba(255,255,255,0.05);
+              border-radius: 4px;
+            }
+            .categories-scrollbar::-webkit-scrollbar-thumb {
+              background: rgba(212,175,55,0.5);
+              border-radius: 4px;
+            }
+          `}} />
+          <div className="flex gap-3 overflow-x-auto pb-4 categories-scrollbar">
             {allCategories.map((cat) => (
               <button
                 key={cat.slug}
                 onClick={() => {
                   updateParams({ category: cat.slug === "all" ? null : cat.slug });
                 }}
-                className={`whitespace-nowrap px-6 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase transition-all border ${
+                className={`whitespace-nowrap px-8 py-3 rounded-full text-xs font-bold tracking-[0.15em] uppercase transition-all duration-300 transform hover:scale-105 active:scale-95 ${
                   activeCategory === cat.slug
-                    ? "bg-primary text-black border-primary"
-                    : "bg-transparent text-white/50 border-white/10 hover:border-white/30 hover:text-white"
+                  ? "bg-gradient-to-r from-primary to-primary-dark text-black shadow-[0_0_20px_rgba(212,175,55,0.3)] border-transparent"
+                  : "bg-white/[0.03] backdrop-blur-md text-fg-muted border border-white/10 hover:border-primary/50 hover:text-white"
                 }`}
               >
                 {locale === 'ar' ? (cat.name_ar || cat.name) : (cat.name_en || cat.name)}
@@ -206,17 +221,17 @@ function ShopContent() {
           ) : productsError ? (
             <div className="text-center py-20">
               <p className="text-red-400/80 text-sm mb-2">{tc('error_occurred')}</p>
-              <p className="text-white/30 text-xs">{productsError}</p>
+                <p className="text-fg-faint text-xs">{productsError}</p>
             </div>
             ) : products.length === 0 ? (
             <div className="text-center py-20">
               <div className="w-20 h-20 bg-surface-dark rounded-full flex items-center justify-center mx-auto mb-6">
                 <Search size={32} className="text-white/10" />
               </div>
-              <h3 className="text-xl font-display text-white/60 mb-2">
+                  <h3 className="text-xl font-sans text-fg-muted mb-2">
                     {t('no_results_found')}
               </h3>
-              <p className="text-white/30 text-sm">
+                  <p className="text-fg-faint text-sm">
                     {t('adjust_filters')}
               </p>
                   <button
@@ -229,23 +244,24 @@ function ShopContent() {
           ) : (
             <>
                     {(searchQuery || minPrice || maxPrice || genderTarget || activeCategory !== "all") && (
-                <p className="text-white/30 text-xs tracking-widest uppercase mb-6">
+                      <p className="text-fg-faint text-xs tracking-widest uppercase mb-6">
                         {t('results_found', { count: products.length })}
                 </p>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                      {products.slice(0, visibleCount).map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    isFavorite={isFavorite(product.id)}
-                    onToggleFavorite={() => toggleFavorite(product.id)}
-                  />
+                      {products.slice(0, visibleCount).map((product, index) => (
+                        <RevealOnScroll key={product.id} delay={0.1 + (index % 4) * 0.1}>
+                          <ProductCard
+                      product={product}
+                      isFavorite={isFavorite(product.id)}
+                      onToggleFavorite={() => toggleFavorite(product.id)}
+                    />
+                  </RevealOnScroll>
                 ))}
               </div>
                     {visibleCount < products.length && (
                       <div className="flex flex-col items-center mt-12 gap-3">
-                        <p className="text-white/30 text-xs tracking-widest uppercase">
+                        <p className="text-fg-faint text-xs tracking-widest uppercase">
                           {tc('showing_of', { count: Math.min(visibleCount, products.length), total: products.length })}
                         </p>
                         <button
@@ -267,8 +283,8 @@ function ShopContent() {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsFilterOpen(false)} />
           <div className="relative w-full max-w-sm h-full bg-background-dark border-l border-white/10 rtl:border-l-0 rtl:border-r p-6 flex flex-col pt-10">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-display text-white">{t('filters')}</h2>
-              <button onClick={() => setIsFilterOpen(false)} className="text-white/50 hover:text-white" title={t('close_filters')}>
+              <h2 className="text-2xl font-sans text-white">{t('filters')}</h2>
+              <button onClick={() => setIsFilterOpen(false)} className="text-fg-muted hover:text-white" title={t('close_filters')}>
                 <X size={24} />
               </button>
             </div>
@@ -276,7 +292,7 @@ function ShopContent() {
             <div className="flex-1 overflow-y-auto pr-2 rtl:pr-0 rtl:pl-2 flex flex-col gap-8 text-left rtl:text-right">
               {/* Sort By */}
               <div>
-                <label className="block text-xs font-bold tracking-widest uppercase text-white/50 mb-3">{t('sort_by')}</label>
+                <label className="block text-xs font-bold tracking-widest uppercase text-fg-muted mb-3">{t('sort_by')}</label>
                 <div className="relative">
                   <select
                     title={t('sort_by')}
@@ -290,35 +306,35 @@ function ShopContent() {
                     <option value="best_rated">{t('best_rated')}</option>
                     <option value="most_popular">{t('most_popular')}</option>
                   </select>
-                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none rtl:right-auto rtl:left-4" size={16} />
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-fg-muted pointer-events-none rtl:right-auto rtl:left-4" size={16} />
                 </div>
               </div>
 
               {/* Price Range */}
               <div>
-                <label className="block text-xs font-bold tracking-widest uppercase text-white/50 mb-3">{t('price_range')}</label>
+                <label className="block text-xs font-bold tracking-widest uppercase text-fg-muted mb-3">{t('price_range')}</label>
                 <div className="flex items-center gap-4">
                   <input
                     type="number"
                     placeholder={t('min')}
                     value={draftState.minPrice}
                     onChange={(e) => setDraftState(prev => ({ ...prev, minPrice: e.target.value }))}
-                    className="w-full bg-surface-dark border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-primary placeholder:text-white/20"
+                    className="w-full bg-surface-dark border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-primary placeholder:text-fg-faint"
                   />
-                  <span className="text-white/30">-</span>
+                  <span className="text-fg-faint">-</span>
                   <input
                     type="number"
                     placeholder={t('max')}
                     value={draftState.maxPrice}
                     onChange={(e) => setDraftState(prev => ({ ...prev, maxPrice: e.target.value }))}
-                    className="w-full bg-surface-dark border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-primary placeholder:text-white/20"
+                    className="w-full bg-surface-dark border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-primary placeholder:text-fg-faint"
                   />
                 </div>
               </div>
 
               {/* Gender */}
               <div>
-                <label className="block text-xs font-bold tracking-widest uppercase text-white/50 mb-3">{t('gender_target')}</label>
+                <label className="block text-xs font-bold tracking-widest uppercase text-fg-muted mb-3">{t('gender_target')}</label>
                 <div className="flex flex-col gap-2">
                   {[
                     { label: t('all'), value: '' },
@@ -330,7 +346,7 @@ function ShopContent() {
                       <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${draftState.gender === option.value ? 'bg-primary border-primary' : 'border-white/20 group-hover:border-white/40'}`}>
                         {draftState.gender === option.value && <div className="w-2 h-2 bg-black rounded-sm" />}
                       </div>
-                      <span className="text-sm text-white/80 group-hover:text-white transition-colors">{option.label}</span>
+                      <span className="text-sm text-fg group-hover:text-white transition-colors">{option.label}</span>
                     </label>
                   ))}
                 </div>
@@ -342,7 +358,7 @@ function ShopContent() {
                   <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${draftState.inStock ? 'bg-primary border-primary' : 'border-white/20 group-hover:border-white/40'}`}>
                     {draftState.inStock && <div className="w-2 h-2 bg-black rounded-sm" />}
                   </div>
-                  <span className="text-sm font-bold tracking-widest uppercase text-white/80 group-hover:text-white transition-colors">{t('in_stock_only')}</span>
+                  <span className="text-sm font-bold tracking-widest uppercase text-fg group-hover:text-white transition-colors">{t('in_stock_only')}</span>
                 </label>
               </div>
             </div>
@@ -350,7 +366,7 @@ function ShopContent() {
             <div className="pt-6 border-t border-white/10 flex gap-4 mt-auto">
               <button
                 onClick={clearFilters}
-                className="flex-1 py-3 text-xs font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors"
+                className="flex-1 py-3 text-xs font-bold tracking-widest uppercase text-fg-muted hover:text-white transition-colors"
               >
                 {t('clear_all')}
               </button>

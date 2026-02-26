@@ -57,6 +57,8 @@ export function useAdminProducts(supabase: SupabaseClient) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
     }
   });
 
@@ -73,6 +75,8 @@ export function useAdminProducts(supabase: SupabaseClient) {
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
     }
   });
 
@@ -104,6 +108,32 @@ export function useAdminProducts(supabase: SupabaseClient) {
     return updateProduct(id, { is_new } as any);
   }, [updateProduct]);
 
+  const bulkUpdateProductStatusMutation = useMutation({
+    mutationFn: async ({ productIds, status, isActive }: { productIds: string[], status: string, isActive: boolean }) => {
+      const { error } = await supabase.rpc('admin_bulk_update_product_status', {
+        p_product_ids: productIds,
+        p_status: status,
+        p_is_active: isActive
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    }
+  });
+
+  const bulkUpdateProductStatus = useCallback(async (productIds: string[], status: string, isActive: boolean) => {
+    try {
+      await bulkUpdateProductStatusMutation.mutateAsync({ productIds, status, isActive });
+      return { success: true };
+    } catch (err: any) {
+      console.error('Bulk update status error:', err);
+      return { success: false, error: err.message };
+    }
+  }, [bulkUpdateProductStatusMutation]);
+
   // Inventory management
   const fetchInventory = useCallback(async (productId: string): Promise<Inventory[]> => {
     const { data } = await supabase.from('inventory').select('*').eq('product_id', productId).order('size');
@@ -123,6 +153,29 @@ export function useAdminProducts(supabase: SupabaseClient) {
       return { success: false, error: err.message };
     }
   }, [supabase]);
+
+  const saveProductFullMutation = useMutation({
+    mutationFn: async (payload: any) => {
+      const { data, error } = await supabase.rpc('admin_save_product', payload);
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    }
+  });
+
+  const saveProductFull = useCallback(async (payload: any) => {
+    try {
+      const productId = await saveProductFullMutation.mutateAsync(payload);
+      return { success: true, productId };
+    } catch (err: any) {
+      console.error('Save product full error:', err);
+      return { success: false, error: err.message };
+    }
+  }, [saveProductFullMutation]);
 
   // Image upload
   const uploadProductImage = useCallback(async (file: File, productId: string): Promise<string | null> => {
@@ -147,8 +200,10 @@ export function useAdminProducts(supabase: SupabaseClient) {
     fetchProducts,
     createProduct,
     updateProduct,
+    saveProductFull,
     toggleProductActive,
     toggleProductNew,
+    bulkUpdateProductStatus,
     fetchInventory,
     upsertInventory,
     uploadProductImage,

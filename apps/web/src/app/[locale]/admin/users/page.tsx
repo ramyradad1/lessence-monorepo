@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useAdminUsers } from '@lessence/supabase';
 import { Profile } from '@lessence/core';
 import { Mail, Shield, User as UserIcon, Calendar, Loader2, Plus, Trash2, Edit2, X } from 'lucide-react';
+import Image from 'next/image';
 
 export default function AdminUsersPage() {
   const { users, loading, createUser, deleteUser, updateUser } = useAdminUsers(supabase);
@@ -87,7 +88,7 @@ export default function AdminUsersPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-white">Users</h1>
-          <p className="text-sm text-white/40">Manage user accounts and permissions</p>
+          <p className="text-sm text-fg-muted">Manage user accounts and permissions</p>
         </div>
         <button 
           onClick={() => { resetForm(); setIsModalOpen(true); }}
@@ -103,10 +104,10 @@ export default function AdminUsersPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-white/5 bg-white/5">
-                <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-wider">User</th>
-                <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-wider">Role</th>
-                <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-wider">Joined</th>
-                <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-wider text-right">Actions</th>
+                <th className="px-6 py-4 text-xs font-semibold text-fg-muted uppercase tracking-wider">User</th>
+                <th className="px-6 py-4 text-xs font-semibold text-fg-muted uppercase tracking-wider">Role</th>
+                <th className="px-6 py-4 text-xs font-semibold text-fg-muted uppercase tracking-wider">Joined</th>
+                <th className="px-6 py-4 text-xs font-semibold text-fg-muted uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -116,14 +117,14 @@ export default function AdminUsersPage() {
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-[#f4c025]/10 flex items-center justify-center text-[#f4c025]">
                         {user.avatar_url ? (
-                          <img src={user.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+                          <Image src={user.avatar_url} alt="" width={40} height={40} className="w-full h-full rounded-full object-cover" />
                         ) : (
                           <UserIcon size={20} />
                         )}
                       </div>
                       <div>
                         <div className="text-sm font-medium text-white">{user.full_name || 'Anonymous User'}</div>
-                        <div className="text-xs text-white/40 flex items-center gap-1">
+                        <div className="text-xs text-fg-muted flex items-center gap-1">
                           <Mail size={12} /> {user.email}
                         </div>
                       </div>
@@ -135,7 +136,7 @@ export default function AdminUsersPage() {
                         ? 'bg-[#f4c025] text-black'
                         : user.role !== 'user'
                           ? 'bg-[#f4c025]/10 text-[#f4c025]'
-                          : 'bg-white/5 text-white/60'
+                          : 'bg-white/5 text-fg-muted'
                     }`}>
                       <Shield size={12} />
                       {user.role === 'super_admin' ? 'Super Admin' :
@@ -145,7 +146,7 @@ export default function AdminUsersPage() {
                               user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-xs text-white/60">
+                  <td className="px-6 py-4 text-xs text-fg-muted">
                     <div className="flex items-center gap-1">
                       <Calendar size={12} />
                       {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
@@ -156,14 +157,14 @@ export default function AdminUsersPage() {
                       <button
                         onClick={() => handleEdit(user)}
                         title="Edit User"
-                        className="p-2 text-white/40 hover:text-[#f4c025] hover:bg-[#f4c025]/10 rounded-lg transition-colors"
+                        className="p-2 text-fg-muted hover:text-[#f4c025] hover:bg-[#f4c025]/10 rounded-lg transition-colors"
                       >
                         <Edit2 size={16} />
                       </button>
                       <button
                         onClick={() => handleDelete(user.id, user.email)}
                         title="Delete User"
-                        className="p-2 text-white/40 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                        className="p-2 text-fg-muted hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -183,7 +184,7 @@ export default function AdminUsersPage() {
           <div className="bg-[#1e1b16] border border-white/10 w-full max-w-md rounded-2xl p-6 relative z-50 shadow-2xl">
             <button 
               onClick={() => setIsModalOpen(false)} 
-              className="absolute top-4 right-4 text-white/40 hover:text-white"
+              className="absolute top-4 right-4 text-fg-muted hover:text-white"
               title="Close modal"
               aria-label="Close modal"
             >
@@ -194,7 +195,7 @@ export default function AdminUsersPage() {
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="text-xs text-white/40 mb-1 block uppercase tracking-wider">Full Name</label>
+                <label className="text-xs text-fg-muted mb-1 block uppercase tracking-wider">Full Name</label>
                 <input 
                   title="Full Name"
                   required 
@@ -207,7 +208,7 @@ export default function AdminUsersPage() {
               {!editingUser && (
                 <>
                   <div>
-                    <label className="text-xs text-white/40 mb-1 block uppercase tracking-wider">Email Address</label>
+                    <label className="text-xs text-fg-muted mb-1 block uppercase tracking-wider">Email Address</label>
                     <input 
                       title="Email Address"
                       type="email" 
@@ -219,7 +220,7 @@ export default function AdminUsersPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-white/40 mb-1 block uppercase tracking-wider">Initial Password</label>
+                    <label className="text-xs text-fg-muted mb-1 block uppercase tracking-wider">Initial Password</label>
                     <input 
                       title="Initial Password"
                       type="password" 
@@ -233,7 +234,7 @@ export default function AdminUsersPage() {
                 </>
               )}
               <div>
-                <label className="text-xs text-white/40 mb-1 block uppercase tracking-wider">Role</label>
+                <label className="text-xs text-fg-muted mb-1 block uppercase tracking-wider">Role</label>
                 <select 
                   title="Role"
                   value={form.role} 

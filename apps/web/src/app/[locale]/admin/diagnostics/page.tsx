@@ -3,9 +3,28 @@
 import React from "react";
 import { useAdminDiagnostics, SystemLog } from "@lessence/supabase";
 import { supabase } from "@/lib/supabase";
-import { Activity, AlertTriangle, Clock, ServerCrash, RefreshCw, Filter } from "lucide-react";
+import { Activity, AlertTriangle, Clock, ServerCrash, RefreshCw, Filter, CheckCircle2, Box, FileText, Database } from "lucide-react";
 
 export default function DiagnosticsPage() {
+  const [storeStats, setStoreStats] = React.useState<{
+    total_products: number;
+    placeholder_products: number;
+    missing_metadata_products: number;
+    placeholder_categories: number;
+    status: string;
+  } | null>(null);
+  const [checkingStore, setCheckingStore] = React.useState(true);
+
+  React.useEffect(() => {
+    fetchStoreStats();
+  }, []);
+
+  const fetchStoreStats = async () => {
+    setCheckingStore(true);
+    const { data } = await supabase.rpc('get_store_diagnostics');
+    if (data) setStoreStats(data);
+    setCheckingStore(false);
+  };
   const {
     logs,
     loading,
@@ -22,7 +41,7 @@ export default function DiagnosticsPage() {
       case 'error': return 'text-red-500 bg-red-500/10 border-red-500/20';
       case 'warn': return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20';
       case 'perf': return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
-      default: return 'text-white/60 bg-white/5 border-white/10';
+      default: return 'text-fg-muted bg-white/5 border-white/10';
     }
   };
 
@@ -46,13 +65,13 @@ export default function DiagnosticsPage() {
     <div className="p-8">
       <div className="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-display text-white mb-2">System Diagnostics</h1>
-          <p className="text-white/40">Monitor performance and error logs across the platform.</p>
+          <h1 className="text-3xl font-sans text-white mb-2">System Diagnostics</h1>
+          <p className="text-fg-muted">Monitor performance and error logs across the platform.</p>
         </div>
         
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2 bg-surface-dark border border-white/5 rounded-lg px-3 py-2">
-            <Filter size={16} className="text-white/40" />
+            <Filter size={16} className="text-fg-muted" />
             <select
               title="Filter by log level"
               value={filterLevel}
@@ -68,7 +87,7 @@ export default function DiagnosticsPage() {
           </div>
           
           <div className="flex items-center gap-2 bg-surface-dark border border-white/5 rounded-lg px-3 py-2">
-            <Filter size={16} className="text-white/40" />
+            <Filter size={16} className="text-fg-muted" />
             <select
               title="Filter by log source"
               value={filterSource}
@@ -93,10 +112,68 @@ export default function DiagnosticsPage() {
         </div>
       </div>
 
+      {/* Store Content Health */}
+      <h2 className="text-xl font-sans text-white mb-4 mt-8">Store Content Health</h2>
+      {checkingStore ? (
+        <div className="bg-surface-dark border border-white/5 rounded-2xl p-6 mb-8 flex items-center justify-center">
+          <RefreshCw className="animate-spin text-fg-muted" size={24} />
+        </div>
+      ) : storeStats ? (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-surface-dark border border-white/5 rounded-2xl p-6">
+            <div className="flex items-center gap-3 text-fg-muted mb-2">
+              <Box size={18} />
+              <span className="text-sm font-medium uppercase tracking-wider">Total Products</span>
+            </div>
+            <div className="text-3xl font-sans text-white">{storeStats.total_products}</div>
+          </div>
+
+          <div className="bg-surface-dark border border-white/5 rounded-2xl p-6">
+            <div className="flex items-center gap-3 text-yellow-500/80 mb-2">
+              <FileText size={18} />
+              <span className="text-sm font-medium uppercase tracking-wider">Placeholder Titles</span>
+            </div>
+            <div className="text-3xl font-sans text-white">{storeStats.placeholder_products + storeStats.placeholder_categories}</div>
+            {storeStats.placeholder_products > 0 && <p className="text-xs text-yellow-500/60 mt-2">Replace dummy text in products/categories</p>}
+          </div>
+
+          <div className="bg-surface-dark border border-white/5 rounded-2xl p-6">
+            <div className="flex items-center gap-3 text-red-400 mb-2">
+              <AlertTriangle size={18} />
+              <span className="text-sm font-medium uppercase tracking-wider">Missing Metadata</span>
+            </div>
+            <div className="text-3xl font-sans text-white">{storeStats.missing_metadata_products}</div>
+            {storeStats.missing_metadata_products > 0 && <p className="text-xs text-red-400/60 mt-2">Products missing SKU or price</p>}
+          </div>
+
+          <div className="bg-surface-dark border border-white/5 rounded-2xl p-6">
+            <div className="flex items-center gap-3 text-fg-muted mb-2">
+              <Database size={18} />
+              <span className="text-sm font-medium uppercase tracking-wider">Overall Status</span>
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              {storeStats.status === 'healthy' ? (
+                <>
+                  <CheckCircle2 size={24} className="text-green-500" />
+                  <span className="text-xl font-sans text-green-500">Healthy</span>
+                </>
+              ) : (
+                <>
+                  <AlertTriangle size={24} className="text-yellow-500" />
+                  <span className="text-xl font-sans text-yellow-500">Action Needed</span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <h2 className="text-xl font-sans text-white mb-4">System Event Logs</h2>
+
       {error ? (
         <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center">
           <AlertTriangle size={32} className="text-red-500 mx-auto mb-4" />
-          <h3 className="text-red-500 font-display text-lg mb-2">Failed to load diagnostics</h3>
+          <h3 className="text-red-500 font-sans text-lg mb-2">Failed to load diagnostics</h3>
           <p className="text-red-400/80 text-sm">{error}</p>
         </div>
       ) : (
@@ -105,32 +182,32 @@ export default function DiagnosticsPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-white/5 bg-white/[0.02]">
-                  <th className="p-4 text-xs font-bold tracking-widest uppercase text-white/40">Timestamp</th>
-                  <th className="p-4 text-xs font-bold tracking-widest uppercase text-white/40">Level</th>
-                  <th className="p-4 text-xs font-bold tracking-widest uppercase text-white/40">Source</th>
-                  <th className="p-4 text-xs font-bold tracking-widest uppercase text-white/40">Action</th>
-                  <th className="p-4 text-xs font-bold tracking-widest uppercase text-white/40">Duration</th>
-                  <th className="p-4 text-xs font-bold tracking-widest uppercase text-white/40">Details</th>
+                  <th className="p-4 text-xs font-bold tracking-widest uppercase text-fg-muted">Timestamp</th>
+                  <th className="p-4 text-xs font-bold tracking-widest uppercase text-fg-muted">Level</th>
+                  <th className="p-4 text-xs font-bold tracking-widest uppercase text-fg-muted">Source</th>
+                  <th className="p-4 text-xs font-bold tracking-widest uppercase text-fg-muted">Action</th>
+                  <th className="p-4 text-xs font-bold tracking-widest uppercase text-fg-muted">Duration</th>
+                  <th className="p-4 text-xs font-bold tracking-widest uppercase text-fg-muted">Details</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {loading && logs.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-white/40">
+                    <td colSpan={6} className="p-8 text-center text-fg-muted">
                       <RefreshCw size={24} className="animate-spin mx-auto mb-4 opacity-50" />
                       Loading logs...
                     </td>
                   </tr>
                 ) : logs.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-white/40 font-light italic">
+                    <td colSpan={6} className="p-8 text-center text-fg-muted font-light italic">
                       No logs found matching your filters.
                     </td>
                   </tr>
                 ) : (
                   logs.map((log: SystemLog) => (
                     <tr key={log.id} className="hover:bg-white/[0.02] transition-colors group">
-                      <td className="p-4 text-sm text-white/60 whitespace-nowrap">
+                      <td className="p-4 text-sm text-fg-muted whitespace-nowrap">
                         {formatTime(log.created_at)}
                       </td>
                       <td className="p-4">
@@ -139,19 +216,19 @@ export default function DiagnosticsPage() {
                           {log.level}
                         </span>
                       </td>
-                      <td className="p-4 text-sm text-white/80">{log.source}</td>
+                      <td className="p-4 text-sm text-fg">{log.source}</td>
                       <td className="p-4 text-sm font-medium text-white">{log.action}</td>
-                      <td className="p-4 text-sm text-white/60">
+                      <td className="p-4 text-sm text-fg-muted">
                         {log.duration_ms ? `${log.duration_ms}ms` : '-'}
                       </td>
                       <td className="p-4">
-                        <div className="text-sm text-white/80 line-clamp-2 max-w-md">
+                        <div className="text-sm text-fg line-clamp-2 max-w-md">
                           {log.message}
                         </div>
                         {log.metadata && Object.keys(log.metadata).length > 0 && (
                           <details className="mt-2 text-xs">
                             <summary className="text-primary/70 hover:text-primary cursor-pointer select-none">Show Metadata</summary>
-                            <pre className="mt-2 p-3 bg-black/40 rounded border border-white/5 text-white/50 overflow-x-auto">
+                            <pre className="mt-2 p-3 bg-black/40 rounded border border-white/5 text-fg-muted overflow-x-auto">
                               {JSON.stringify(log.metadata, null, 2)}
                             </pre>
                           </details>

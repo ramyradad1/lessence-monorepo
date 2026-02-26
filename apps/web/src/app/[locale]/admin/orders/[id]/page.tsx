@@ -79,18 +79,18 @@ export default function OrderDetailPage() {
   }
 
   if (!order) {
-    return <p className="text-white/40 text-center py-12">Order not found</p>;
+    return <p className="text-fg-muted text-center py-12">Order not found</p>;
   }
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <button onClick={() => router.push('/admin/orders')} className="text-sm text-white/40 hover:text-white">← Back to Orders</button>
+      <button onClick={() => router.push('/admin/orders')} className="text-sm text-fg-muted hover:text-white">← Back to Orders</button>
 
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">{order.order_number}</h1>
-          <p className="text-white/30 text-sm mt-1">{order.customer_name || 'Guest'} {order.customer_email ? `(${order.customer_email})` : ''}</p>
+          <p className="text-fg-faint text-sm mt-1">{order.customer_name || 'Guest'} {order.customer_email ? `(${order.customer_email})` : ''}</p>
         </div>
         <div className="flex items-center gap-3">
           <select
@@ -110,27 +110,27 @@ export default function OrderDetailPage() {
 
       {/* Order Timeline */}
       <div className="bg-[#1e1b16] border border-white/5 rounded-2xl p-6">
-        <h2 className="text-sm font-semibold text-white/40 uppercase tracking-wider mb-2">Order Progress</h2>
+        <h2 className="text-sm font-semibold text-fg-muted uppercase tracking-wider mb-2">Order Progress</h2>
         <OrderTimeline currentStatus={order.status} history={order.status_history} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Items */}
         <div className="bg-[#1e1b16] border border-white/5 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-white/40 uppercase tracking-wider mb-4">Items</h2>
+          <h2 className="text-sm font-semibold text-fg-muted uppercase tracking-wider mb-4">Items</h2>
           <div className="space-y-3">
             {order.items.map(item => (
               <div key={item.id} className="flex justify-between items-center">
                 <div>
                   <p className="text-sm text-white font-medium">{item.product_name}</p>
-                  <p className="text-xs text-white/30">{item.selected_size} × {item.quantity}</p>
+                  <p className="text-xs text-fg-faint">{item.selected_size} × {item.quantity}</p>
                 </div>
                 <p className="text-sm font-semibold text-white">{formatCurrency((item.price * item.quantity), locale)}</p>
               </div>
             ))}
           </div>
           <div className="mt-4 pt-4 border-t border-white/5 flex justify-between">
-            <span className="text-sm text-white/40">Total</span>
+            <span className="text-sm text-fg-muted">Total</span>
             <span className="text-lg font-bold text-[#f4c025]">{formatCurrency(Number(order.total_amount || 0), locale)}</span>
           </div>
         </div>
@@ -139,21 +139,21 @@ export default function OrderDetailPage() {
         <div className="space-y-6">
           {order.payment && (
             <div className="bg-[#1e1b16] border border-white/5 rounded-2xl p-5">
-              <h2 className="text-sm font-semibold text-white/40 uppercase tracking-wider mb-3">Payment</h2>
-              <p className="text-sm text-white"><span className="text-white/40">Provider:</span> {order.payment.provider}</p>
-              <p className="text-sm text-white"><span className="text-white/40">Status:</span> {order.payment.status}</p>
+              <h2 className="text-sm font-semibold text-fg-muted uppercase tracking-wider mb-3">Payment</h2>
+              <p className="text-sm text-white"><span className="text-fg-muted">Provider:</span> {order.payment.provider}</p>
+              <p className="text-sm text-white"><span className="text-fg-muted">Status:</span> {order.payment.status}</p>
               {order.payment.transaction_id && (
-                <p className="text-xs text-white/20 mt-1 font-mono break-all">{order.payment.transaction_id}</p>
+                <p className="text-xs text-fg-faint mt-1 font-mono break-all">{order.payment.transaction_id}</p>
               )}
             </div>
           )}
           {order.address && (
             <div className="bg-[#1e1b16] border border-white/5 rounded-2xl p-5">
-              <h2 className="text-sm font-semibold text-white/40 uppercase tracking-wider mb-3">Shipping Address</h2>
+              <h2 className="text-sm font-semibold text-fg-muted uppercase tracking-wider mb-3">Shipping Address</h2>
               <p className="text-sm text-white">{order.address.full_name}</p>
-              <p className="text-sm text-white/60">{order.address.address_line1}</p>
-              <p className="text-sm text-white/60">{order.address.city}, {order.address.state} {order.address.postal_code}</p>
-              <p className="text-sm text-white/60">{order.address.country}</p>
+              <p className="text-sm text-fg-muted">{order.address.address_line1}</p>
+              <p className="text-sm text-fg-muted">{order.address.city}, {order.address.state} {order.address.postal_code}</p>
+              <p className="text-sm text-fg-muted">{order.address.country}</p>
             </div>
           )}
         </div>
@@ -174,12 +174,12 @@ export default function OrderDetailPage() {
           <h2 className="text-sm font-semibold text-[#f4c025] uppercase tracking-wider mb-4">Gift Information</h2>
           <div className="space-y-4 relative z-10">
             <div>
-              <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Gift Wrap Requested</p>
+              <p className="text-xs text-fg-muted uppercase tracking-wider mb-1">Gift Wrap Requested</p>
               <p className="text-sm text-white font-medium">{order.gift_wrap ? 'Yes, please wrap' : 'No'}</p>
             </div>
             {order.gift_message && (
               <div>
-                <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Gift Message</p>
+                <p className="text-xs text-fg-muted uppercase tracking-wider mb-1">Gift Message</p>
                 <div className="bg-black/30 p-4 rounded-xl border border-white/5 italic">
                   <p className="text-sm text-white/90 whitespace-pre-wrap">{order.gift_message}</p>
                 </div>
@@ -191,7 +191,7 @@ export default function OrderDetailPage() {
 
       {/* Admin Notes */}
       <div className="bg-[#1e1b16] border border-white/5 rounded-2xl p-5">
-        <h2 className="text-sm font-semibold text-white/40 uppercase tracking-wider mb-4">Internal Admin Notes</h2>
+        <h2 className="text-sm font-semibold text-fg-muted uppercase tracking-wider mb-4">Internal Admin Notes</h2>
 
         <form onSubmit={handleAddNote} className="mb-6">
           <textarea
@@ -218,13 +218,13 @@ export default function OrderDetailPage() {
               <div key={note.id} className="bg-white/5 rounded-xl p-4 border border-white/5">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs font-bold text-[#f4c025] uppercase tracking-wider">{note.admin_name || 'Admin'}</span>
-                  <span className="text-[10px] text-white/20">{new Date(note.created_at).toLocaleString()}</span>
+                  <span className="text-[10px] text-fg-faint">{new Date(note.created_at).toLocaleString()}</span>
                 </div>
-                <p className="text-sm text-white/80 whitespace-pre-wrap">{note.note}</p>
+                <p className="text-sm text-fg whitespace-pre-wrap">{note.note}</p>
               </div>
             ))
           ) : (
-            <p className="text-center py-4 text-white/20 text-xs italic">No internal notes yet.</p>
+            <p className="text-center py-4 text-fg-faint text-xs italic">No internal notes yet.</p>
           )}
         </div>
       </div>

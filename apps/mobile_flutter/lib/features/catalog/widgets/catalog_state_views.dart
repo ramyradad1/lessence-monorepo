@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../theme/app_colors.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
+
 class CatalogLoadingView extends StatelessWidget {
   const CatalogLoadingView({super.key, this.message});
 
@@ -13,14 +16,21 @@ class CatalogLoadingView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(),
+            const SizedBox(
+              width: 40,
+              height: 40,
+              child: CircularProgressIndicator(
+                color: AppColors.primary,
+                strokeWidth: 3,
+              ),
+            ),
             if ((message ?? '').isNotEmpty) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
               Text(
                 message!,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.black54),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.foregroundMuted,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -46,7 +56,8 @@ class CatalogErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final child = _CatalogStateCard(
-      icon: Icons.error_outline,
+      icon: LucideIcons.circle_alert,
+      iconColor: AppColors.warning,
       title: 'Something went wrong',
       subtitle: message,
       actionLabel: onRetry != null ? 'Retry' : null,
@@ -65,7 +76,7 @@ class CatalogEmptyView extends StatelessWidget {
     super.key,
     required this.title,
     required this.subtitle,
-    this.icon = Icons.inventory_2_outlined,
+    this.icon = LucideIcons.package,
     this.actionLabel,
     this.onAction,
     this.compact = false,
@@ -82,6 +93,7 @@ class CatalogEmptyView extends StatelessWidget {
   Widget build(BuildContext context) {
     final child = _CatalogStateCard(
       icon: icon,
+      iconColor: AppColors.foregroundFaint,
       title: title,
       subtitle: subtitle,
       actionLabel: actionLabel,
@@ -101,15 +113,15 @@ class CatalogInlineMessageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Container(
       margin: EdgeInsets.zero,
-      elevation: 0,
-      color: Colors.grey.shade50,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundSubtle,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
       ),
-      child: Padding(padding: const EdgeInsets.all(16), child: child),
+      child: child,
     );
   }
 }
@@ -117,6 +129,7 @@ class CatalogInlineMessageCard extends StatelessWidget {
 class _CatalogStateCard extends StatelessWidget {
   const _CatalogStateCard({
     required this.icon,
+    this.iconColor,
     required this.title,
     required this.subtitle,
     this.actionLabel,
@@ -124,6 +137,7 @@ class _CatalogStateCard extends StatelessWidget {
   });
 
   final IconData icon;
+  final Color? iconColor;
   final String title;
   final String subtitle;
   final String? actionLabel;
@@ -131,12 +145,31 @@ class _CatalogStateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CatalogInlineMessageCard(
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundSubtle,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 32, color: Colors.black45),
-          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: (iconColor ?? AppColors.foregroundFaint).withValues(
+                alpha: 0.1,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              size: 28,
+              color: iconColor ?? AppColors.foregroundFaint,
+            ),
+          ),
+          const SizedBox(height: 14),
           Text(
             title,
             style: Theme.of(
@@ -149,11 +182,11 @@ class _CatalogStateCard extends StatelessWidget {
             subtitle,
             style: Theme.of(
               context,
-            ).textTheme.bodySmall?.copyWith(color: Colors.black54),
+            ).textTheme.bodySmall?.copyWith(color: AppColors.foregroundMuted),
             textAlign: TextAlign.center,
           ),
           if ((actionLabel ?? '').isNotEmpty && onAction != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             OutlinedButton(onPressed: onAction, child: Text(actionLabel!)),
           ],
         ],

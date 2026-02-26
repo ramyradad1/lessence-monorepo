@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { SupabaseClient } from '@supabase/supabase-js';
 
+export type ReviewStatus = 'pending' | 'approved' | 'hidden' | 'rejected';
+
 export type AdminReview = {
   id: string;
   user_id: string;
   product_id: string;
   rating: number;
   comment: string | null;
-  is_hidden: boolean;
+  status: ReviewStatus;
+  moderation_reason: string | null;
+  admin_note: string | null;
   is_verified_purchase: boolean;
   created_at: string;
   profiles?: {
@@ -15,7 +19,7 @@ export type AdminReview = {
     email: string | null;
   };
   products?: {
-    name: string;
+    name_en: string;
     image_url: string;
   };
 };
@@ -34,7 +38,7 @@ export function useAdminReviews(supabase: SupabaseClient) {
         .select(`
           *,
           profiles (full_name, email),
-          products (name, image_url)
+          products (name_en, slug)
         `)
         .order('created_at', { ascending: false });
 
@@ -52,30 +56,34 @@ export function useAdminReviews(supabase: SupabaseClient) {
     fetchReviews();
   }, []);
 
-  const toggleReviewHiddenStatus = async (reviewId: string, currentStatus: boolean) => {
+  const moderateReviews = async (
+    reviewIds: string[],
+    newStatus: ReviewStatus,
+    reason?: string,
+    note?: string
+  ) => {
     try {
-      const { error } = await supabase
-        .from('reviews')
-        .update({
-          is_hidden: !currentStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', reviewId);
+      const { data, error } = await supabase.rpc('moderate_reviews', {
+        p_review_ids: reviewIds,
+        p_status: newStatus,
+        p_reason: reason || null,
+        p_note: note || null,
+      });
 
       if (error) throw error;
       
       // Update local state without refetching everything
       setReviews(current => 
         current.map(review => 
-          review.id === reviewId 
-            ? { ...review, is_hidden: !currentStatus }
+          reviewIds.includes(review.id)
+            ? { ...review, status: newStatus, moderation_reason: reason || null, admin_note: note || null }
             : review
         )
       );
       
       return true;
     } catch (err) {
-      console.error('Error toggling review hidden status:', err);
+      console.error('Error moderating reviews:', err);
       throw err;
     }
   };
@@ -102,7 +110,7 @@ export function useAdminReviews(supabase: SupabaseClient) {
     loading,
     error,
     refreshReviews: fetchReviews,
-    toggleReviewHiddenStatus,
+    moderateReviews,
     deleteReview
   };
 }

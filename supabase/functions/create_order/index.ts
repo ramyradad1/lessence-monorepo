@@ -1,4 +1,3 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
 
 const corsHeaders = {
@@ -6,7 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -23,11 +22,36 @@ serve(async (req) => {
        return new Response(JSON.stringify({ error: 'Unauthorized' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 });
     }
 
-    const { items, shipping_address_id, coupon_code, idempotency_key } = await req.json();
+    const { items, address, coupon_code, idempotency_key, is_gift, gift_wrap, gift_message } = await req.json();
 
-    if (!items || !items.length || !shipping_address_id || !idempotency_key) {
+    if (!items || !items.length || !address || !idempotency_key) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 });
     }
+
+    // 0. Save the address to get an ID
+    const { data: addrData, error: addrError } = await supabaseClient
+      .from('addresses')
+      .insert({
+        user_id: user.id,
+        full_name: address.fullName,
+        email: address.email,
+        phone: address.phone,
+        address_line1: address.line1,
+        address_line2: address.line2,
+        city: address.city,
+        state: address.state,
+        postal_code: address.postal_code,
+        country: address.country || 'Egypt',
+      })
+      .select('id')
+      .single();
+
+    if (addrError || !addrData) {
+      console.error('Address creation failed:', addrError);
+      return new Response(JSON.stringify({ error: 'Failed to save address' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 });
+    }
+    const shipping_address_id = addrData.id;
+
 
     // 1. Fetch server-side product prices
     let subtotal = 0;
@@ -105,7 +129,10 @@ serve(async (req) => {
        p_total_amount: total_amount,
        p_shipping_address_id: shipping_address_id,
        p_idempotency_key: idempotency_key,
-       p_coupon_id: coupon_id
+       p_coupon_id: coupon_id,
+       p_is_gift: is_gift || false,
+       p_gift_wrap: gift_wrap || false,
+       p_gift_message: gift_message || null
     });
 
     if (rpcError || !rpcResult.success) {
@@ -117,8 +144,9 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
-  } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     });

@@ -35,5 +35,7 @@
   "saved_successfully": "Saved successfully",
   "my_favorites": "My Favorites",
   "favorites_empty": "You haven't favorited any items yet.",
-  "view_favorites": "View Favorites"
+  "view_favorites": "View Favorites",
+  "select_province": "Select Governorate",
+  "phone_label": "Phone Number"
 }

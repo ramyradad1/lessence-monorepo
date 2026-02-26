@@ -6,7 +6,10 @@ export function useProducts(supabase: SupabaseClient, categorySlug?: string) {
   const { data: products = [], isLoading: loading, error: queryError, refetch } = useQuery<Product[]>({
     queryKey: ['products', categorySlug || 'all'],
     queryFn: async () => {
-      let query = supabase.from('products').select('*, variants:product_variants(*)');
+      let query = supabase
+        .from('products')
+        .select('*, variants:product_variants(*)')
+        .eq('is_active', true);
       
       if (categorySlug && categorySlug !== 'all') {
         const { data: cat, error: catErr } = await supabase
@@ -22,11 +25,16 @@ export function useProducts(supabase: SupabaseClient, categorySlug?: string) {
       }
 
       const { data, error: err } = await query.order('created_at', { ascending: false });
-      if (err) throw err;
+      if (err) {
+        console.error('[useProducts] Supabase query failed:', err.message);
+        throw err;
+      }
       
       return data || [];
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes for general product lists
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    refetchOnMount: 'always',
+    retry: 3,
   });
 
   const error = queryError ? (queryError as any).message : null;

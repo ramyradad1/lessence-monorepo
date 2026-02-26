@@ -8,6 +8,8 @@ export type ProductVariant = {
   price: number;
   stock_qty: number;
   sku?: string;
+  barcode?: string;
+  compare_at_price?: number;
   is_active: boolean;
   low_stock_threshold?: number;
   created_at?: string;
@@ -40,6 +42,13 @@ export type Product = {
   is_new: boolean;
   is_active?: boolean;
   is_limited?: boolean;
+  is_featured?: boolean;
+  is_sale?: boolean;
+  status?: 'active' | 'draft' | 'hidden';
+  tags?: string[];
+  top_notes?: string[];
+  heart_notes?: string[];
+  base_notes?: string[];
   low_stock_threshold?: number;
   gender_target?: 'men' | 'women' | 'unisex';
   created_at?: string;
@@ -58,6 +67,7 @@ export type Category = {
   image_url?: string;
   icon?: string;
   sort_order?: number;
+  is_active?: boolean;
   created_at?: string;
 };
 

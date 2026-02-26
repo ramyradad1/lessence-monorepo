@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../localization/app_localizations.dart';
 import '../providers/locale_provider.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class LanguageMenuButton extends ConsumerWidget {
   const LanguageMenuButton({super.key});
@@ -15,7 +16,7 @@ class LanguageMenuButton extends ConsumerWidget {
 
     return PopupMenuButton<AppLanguage>(
       tooltip: l10n.language,
-      icon: const Icon(Icons.language),
+      icon: const Icon(LucideIcons.globe),
       initialValue: selectedLanguage,
       onSelected: (language) => localeController.setLanguage(language),
       itemBuilder: (context) => [

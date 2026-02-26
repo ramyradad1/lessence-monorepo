@@ -8,60 +8,87 @@ export type DashboardKpis = {
   newOrdersCount: number;
   uniqueCustomers: number;
   visitorCount: number;
+  revenueTrend: number;
+  orderTrend: number;
+  customerTrend: number;
+  visitorTrend: number;
 };
 
 export type ChartDataPoint = {
   date: string;
   label: string;
   revenue: number;
+  orders: number;
 };
 
-export function useAdminDashboard(supabase: SupabaseClient) {
+export type OrderStatusBreakdown = Record<string, number>;
+
+export type TopProduct = {
+  name: string;
+  revenue: number;
+  quantity: number;
+};
+
+export function useAdminDashboard(supabase: SupabaseClient, period: string = '30d') {
   const [kpis, setKpis] = useState<DashboardKpis>({
     totalRevenue: 0,
     orderCount: 0,
     newOrdersCount: 0,
     uniqueCustomers: 0,
     visitorCount: 0,
+    revenueTrend: 0,
+    orderTrend: 0,
+    customerTrend: 0,
+    visitorTrend: 0,
   });
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  const [ordersByStatus, setOrdersByStatus] = useState<OrderStatusBreakdown>({});
+  const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
     try {
-      // 1. Fetch KPIs and chartData via RPC
-      const { data: metricsData, error: metricsError } = await supabase.rpc('get_admin_dashboard_metrics');
-      
+      // 1. Fetch KPIs via enhanced RPC
+      const { data: metricsData, error: metricsError } = await supabase.rpc(
+        'get_admin_dashboard_metrics_v2',
+        { p_period: period }
+      );
+
       if (!metricsError && metricsData) {
         setKpis({
           totalRevenue: Number(metricsData.totalRevenue) || 0,
           orderCount: Number(metricsData.orderCount) || 0,
-          newOrdersCount: Number(metricsData.newOrdersCount) || 0,
+          newOrdersCount: 0,
           uniqueCustomers: Number(metricsData.uniqueCustomers) || 0,
           visitorCount: Number(metricsData.visitorCount) || 0,
+          revenueTrend: Number(metricsData.revenueTrend) || 0,
+          orderTrend: Number(metricsData.orderTrend) || 0,
+          customerTrend: Number(metricsData.customerTrend) || 0,
+          visitorTrend: Number(metricsData.visitorTrend) || 0,
         });
 
-        // Parse chart data and map to day labels
+        // Parse chart data
         const rawChartData = Array.isArray(metricsData.chartData) ? metricsData.chartData : [];
-        const days: ChartDataPoint[] = [];
-        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        
-        // Fill last 7 days even if no sales
-        for (let i = 6; i >= 0; i--) {
-          const d = new Date();
-          d.setDate(d.getDate() - i);
-          const dateStr = d.toISOString().split('T')[0];
-          
-          const existingData = rawChartData.find((raw: any) => raw.date === dateStr);
-          days.push({ 
-            date: dateStr, 
-            label: dayNames[d.getDay()], 
-            revenue: existingData ? Number(existingData.sales) : 0 
-          });
-        }
+        const days: ChartDataPoint[] = rawChartData.map((raw: any) => ({
+          date: raw.date,
+          label: new Date(raw.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          revenue: Number(raw.revenue) || 0,
+          orders: Number(raw.orders) || 0,
+        }));
         setChartData(days);
+
+        // Orders by status
+        setOrdersByStatus(metricsData.ordersByStatus || {});
+
+        // Top products
+        const tp = Array.isArray(metricsData.topProducts) ? metricsData.topProducts : [];
+        setTopProducts(tp.map((p: any) => ({
+          name: p.name || 'Unknown',
+          revenue: Number(p.revenue) || 0,
+          quantity: Number(p.quantity) || 0,
+        })));
       }
 
       // 2. Fetch Recent Orders (just 10)
@@ -82,11 +109,11 @@ export function useAdminDashboard(supabase: SupabaseClient) {
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, [supabase, period]);
 
   useEffect(() => {
     fetchDashboard();
   }, [fetchDashboard]);
 
-  return { kpis, chartData, recentOrders, loading, refetch: fetchDashboard };
+  return { kpis, chartData, ordersByStatus, topProducts, recentOrders, loading, refetch: fetchDashboard };
 }

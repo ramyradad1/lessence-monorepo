@@ -78,15 +78,28 @@ serve(async (req: Request) => {
 
       const price = sizeOption.price;
 
-      // Validate stock
-      const { data: inventory, error: inventoryError } = await supabaseClient
-        .from('inventory')
-        .select('quantity_available')
-        .eq('product_id', productId)
-        .eq('size', selectedSize)
-        .single();
+      let availableQty = 0;
+      if (item.variant_id) {
+        const { data: variant, error: variantError } = await supabaseClient
+          .from('product_variants')
+          .select('stock_qty')
+          .eq('id', item.variant_id)
+          .single();
+        if (variantError || !variant) throw new Error(`Variant not found for ${product.name}`);
+        availableQty = variant.stock_qty;
+      } else {
+        const { data: inventory, error: inventoryError } = await supabaseClient
+          .from('inventory')
+          .select('quantity_available')
+          .eq('product_id', productId)
+          .eq('size', selectedSize)
+          .maybeSingle();
+          
+        if (inventoryError) throw new Error(`Error checking stock for ${product.name}`);
+        availableQty = inventory?.quantity_available ?? Infinity;
+      }
         
-      if (inventoryError || !inventory || inventory.quantity_available < item.quantity) {
+      if (availableQty < item.quantity) {
         throw new Error(`Insufficient stock for ${product.name} (${selectedSize})`)
       }
 
@@ -96,7 +109,8 @@ serve(async (req: Request) => {
         product_id: productId,
         selected_size: selectedSize,
          price,
-         product_name: product.name
+         product_name: product.name,
+         variant_id: item.variant_id || null
       });
 
       line_items.push({
@@ -185,7 +199,8 @@ serve(async (req: Request) => {
               selected_size: item.selected_size,
               quantity: item.quantity,
               price: item.price,
-              product_name: item.product_name
+              product_name: item.product_name,
+              variant_id: item.variant_id
           })))
       }
     };

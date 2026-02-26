@@ -56,10 +56,15 @@ serve(async (req) => {
     }
     
     if (status === 'succeeded') {
-        const { error: updateError } = await supabaseAdmin.from('orders').update({
-            status: 'paid'
-        }).eq('id', order.id);
-        if (updateError) throw updateError;
+        // Securely call the RPC to finalize the order (deducts stock, updates status to paid, clears cart)
+        const { data: finalizeData, error: finalizeError } = await supabaseAdmin.rpc('finalize_order_payment_transaction', {
+            p_order_id: order.id
+        });
+
+        if (finalizeError || !finalizeData?.success) {
+             console.error("Failed to finalize order transaction:", finalizeError || finalizeData?.error);
+             throw new Error(finalizeError?.message || finalizeData?.error || 'Failed to finalize order process');
+        }
     }
 
     return new Response(JSON.stringify({ success: true }), {

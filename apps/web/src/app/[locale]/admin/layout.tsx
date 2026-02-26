@@ -9,13 +9,22 @@ const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard', icon: '📊' },
   { href: '/admin/orders', label: 'Orders', icon: '📦' },
   { href: '/admin/products', label: 'Products', icon: '🧴' },
+  { href: '/admin/categories', label: 'Categories', icon: '🗂️' },
+  { href: '/admin/brands', label: 'Brands', icon: '🏷️' },
+  { href: '/admin/collections', label: 'Collections', icon: '✨' },
   { href: '/admin/bundles', label: 'Gift Sets', icon: '🎁' },
   { href: '/admin/reports', label: 'Reports', icon: '📈' },
   { href: '/admin/coupons', label: 'Coupons', icon: '🎟️' },
   { href: '/admin/reviews', label: 'Reviews', icon: '⭐' },
   { href: '/admin/customers', label: 'Customers', icon: '🧑‍💼' },
   { href: '/admin/users', label: 'Users', icon: '👥' },
+  { href: '/admin/settings', label: 'Settings', icon: '⚙️' },
+  { href: '/admin/policies', label: 'Policies', icon: '📝' },
+  { href: '/admin/translations', label: 'Translations', icon: '🌐' },
+  { href: '/admin/variants', label: 'Sizes Mapping', icon: '📏' },
+  { href: '/admin/alerts', label: 'Alerts', icon: '🔔' },
   { href: '/admin/diagnostics', label: 'Diagnostics', icon: '📡' },
+  { href: '/admin/audit-logs', label: 'Audit Logs', icon: '📋' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -67,7 +76,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#1e1b16] border-r border-white/5 flex flex-col transform transition-transform lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-6 border-b border-white/5">
           <Link href="/" className="text-xl font-bold text-white tracking-wider">L&apos;ESSENCE</Link>
-          <p className="text-xs text-white/30 mt-1 font-medium tracking-widest uppercase">Admin Panel</p>
+          <p className="text-xs text-fg-faint mt-1 font-medium tracking-widest uppercase">Admin Panel</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
@@ -81,7 +90,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                   isActive
                     ? 'bg-[#f4c025]/10 text-[#f4c025] border border-[#f4c025]/20'
-                    : 'text-white/50 hover:text-white hover:bg-white/5'
+                    : 'text-fg-muted hover:text-white hover:bg-white/5'
                 }`}
               >
                 <span className="text-lg">{item.icon}</span>
@@ -92,7 +101,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         <div className="p-4 border-t border-white/5">
-          <Link href="/" className="flex items-center gap-2 text-white/30 hover:text-white text-sm px-4 py-2 transition-colors">
+          <Link href="/" className="flex items-center gap-2 text-fg-faint hover:text-white text-sm px-4 py-2 transition-colors">
             ← Back to Store
           </Link>
         </div>
@@ -104,7 +113,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <header className="h-16 border-b border-white/5 flex items-center px-6 gap-4 bg-[#181611]/80 backdrop-blur-sm sticky top-0 z-30">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden text-white/60 hover:text-white"
+            className="lg:hidden text-fg-muted hover:text-white"
             aria-label="Open sidebar"
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>

@@ -49,12 +49,12 @@ export default function OrderHistoryPage() {
           <div className={`flex items-center gap-4 mb-8 ${rtl ? 'flex-row-reverse' : ''}`}>
             <button 
               onClick={() => router.push('/profile')}
-              className="text-white/40 hover:text-white transition-colors text-sm"
+              className="text-fg-muted hover:text-white transition-colors text-sm"
             >
               {t('back_to_profile')}
             </button>
-            <ChevronRight size={14} className={`text-white/20 ${rtl ? 'rotate-180' : ''}`} />
-            <h1 className="font-display text-2xl text-white">{t('order_history')}</h1>
+            <ChevronRight size={14} className={`text-fg-faint ${rtl ? 'rotate-180' : ''}`} />
+            <h1 className="font-sans text-2xl text-white">{t('order_history')}</h1>
           </div>
 
           <div className="space-y-4">
@@ -65,7 +65,7 @@ export default function OrderHistoryPage() {
             ) : orders.length === 0 ? (
               <div className="glass-effect p-12 rounded-3xl border border-white/5 text-center">
                 <Package size={48} className="text-white/10 mx-auto mb-4" />
-                <p className="text-white/40 mb-6">{t('no_orders')}</p>
+                <p className="text-fg-muted mb-6">{t('no_orders')}</p>
                 <button 
                   onClick={() => router.push('/shop')}
                   className="bg-[#f4c025] text-black px-8 py-3 rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-white transition-all"
@@ -91,7 +91,7 @@ export default function OrderHistoryPage() {
                           {t(`statuses.${order.status}`)}
                         </span>
                       </div>
-                      <div className={`flex items-center gap-4 text-[10px] text-white/40 uppercase tracking-widest ${rtl ? 'flex-row-reverse' : ''}`}>
+                      <div className={`flex items-center gap-4 text-[10px] text-fg-muted uppercase tracking-widest ${rtl ? 'flex-row-reverse' : ''}`}>
                         <span className={`flex items-center gap-1 ${rtl ? 'flex-row-reverse' : ''}`}>
                           <Calendar size={12} />
                           {new Date(order.created_at).toLocaleDateString(locale)}

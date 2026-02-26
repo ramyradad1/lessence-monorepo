@@ -8,6 +8,7 @@ import {
   ArrowLeft, User as UserIcon, Mail, Phone, Calendar, ShoppingBag,
   MapPin, StickyNote, Loader2, Trash2, Send
 } from 'lucide-react';
+import Image from 'next/image';
 
 const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
@@ -79,13 +80,13 @@ export default function CustomerDetailPage() {
   }
 
   if (!customer) {
-    return <p className="text-white/40 text-center py-12">Customer not found</p>;
+    return <p className="text-fg-muted text-center py-12">Customer not found</p>;
   }
 
   return (
     <div className="space-y-6 max-w-5xl">
       {/* Back */}
-      <button onClick={() => router.push('/admin/customers')} className="flex items-center gap-1.5 text-sm text-white/40 hover:text-white transition-colors">
+      <button onClick={() => router.push('/admin/customers')} className="flex items-center gap-1.5 text-sm text-fg-muted hover:text-white transition-colors">
         <ArrowLeft size={16} /> Back to Customers
       </button>
 
@@ -94,14 +95,14 @@ export default function CustomerDetailPage() {
         <div className="flex items-start gap-4 flex-wrap">
           <div className="w-16 h-16 rounded-full bg-[#f4c025]/10 flex items-center justify-center text-[#f4c025] shrink-0">
             {customer.avatar_url ? (
-              <img src={customer.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+              <Image src={customer.avatar_url} alt="" width={64} height={64} unoptimized className="w-full h-full rounded-full object-cover" />
             ) : (
               <UserIcon size={28} />
             )}
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-2xl font-bold text-white">{customer.full_name || 'Anonymous Customer'}</h1>
-            <div className="flex flex-wrap gap-4 mt-2 text-sm text-white/50">
+            <div className="flex flex-wrap gap-4 mt-2 text-sm text-fg-muted">
               <span className="flex items-center gap-1.5"><Mail size={14} /> {customer.email}</span>
               {customer.phone && <span className="flex items-center gap-1.5"><Phone size={14} /> {customer.phone}</span>}
               <span className="flex items-center gap-1.5"><Calendar size={14} /> Joined {customer.created_at ? new Date(customer.created_at).toLocaleDateString() : 'N/A'}</span>
@@ -110,11 +111,11 @@ export default function CustomerDetailPage() {
           <div className="flex gap-3">
             <div className="bg-[#f4c025]/10 rounded-xl px-4 py-2 text-center">
               <div className="text-lg font-bold text-[#f4c025]">{customer.total_orders}</div>
-              <div className="text-[10px] text-white/30 uppercase tracking-wider font-semibold">Orders</div>
+              <div className="text-[10px] text-fg-faint uppercase tracking-wider font-semibold">Orders</div>
             </div>
             <div className="bg-[#f4c025]/10 rounded-xl px-4 py-2 text-center">
               <div className="text-lg font-bold text-[#f4c025]">{formatCurrency(Number(customer.total_spend), locale)}</div>
-              <div className="text-[10px] text-white/30 uppercase tracking-wider font-semibold">Total Spend</div>
+              <div className="text-[10px] text-fg-faint uppercase tracking-wider font-semibold">Total Spend</div>
             </div>
           </div>
         </div>
@@ -125,20 +126,20 @@ export default function CustomerDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Order History */}
           <div className="bg-[#1e1b16] border border-white/5 rounded-2xl p-5">
-            <h2 className="text-sm font-semibold text-white/40 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-fg-muted uppercase tracking-wider mb-4 flex items-center gap-2">
               <ShoppingBag size={14} /> Order History
             </h2>
             {customer.orders.length === 0 ? (
-              <p className="text-white/20 text-sm py-4 text-center">No orders yet</p>
+              <p className="text-fg-faint text-sm py-4 text-center">No orders yet</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="border-b border-white/5">
-                      <th className="pb-2 text-xs font-semibold text-white/20 uppercase">Order</th>
-                      <th className="pb-2 text-xs font-semibold text-white/20 uppercase">Status</th>
-                      <th className="pb-2 text-xs font-semibold text-white/20 uppercase text-right">Total</th>
-                      <th className="pb-2 text-xs font-semibold text-white/20 uppercase text-right">Date</th>
+                      <th className="pb-2 text-xs font-semibold text-fg-faint uppercase">Order</th>
+                      <th className="pb-2 text-xs font-semibold text-fg-faint uppercase">Status</th>
+                      <th className="pb-2 text-xs font-semibold text-fg-faint uppercase text-right">Total</th>
+                      <th className="pb-2 text-xs font-semibold text-fg-faint uppercase text-right">Date</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
@@ -155,7 +156,7 @@ export default function CustomerDetailPage() {
                           </span>
                         </td>
                         <td className="py-3 text-right text-sm font-semibold text-white">{formatCurrency(Number(order.total_amount), locale)}</td>
-                        <td className="py-3 text-right text-xs text-white/30">{new Date(order.created_at).toLocaleDateString()}</td>
+                        <td className="py-3 text-right text-xs text-fg-faint">{new Date(order.created_at).toLocaleDateString()}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -169,11 +170,11 @@ export default function CustomerDetailPage() {
         <div className="space-y-6">
           {/* Addresses */}
           <div className="bg-[#1e1b16] border border-white/5 rounded-2xl p-5">
-            <h2 className="text-sm font-semibold text-white/40 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-fg-muted uppercase tracking-wider mb-4 flex items-center gap-2">
               <MapPin size={14} /> Addresses
             </h2>
             {customer.addresses.length === 0 ? (
-              <p className="text-white/20 text-sm py-2 text-center">No addresses saved</p>
+              <p className="text-fg-faint text-sm py-2 text-center">No addresses saved</p>
             ) : (
               <div className="space-y-3">
                 {customer.addresses.map(addr => (
@@ -182,12 +183,12 @@ export default function CustomerDetailPage() {
                       <span className="text-[10px] font-bold text-[#f4c025] uppercase tracking-wider">Default</span>
                     )}
                     <p className="text-sm text-white font-medium">{addr.full_name}</p>
-                    <p className="text-xs text-white/50">{addr.address_line1}</p>
-                    {addr.address_line2 && <p className="text-xs text-white/50">{addr.address_line2}</p>}
-                    <p className="text-xs text-white/50">{addr.city}, {addr.state} {addr.postal_code}</p>
-                    <p className="text-xs text-white/50">{addr.country}</p>
+                    <p className="text-xs text-fg-muted">{addr.address_line1}</p>
+                    {addr.address_line2 && <p className="text-xs text-fg-muted">{addr.address_line2}</p>}
+                    <p className="text-xs text-fg-muted">{addr.city}, {addr.state} {addr.postal_code}</p>
+                    <p className="text-xs text-fg-muted">{addr.country}</p>
                     {addr.phone && (
-                      <p className="text-xs text-white/30 mt-1 flex items-center gap-1"><Phone size={10} /> {addr.phone}</p>
+                      <p className="text-xs text-fg-faint mt-1 flex items-center gap-1"><Phone size={10} /> {addr.phone}</p>
                     )}
                   </div>
                 ))}
@@ -197,7 +198,7 @@ export default function CustomerDetailPage() {
 
           {/* Admin Notes */}
           <div className="bg-[#1e1b16] border border-white/5 rounded-2xl p-5">
-            <h2 className="text-sm font-semibold text-white/40 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-fg-muted uppercase tracking-wider mb-4 flex items-center gap-2">
               <StickyNote size={14} /> Admin Notes
             </h2>
 
@@ -224,20 +225,20 @@ export default function CustomerDetailPage() {
 
             {/* Notes List */}
             {customer.notes.length === 0 ? (
-              <p className="text-white/20 text-sm py-2 text-center">No notes yet</p>
+              <p className="text-fg-faint text-sm py-2 text-center">No notes yet</p>
             ) : (
               <div className="space-y-2 max-h-80 overflow-y-auto">
                 {customer.notes.map(note => (
                   <div key={note.id} className="bg-black/20 rounded-xl p-3 border border-white/5 group relative">
-                    <p className="text-sm text-white/80 whitespace-pre-wrap leading-relaxed">{note.note}</p>
+                    <p className="text-sm text-fg whitespace-pre-wrap leading-relaxed">{note.note}</p>
                     <div className="flex items-center justify-between mt-2">
-                      <span className="text-[10px] text-white/20">
+                      <span className="text-[10px] text-fg-faint">
                         {note.admin_name || 'Admin'} · {new Date(note.created_at).toLocaleString()}
                       </span>
                       <button
                         onClick={() => handleDeleteNote(note.id)}
                         disabled={deletingNoteId === note.id}
-                        className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all p-1"
+                        className="opacity-0 group-hover:opacity-100 text-fg-faint hover:text-red-400 transition-all p-1"
                         title="Delete note"
                       >
                         {deletingNoteId === note.id ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}

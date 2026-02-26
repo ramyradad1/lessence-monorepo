@@ -1,18 +1,57 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/app_models.dart';
 import 'auth_provider.dart';
 import 'products_provider.dart';
+import '../storage/local_db.dart';
+import '../storage/sync_service.dart';
+import '../utils/fetch_logger.dart';
+
+final favoritesRepositoryProvider = Provider<FavoritesRepository>((ref) {
+  return FavoritesRepository(ref.watch(supabaseClientProvider));
+});
+
+class FavoritesRepository {
+  FavoritesRepository(this._supabase);
+  final SupabaseClient _supabase;
+
+  Future<Set<String>> fetchUserFavorites(String userId) async {
+    final rows = await _supabase
+        .from('favorites')
+        .select('product_id')
+        .eq('user_id', userId)
+        .executeAndLog('FavoritesRepository:fetchUserFavorites');
+
+    return (rows as List<dynamic>)
+        .whereType<Map<String, dynamic>>()
+        .map((row) => row['product_id'] as String?)
+        .whereType<String>()
+        .toSet();
+  }
+
+  Future<void> addFavorite(String userId, String productId) async {
+    await _supabase.from('favorites').upsert({
+      'user_id': userId,
+      'product_id': productId,
+    });
+  }
+
+  Future<void> removeFavorite(String userId, String productId) async {
+    await _supabase
+        .from('favorites')
+        .delete()
+        .eq('user_id', userId)
+        .eq('product_id', productId);
+  }
+}
 
 final favoritesControllerProvider =
-    StateNotifierProvider<FavoritesController, FavoritesState>((ref) {
-  return FavoritesController(ref);
-});
+    NotifierProvider<FavoritesController, FavoritesState>(
+      FavoritesController.new,
+    );
 
 final favoriteProductsProvider = FutureProvider<List<AppProduct>>((ref) async {
   final favorites = ref.watch(favoritesControllerProvider);
@@ -20,7 +59,9 @@ final favoriteProductsProvider = FutureProvider<List<AppProduct>>((ref) async {
 
   final ids = favorites.ids.toList(growable: false);
   final productsById =
-      await ref.watch(productsRepositoryProvider).fetchProductsByIds(ids);
+      await ref
+      .watch(productsRepositoryProvider)
+      .fetchProductsByIdsBatched(ids);
 
   return ids
       .map((id) => productsById[id])
@@ -59,27 +100,35 @@ class FavoritesState {
   bool contains(String productId) => ids.contains(productId);
 }
 
-class FavoritesController extends StateNotifier<FavoritesState> {
-  FavoritesController(this._ref) : super(const FavoritesState()) {
+class FavoritesController extends Notifier<FavoritesState> {
+  StreamSubscription<AuthState>? _authSubscription;
+  String? _lastUserId;
+
+  SupabaseClient get _supabase => ref.read(supabaseClientProvider);
+  FavoritesRepository get _favoritesRepository =>
+      ref.read(favoritesRepositoryProvider);
+  LocalDb get _localDb => LocalDb.instance;
+  SyncService get _syncService => ref.read(syncServiceProvider);
+
+  @override
+  FavoritesState build() {
+    _authSubscription?.cancel();
     _authSubscription = _supabase.auth.onAuthStateChange.listen(
       (event) => _handleAuthChange(event.session?.user.id),
     );
-    _handleAuthChange(_supabase.auth.currentUser?.id);
+    ref.onDispose(() {
+      _authSubscription?.cancel();
+    });
+    Future.microtask(() => _handleAuthChange(_supabase.auth.currentUser?.id));
+    return const FavoritesState();
   }
-
-  static const _storageKey = 'lessence_favorites';
-
-  final Ref _ref;
-  late final SupabaseClient _supabase = _ref.read(supabaseClientProvider);
-  StreamSubscription<AuthState>? _authSubscription;
-  String? _lastUserId;
 
   Future<void> _handleAuthChange(String? userId) async {
     final previousUserId = _lastUserId;
     _lastUserId = userId;
 
     if (userId != null && previousUserId == null) {
-      await _syncGuestToServer(userId);
+      await _syncGuestToServer();
       await refresh();
       return;
     }
@@ -103,28 +152,38 @@ class FavoritesController extends StateNotifier<FavoritesState> {
         return;
       }
 
-      final rows = await _supabase
-          .from('favorites')
-          .select('product_id')
-          .eq('user_id', userId);
+      // 1. Get from Supabase via Repository
+      final supabaseIds = await _favoritesRepository.fetchUserFavorites(userId);
 
-      final ids = (rows as List<dynamic>)
-          .whereType<Map<String, dynamic>>()
-          .map((row) => row['product_id'] as String?)
-          .whereType<String>()
-          .toSet();
+      // 2. Also check local favorites that might not have been synced
+      final localIds = await _readLocalFavorites();
+      final mergedIds = <String>{...supabaseIds, ...localIds};
 
       state = state.copyWith(
-        ids: ids,
+        ids: mergedIds,
         isLoading: false,
         isSyncing: false,
         clearError: true,
       );
-      await _writeLocalFavorites(ids.toList(growable: false));
+      
+      // Update local cache fully to match merged
+      for (final id in mergedIds) {
+        await _localDb.setLocalFavorite(id, true);
+      }
     } on PostgrestException catch (error) {
-      state = state.copyWith(isLoading: false, isSyncing: false, errorMessage: error.message);
-    } catch (_) {
+      // Fallback to local
+      final localIds = await _readLocalFavorites();
       state = state.copyWith(
+        ids: localIds.toSet(),
+        isLoading: false,
+        isSyncing: false,
+        errorMessage: error.message,
+      );
+    } catch (_) {
+      // Fallback to local
+      final localIds = await _readLocalFavorites();
+      state = state.copyWith(
+        ids: localIds.toSet(),
         isLoading: false,
         isSyncing: false,
         errorMessage: 'Failed to load favorites',
@@ -143,64 +202,41 @@ class FavoritesController extends StateNotifier<FavoritesState> {
       nextIds.add(productId);
     }
 
+    // Optimistic UI Update & Local Cache
     state = state.copyWith(ids: nextIds, isSyncing: true, clearError: true);
-    await _writeLocalFavorites(nextIds.toList(growable: false));
+    await _localDb.setLocalFavorite(productId, !wasFavorite);
 
     if (userId == null) {
       state = state.copyWith(isSyncing: false);
       return;
     }
 
+    // Offline-first sync (enqueue sync queue action)
     try {
-      if (wasFavorite) {
-        await _supabase
-            .from('favorites')
-            .delete()
-            .eq('user_id', userId)
-            .eq('product_id', productId);
-      } else {
-        await _supabase.from('favorites').insert(<String, dynamic>{
-          'user_id': userId,
-          'product_id': productId,
-        });
-      }
-
+      await _syncService.enqueueAction(
+        wasFavorite ? 'remove_favorite' : 'add_favorite',
+        {'product_id': productId},
+      );
       state = state.copyWith(isSyncing: false, clearError: true);
-    } on PostgrestException {
+    } catch (e) {
+      // Very unlikely saving to queue fails, but if it does, don't rollback, just warn
       state = state.copyWith(
-        ids: state.ids.contains(productId)
-            ? <String>{...state.ids}..remove(productId)
-            : <String>{...state.ids}..add(productId),
         isSyncing: false,
-        errorMessage: error.message,
+        errorMessage: 'Failed to queue update',
       );
-      await _writeLocalFavorites(state.ids.toList(growable: false));
-    } catch (_) {
-      state = state.copyWith(
-        ids: state.ids.contains(productId)
-            ? <String>{...state.ids}..remove(productId)
-            : <String>{...state.ids}..add(productId),
-        isSyncing: false,
-        errorMessage: 'Failed to update favorites',
-      );
-      await _writeLocalFavorites(state.ids.toList(growable: false));
     }
   }
 
-  Future<void> _syncGuestToServer(String userId) async {
+  Future<void> _syncGuestToServer() async {
     final guestIds = await _readLocalFavorites();
     if (guestIds.isEmpty) return;
 
     state = state.copyWith(isSyncing: true, clearError: true);
     try {
-      final rows = guestIds
-          .map((id) => <String, dynamic>{'user_id': userId, 'product_id': id})
-          .toList(growable: false);
-      await _supabase.from('favorites').upsert(
-            rows,
-            onConflict: 'user_id,product_id',
-          );
-      await _writeLocalFavorites(const <String>[]);
+      // Merge by enqueuing adds for all guest IDs
+      for (final id in guestIds) {
+        await _syncService.enqueueAction('add_favorite', {'product_id': id});
+      }
       state = state.copyWith(isSyncing: false);
     } catch (_) {
       state = state.copyWith(isSyncing: false);
@@ -208,29 +244,7 @@ class FavoritesController extends StateNotifier<FavoritesState> {
   }
 
   Future<List<String>> _readLocalFavorites() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_storageKey);
-    if (raw == null || raw.isEmpty) return const <String>[];
-
-    try {
-      final decoded = jsonDecode(raw);
-      if (decoded is List<dynamic>) {
-        return decoded.whereType<String>().toList(growable: false);
-      }
-    } catch (_) {
-      return const <String>[];
-    }
-    return const <String>[];
-  }
-
-  Future<void> _writeLocalFavorites(List<String> ids) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_storageKey, jsonEncode(ids));
-  }
-
-  @override
-  void dispose() {
-    _authSubscription?.cancel();
-    super.dispose();
+    final map = await _localDb.getLocalFavorites();
+    return map.entries.where((e) => e.value).map((e) => e.key).toList();
   }
 }

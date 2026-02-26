@@ -30,7 +30,7 @@
   "free": "مجاني",
   "calculated_next_step": "سيتم حسابه في الخطوة التالية",
   "total": "الإجمالي",
-  "place_order": "إتمام الطلب (الدفع عند الاستلام)",
+  "place_order": "تأكيد الطلب عبر الواتساب",
   "cart_empty": "سلة التسوق فارغة",
   "continue_shopping": "مواصلة التسوق",
   "error_initiating_checkout": "خطأ في بدء عملية الدفع",
@@ -52,5 +52,14 @@
   "error_creating_order": "فشل في إنشاء الطلب",
   "cart_title": "سلة التسوق",
   "start_shopping": "ابدأ التسوق",
-  "order_success_message": "تم تقديم طلبك رقم {{orderRef}} بنجاح."
+  "order_success_message": "تم تقديم طلبك رقم {{orderRef}} بنجاح.",
+  "confirm_whatsapp": "تأكيد الطلب عبر الواتساب",
+  "whatsapp_msg": "يرجى تأكيد طلبك من خلال إرسال رسالة لنا على الواتساب.",
+  "out_of_stock": "المنتج غير متوفر",
+  "stock_error": "نفدت بعض منتجات السلة. يرجى تقليل الكمية المطلوبة أو إزالتها.",
+  "payment_method": "طريقة الدفع",
+  "credit_card": "بطاقة ائتمان / خصم",
+  "cash_on_delivery": "الدفع عند الاستلام",
+  "redirecting_paymob": "جاري التحويل لصفحة الدفع الآمنة...",
+  "pay_now": "ادفع الآن"
 }

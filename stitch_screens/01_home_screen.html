@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>L'ESSENCE Home Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#c5a87c",
+                        "background-light": "#f7f7f6",
+                        "background-dark": "#1d1a15",
+                        "surface-dark": "#2a2620",
+                        "surface-light": "#ffffff",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased selection:bg-primary selection:text-white">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto shadow-2xl">
+<!-- Header -->
+<div class="flex items-center justify-between px-4 pt-6 pb-2 sticky top-0 z-20 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-slate-900 dark:text-white">menu</span>
+</button>
+<h1 class="text-xl font-bold tracking-widest text-slate-900 dark:text-white uppercase">L'ESSENCE</h1>
+<button class="relative flex items-center justify-center p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-slate-900 dark:text-white">shopping_bag</span>
+<span class="absolute top-1 right-1 flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+</span>
+</button>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto pb-24 no-scrollbar">
+<!-- Hero Section -->
+<div class="px-4 py-4">
+<div class="relative w-full aspect-[4/3] rounded-xl overflow-hidden shadow-lg group">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Luxury perfume bottle on dark background with gold lighting" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAlL5K2s5XmqZ8wrOseTiGgWhN83qZIQNnkHfLYcO76LnBvEgOBbfCJKpbsNhmP0FWZjbya9eGTQGEeQoCoFzS3Iw-gUeHO4Wf8HPDNW8ENs2jPYzz2TCEzwTB8EWc6pG-eVV2c952QCeg5nGwh-JkZ8AWN9Di_arFFvQNamLazxIaeeUKJ8OOUIfiFiIb5_D3ESVsfz-p4p5Pj5KX_xPzzRP3ePiHS8pGJbFqaeevIjKREOy5gvWEsG2gYcZxh-4pCDjo5dCQnnrg');">
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-6 w-full">
+<span class="inline-block px-3 py-1 mb-3 text-xs font-semibold tracking-wider text-black bg-primary rounded-full uppercase">New Collection</span>
+<h2 class="text-3xl font-bold text-white mb-2 leading-tight">The Signature Collection</h2>
+<p class="text-white/80 text-sm mb-4 line-clamp-2">Experience the essence of luxury with our newest arrivals, crafted for the discerning few.</p>
+<button class="bg-white text-black px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors w-full sm:w-auto text-center">
+                            Shop Now
+                        </button>
+</div>
+</div>
+</div>
+<!-- Categories -->
+<div class="py-2">
+<div class="flex items-center justify-between px-4 mb-3">
+<h2 class="text-lg font-bold text-slate-900 dark:text-white">Categories</h2>
+<a class="text-xs font-medium text-primary hover:text-primary/80" href="#">View All</a>
+</div>
+<div class="flex gap-3 px-4 overflow-x-auto no-scrollbar pb-2">
+<!-- Category Item: Floral -->
+<button class="flex flex-col items-center gap-2 min-w-[72px] group">
+<div class="w-[72px] h-[72px] rounded-full bg-surface-dark dark:bg-surface-dark border border-gray-200 dark:border-white/10 flex items-center justify-center overflow-hidden relative group-hover:border-primary transition-colors">
+<div class="absolute inset-0 bg-cover bg-center opacity-60 group-hover:opacity-80 transition-opacity" data-alt="Pink floral pattern texture" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC_k0D7ZZuK_OstGfkbbiW1tOrfcRBE9dhe-h-AR5EvMw_V30v99PYkVSqzq6tnRcWil4z0OKLChOQ1hLW3XbBGp8tDjx5k2crQXcd0bVUK6GnIkgMMCRHheHVQDBJK1jIYvIts5O2VFPgdwaTGeqQLpBgg4HU9aNJvvF24IE9uf9UeGADRymsXykr7S6wT2-gYq7ofiSjUbvVURtC8vAXS5OJPGNEtST2uc8s83-6iRedUOPVK-tqg0QzlwGmXIxLozJlZO0LdzlU');"></div>
+</div>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">Floral</span>
+</button>
+<!-- Category Item: Woody -->
+<button class="flex flex-col items-center gap-2 min-w-[72px] group">
+<div class="w-[72px] h-[72px] rounded-full bg-surface-dark dark:bg-surface-dark border border-gray-200 dark:border-white/10 flex items-center justify-center overflow-hidden relative group-hover:border-primary transition-colors">
+<div class="absolute inset-0 bg-cover bg-center opacity-60 group-hover:opacity-80 transition-opacity" data-alt="Dark wood texture background" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA7LUtWJ3XzqGvdXf-VhKicoYXyc0yCP0WiJQhow6TR2g_YwFldMqF7s3BSS9SlUqZhAVr00k48aBqADTx4aTHrafKg4tOgaJQmTxNXPUlDUMd4rNF7zA8JinAu3WL1G1fDNCp0VPaqW5pZIVfBAkVuwHMWBHEZb99mCkIHljnda6Z30LbNxp-Lwu2NPxY8hkNoMP0pfD1b6b9VepAH8g7qWMLqUjhbkUXAVQtSuN0nPETinwIaBpD6PA2E4hoPUr14c9At5sUUKVM');"></div>
+</div>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">Woody</span>
+</button>
+<!-- Category Item: Citrus -->
+<button class="flex flex-col items-center gap-2 min-w-[72px] group">
+<div class="w-[72px] h-[72px] rounded-full bg-surface-dark dark:bg-surface-dark border border-gray-200 dark:border-white/10 flex items-center justify-center overflow-hidden relative group-hover:border-primary transition-colors">
+<div class="absolute inset-0 bg-cover bg-center opacity-60 group-hover:opacity-80 transition-opacity" data-alt="Fresh orange citrus slices" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBdvyPivLBr3O-seOdgUOjOHY5pQx5X2SJ-AJfrhQzkwI6fJzFmCmcWuEjB6-zjZVVBQVkWY-SPKYevZKnXge4RZtdYvAxvjOMbn2DHVH2VhEvGxuLH8nfBIj9lO-YiH_yoYd1PaOqcgKEi729oj5LVat1V-J30EFZMxhfGAk0h-Vsmfr9fJQgAStHHdCLY09XuLZkmu_tFo76zN1LH_yZ7KFHyjhTbmgSrRDK48MfKsHGXSBliPd_chOKzpaojkh9JaV0yliyJw5o');"></div>
+</div>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">Citrus</span>
+</button>
+<!-- Category Item: Oriental -->
+<button class="flex flex-col items-center gap-2 min-w-[72px] group">
+<div class="w-[72px] h-[72px] rounded-full bg-surface-dark dark:bg-surface-dark border border-gray-200 dark:border-white/10 flex items-center justify-center overflow-hidden relative group-hover:border-primary transition-colors">
+<div class="absolute inset-0 bg-cover bg-center opacity-60 group-hover:opacity-80 transition-opacity" data-alt="Spices and oriental texture" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDZnInAvh7Owm9kL7V5ymH7zxLd0Zq1f_8y-o89o8k27DyIDORUmenAx4fXIEdLWLSFEd1BDwyRKfs5Z5BB3AEZFJq4VPPHrw1axC8MyuCPdR9g3Hugv0r1KPluqENXlVITqaz137ck7Lc0X_20eKcikB_3KsLiFVFVYHReJZZU_eGPe7XDM9FX--37LaWZW-EvQAYSvUICZtOVNcxTDD7iKZoF1IK-YJFsZSVm8WMZAbMXvCW4dPl2A5Ko4E47Bj6_BsE7rGxRJmA');"></div>
+</div>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">Oriental</span>
+</button>
+<!-- Category Item: Fresh -->
+<button class="flex flex-col items-center gap-2 min-w-[72px] group">
+<div class="w-[72px] h-[72px] rounded-full bg-surface-dark dark:bg-surface-dark border border-gray-200 dark:border-white/10 flex items-center justify-center overflow-hidden relative group-hover:border-primary transition-colors">
+<div class="absolute inset-0 bg-cover bg-center opacity-60 group-hover:opacity-80 transition-opacity" data-alt="Blue water ripples" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAb43KbQS4GOXIzRNgyF5wkShVAUU2P4_KFo7PSCqRYZJgBfDRwkUxMnYtiM9kxJqJsfUBfoal9cmDQXij12g-CPhVUPsX_aNT9cu11PJDvAwnhbbxblzkuB4e5GTJmGzfDs7uEoWUSJhJ-CbXFoebHwzznjbQcUrm2dYhAWS64TYo3HYXsPPxkEANKyX9R3-SgGh6x8DvgzAHCV8y3SrPZJHqp1p1QtyjTWxA70C4Ekff6KgvHBS8ntyMzNC2OEmNRTCgKiCF1GCg');"></div>
+</div>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">Fresh</span>
+</button>
+</div>
+</div>
+<!-- New Arrivals -->
+<div class="py-6">
+<div class="flex items-center justify-between px-4 mb-4">
+<h2 class="text-lg font-bold text-slate-900 dark:text-white">New Arrivals</h2>
+<div class="flex gap-2">
+<button class="h-8 w-8 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/5">
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+</button>
+<button class="h-8 w-8 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/5">
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<div class="flex gap-4 px-4 overflow-x-auto no-scrollbar pb-4 snap-x snap-mandatory">
+<!-- Product Card 1 -->
+<div class="min-w-[160px] w-[160px] snap-center">
+<div class="relative aspect-[3/4] bg-surface-light dark:bg-surface-dark rounded-xl mb-3 overflow-hidden group">
+<div class="absolute top-2 right-2 z-10">
+<button class="h-8 w-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-base">favorite</span>
+</button>
+</div>
+<img alt="Elysium Perfume Bottle" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Elegant glass perfume bottle on marble" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCpnagXlviMGyL7q3alodgGBe92i0QuQqI3EF2WvZ51-YqNvnigZMDt_AMizgvM_HA1_xzBhTNpZwu1xVdSCaHUvrWgfE-8dIw1PZzlKNMUCO62M_bP9RKL8NNfO9FKVo3xOlJBR-axINVQeRxVeMyIhsuzleubZvQuWCVb5mGLZ4cejFESZM6uxjARbHHi5JJ-DhD7uadfQcBiS8RsJSrt5prIU2GmZ4JTr9WB1AcybWtrpMGtuI96sDn7j4GORrPOHgQnx2qz_I"/>
+</div>
+<h3 class="text-sm font-semibold text-slate-900 dark:text-white truncate">Elysium Pour Homme</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Woody &amp; Spicy</p>
+<div class="flex items-center justify-between">
+<span class="text-sm font-bold text-primary">$280</span>
+<button class="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-black hover:bg-white transition-colors">
+<span class="material-symbols-outlined text-base">add</span>
+</button>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="min-w-[160px] w-[160px] snap-center">
+<div class="relative aspect-[3/4] bg-surface-light dark:bg-surface-dark rounded-xl mb-3 overflow-hidden group">
+<div class="absolute top-2 right-2 z-10">
+<button class="h-8 w-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-base">favorite</span>
+</button>
+</div>
+<img alt="Velvet Rose Perfume Bottle" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Pink glass perfume bottle with rose petals" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsiUGaQCsdZmkNe3L8_3DAQ-N4SFydotIYJUHjEWUzfgePmnHok5Bu6YSJZFysbGADMcT8fQOPecY8gVwnzFeNDWoTBrkWfv89TYdtBN0dVMlCYqqOxGrorAB_z8_Hsng6FBtnYLdOiI7QBTgQzfnRVWnNH2qe64T-gb6jTjPTACA_TlPn_xQyL0hEHpMoCrtAOGZgQ1pa8fy4v6gh8v3xFAmXfKqpjlwSPiLeDcM0zxkjDf6lY9oWIwLyvq1YUMXyvmDGCWXLt4A"/>
+</div>
+<h3 class="text-sm font-semibold text-slate-900 dark:text-white truncate">Velvet Rose Oud</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Floral &amp; Intense</p>
+<div class="flex items-center justify-between">
+<span class="text-sm font-bold text-primary">$310</span>
+<button class="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-black hover:bg-white transition-colors">
+<span class="material-symbols-outlined text-base">add</span>
+</button>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="min-w-[160px] w-[160px] snap-center">
+<div class="relative aspect-[3/4] bg-surface-light dark:bg-surface-dark rounded-xl mb-3 overflow-hidden group">
+<div class="absolute top-2 right-2 z-10">
+<button class="h-8 w-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-base">favorite</span>
+</button>
+</div>
+<img alt="Ocean Mist Perfume Bottle" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Clear blue perfume bottle on water background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUvtnj3rxwmFaIC8D02ZHoLCXe-3nLGTWhA3au9iseaoRpYFAEpRyX3qhSSF82g4FDSXojP8F80ao0cp5R9JsUpIcSwOmjEL894esgFYRm8g_sWDP8r5BWwdXq8gn-cMdbKaLCVj6dMlVM7-FJ2M8nguMMo6DZCXzndhCCkXZbfIDqNAh4CMFzSCAbZcjH61G5_l04kBRl0nnpafFumFEBGK07OW8DocDhaNVEP3l7pQomVvdqO_abS-gLyuS8yqLxn-6udK_IvHY"/>
+</div>
+<h3 class="text-sm font-semibold text-slate-900 dark:text-white truncate">Ocean Mist</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Fresh &amp; Aquatic</p>
+<div class="flex items-center justify-between">
+<span class="text-sm font-bold text-primary">$195</span>
+<button class="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-black hover:bg-white transition-colors">
+<span class="material-symbols-outlined text-base">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Promo Banner -->
+<div class="px-4 py-4">
+<div class="relative w-full rounded-xl overflow-hidden bg-surface-dark shadow-md flex flex-col sm:flex-row">
+<div class="sm:w-1/2 relative min-h-[160px]">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Luxury gift box with ribbon on dark background" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCWTZa1o4LMVNnmtiVhdauV7enI9cuT3CLDOdQH_5dRzplGvGhapdvlJPqMFbkwLCHpdhu0rfsln2CG-LE3JChp5z1bUKbBUIPfokafUSY_ZWrt09Xba7eIhKgRrt8YOWb8vqdpmTAZt68OiFzebrTiCOsQftE6ALulGxlOQYdRXfpNQaJK-0YRLbn4ETZ-88yQnyULxVh3fNHB9dJVnIXRvgPWQuNXtpCbph3UOeSOfBwwKljIaLT3czPGDVIFd5uW4am6HyJh2A0');">
+</div>
+<!-- Gradient Overlay -->
+<div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent sm:bg-gradient-to-r sm:from-transparent sm:to-black/60"></div>
+</div>
+<div class="p-5 sm:w-1/2 flex flex-col justify-center items-start relative z-10 bg-surface-dark dark:bg-surface-dark">
+<span class="text-xs font-bold text-primary uppercase tracking-widest mb-1">Limited Edition</span>
+<h3 class="text-xl font-bold text-white mb-2">Exclusive Gift Sets</h3>
+<p class="text-sm text-gray-400 mb-4">Perfectly curated for your loved ones.</p>
+<button class="text-sm font-semibold text-white border-b border-primary pb-0.5 hover:text-primary transition-colors">
+                            Explore Collection
+                        </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation -->
+<div class="fixed bottom-0 left-0 right-0 z-50 bg-background-light dark:bg-background-dark border-t border-gray-200 dark:border-white/10 px-6 pb-6 pt-3 max-w-md mx-auto">
+<div class="flex items-center justify-between">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined filled">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="text-[10px] font-medium">Search</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span class="text-[10px] font-medium">Wishlist</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</a>
+</div>
+</div>
+</div>
+</body></html>

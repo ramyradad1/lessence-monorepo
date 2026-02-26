@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>L'ESSENCE Checkout</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#c6a87c", // Overriding primary to soft gold/tan for luxury feel requested
+                        "primary-dark": "#b09368",
+                        "background-light": "#fcfbf9", // Creamy white
+                        "background-dark": "#1c1c1e", // Deep charcoal/black
+                        "charcoal": "#2d3436",
+                        "slate-50": "#fcfbf9",
+                        "slate-100": "#f5f3ef",
+                        "slate-200": "#e6e2db",
+                        "slate-900": "#1a1a1a",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.75rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased selection:bg-primary/30">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto shadow-2xl bg-white dark:bg-background-dark pb-24">
+<!-- Header -->
+<header class="sticky top-0 z-50 flex items-center bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md p-4 pb-2 justify-between border-b border-slate-200 dark:border-slate-800/50">
+<button class="text-slate-900 dark:text-white flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-10">Checkout</h2>
+</header>
+<!-- Main Content -->
+<main class="flex-1 px-4 py-6 flex flex-col gap-8">
+<!-- Shipping Address -->
+<section>
+<div class="flex items-center justify-between mb-3 px-1">
+<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Shipping Address</h3>
+</div>
+<div class="@container">
+<div class="flex flex-col items-start gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-shadow hover:shadow-md">
+<div class="flex flex-row w-full items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white">
+<span class="material-symbols-outlined">location_on</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-white text-base font-bold leading-tight">Jane Doe</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Home</p>
+</div>
+</div>
+<button class="text-primary hover:text-primary-dark font-semibold text-sm px-2 py-1 transition-colors">
+                                Edit
+                            </button>
+</div>
+<div class="w-full h-px bg-slate-100 dark:bg-slate-800"></div>
+<p class="text-slate-600 dark:text-slate-300 text-sm font-normal leading-relaxed w-full">
+                            123 Luxury Lane, Penthouse Suite 4B<br/>Beverly Hills, CA 90210
+                        </p>
+</div>
+</div>
+</section>
+<!-- Delivery Method -->
+<section>
+<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] mb-3 px-1">Delivery Method</h3>
+<div class="flex flex-col gap-3">
+<label class="group relative flex cursor-pointer items-center gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 transition-all hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5 dark:has-[:checked]:bg-primary/10">
+<input class="peer sr-only" name="delivery" type="radio"/>
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 peer-checked:bg-primary peer-checked:text-white transition-colors">
+<span class="material-symbols-outlined">local_shipping</span>
+</div>
+<div class="flex grow flex-col">
+<p class="text-slate-900 dark:text-white text-sm font-semibold leading-normal">Standard Shipping</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium leading-normal">3-5 Business Days</p>
+</div>
+<span class="text-slate-900 dark:text-white text-sm font-bold">Free</span>
+<div class="absolute inset-0 rounded-xl ring-2 ring-primary ring-opacity-0 peer-checked:ring-opacity-100 transition-all pointer-events-none"></div>
+</label>
+<label class="group relative flex cursor-pointer items-center gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 transition-all hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5 dark:has-[:checked]:bg-primary/10">
+<input checked="" class="peer sr-only" name="delivery" type="radio"/>
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 peer-checked:bg-primary peer-checked:text-white transition-colors">
+<span class="material-symbols-outlined">rocket_launch</span>
+</div>
+<div class="flex grow flex-col">
+<p class="text-slate-900 dark:text-white text-sm font-semibold leading-normal">Express Delivery</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium leading-normal">1-2 Business Days</p>
+</div>
+<span class="text-slate-900 dark:text-white text-sm font-bold">$15.00</span>
+<div class="absolute inset-0 rounded-xl ring-2 ring-primary ring-opacity-0 peer-checked:ring-opacity-100 transition-all pointer-events-none"></div>
+</label>
+</div>
+</section>
+<!-- Payment Method -->
+<section>
+<div class="flex items-center justify-between mb-3 px-1">
+<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Payment</h3>
+<button class="text-primary hover:text-primary-dark font-semibold text-sm transition-colors">Add New</button>
+</div>
+<!-- Credit Card Preview -->
+<div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800 to-black p-6 text-white shadow-xl mb-4">
+<div class="absolute right-0 top-0 -mt-4 -mr-4 h-32 w-32 rounded-full bg-white/10 blur-2xl"></div>
+<div class="absolute bottom-0 left-0 -mb-4 -ml-4 h-32 w-32 rounded-full bg-primary/20 blur-2xl"></div>
+<div class="relative z-10 flex flex-col justify-between h-40">
+<div class="flex justify-between items-start">
+<img alt="Mastercard Logo" class="h-8 brightness-0 invert opacity-80" data-alt="Mastercard logo white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJGUYo8QyeEfCn4fg0VVbSU2AsaaUVmtDuFRQVSzKgIEo_ofC_eiHAYdQaNuBRUaUvthX-BYo5aK7sCivRI-u81FzFcMy-zq_CtrWtWzYVXOyBHvhQjTimNg4z-9tN5-r63EZYADuPCWjOZsJtcoWVkOpQBlAAPLErbAgXIK0q41JHSWfBEQW2uCSesDjGQZ1ANx7Gv0bXAwojYxuC_NC1auZo0bN7-o7pIOs1Dhg4FYMJ4b6gUPYdrUBCRi0uNKUqbsPRS9LYISS3"/>
+<span class="material-symbols-outlined text-white/50">contactless</span>
+</div>
+<div>
+<p class="font-mono text-xl tracking-widest opacity-90">•••• •••• •••• 4288</p>
+</div>
+<div class="flex justify-between items-end">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-wider text-white/60">Card Holder</span>
+<span class="font-medium tracking-wide">JANE DOE</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-wider text-white/60">Expires</span>
+<span class="font-medium tracking-wide">09/26</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Payment Options -->
+<div class="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+<button class="flex min-w-[100px] flex-1 items-center justify-center gap-2 rounded-xl border-2 border-primary bg-primary/5 py-3 text-sm font-bold text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">credit_card</span>
+                        Card
+                    </button>
+<button class="flex min-w-[100px] flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-3 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-[20px]">phone_iphone</span>
+                        Apple Pay
+                    </button>
+<button class="flex min-w-[100px] flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-3 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+                        PayPal
+                    </button>
+</div>
+</section>
+<!-- Order Summary -->
+<section class="rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-sm border border-slate-200 dark:border-slate-800">
+<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] mb-4">Order Summary</h3>
+<div class="flex gap-4 mb-6">
+<div class="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800">
+<img alt="Luxury perfume bottle on dark background" class="h-full w-full object-cover" data-alt="Black perfume bottle luxury product shot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB699LiQf0HS2m0CfAMtVKyPKyhuh2kuFMqH0HPRC0jV_CI6FRA1F2B6kSzdgMQWzoQ9BfdeRHzQFPrqW3mFvfx-jDBIk86dtolQxGPGJGXjYCaQ6XHTHWHaTjkiFC6WLCs4iOjPnesbuE2jLMGc-ls0koHRxlzFveo-XgLjoYvwOof0fWvYWBo9Vqfe_WcHHZaABEz5nsjf-7q4f6roMpiQh06-t_6oAkeYhlqz8RIBSWcMTnPGmawo2uuShz_v6XHLQhItBjZWqb-"/>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-slate-900 dark:text-white text-base font-bold leading-tight">Noire Essence</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">50ml · Eau de Parfum</p>
+<p class="text-slate-900 dark:text-white text-sm font-bold mt-2">$145.00</p>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between text-sm">
+<span class="text-slate-500 dark:text-slate-400">Subtotal</span>
+<span class="text-slate-900 dark:text-white font-medium">$145.00</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-slate-500 dark:text-slate-400">Shipping</span>
+<span class="text-slate-900 dark:text-white font-medium">$15.00</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-slate-500 dark:text-slate-400">Tax (8%)</span>
+<span class="text-slate-900 dark:text-white font-medium">$11.60</span>
+</div>
+<div class="my-3 h-px w-full bg-slate-100 dark:bg-slate-800"></div>
+<div class="flex justify-between items-center">
+<span class="text-slate-900 dark:text-white text-base font-bold">Total</span>
+<span class="text-xl font-bold text-primary">$171.60</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Action Bar -->
+<div class="fixed bottom-0 left-0 right-0 z-50 p-4 bg-white/80 dark:bg-background-dark/80 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800/50 max-w-md mx-auto">
+<button class="w-full rounded-full bg-gradient-to-r from-[#c6a87c] to-[#b09368] py-4 text-white shadow-lg shadow-primary/25 transition-transform active:scale-[0.98] hover:shadow-primary/40">
+<span class="text-base font-bold tracking-wide">Place Order</span>
+</button>
+</div>
+</div>
+</body></html>

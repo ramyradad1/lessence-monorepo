@@ -62,6 +62,9 @@ export default async function ProductPage({ params }: Props) {
     .eq("slug", slug)
     .single();
 
+  const { data: normalizationsData } = await supabase.from('variant_normalizations').select('*');
+  const normalizations = normalizationsData || [];
+
   if (!product) {
     notFound();
   }
@@ -103,7 +106,7 @@ export default async function ProductPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <ProductDetailClient initialProduct={product} />
+      <ProductDetailClient initialProduct={product} normalizations={normalizations} />
     </>
   );
 }

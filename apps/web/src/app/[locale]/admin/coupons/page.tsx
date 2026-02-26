@@ -19,7 +19,6 @@ export default function AdminCouponsPage() {
     discount_amount: string;
     valid_from: string;
     valid_until: string;
-    valid_until: string;
     usage_limit: string;
   }>(EMPTY_COUPON);
   const [saving, setSaving] = useState(false);
@@ -79,7 +78,7 @@ export default function AdminCouponsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Coupons</h1>
-          <p className="text-white/40 text-sm mt-1">{coupons.length} coupons</p>
+          <p className="text-fg-muted text-sm mt-1">{coupons.length} coupons</p>
         </div>
         <button onClick={openCreate} className="px-5 py-2.5 bg-[#f4c025] text-black text-sm font-bold rounded-xl hover:bg-[#f4c025]/90">
           + New Coupon
@@ -89,16 +88,16 @@ export default function AdminCouponsPage() {
       {/* Form */}
       {showForm && (
         <div className="bg-[#1e1b16] border border-white/5 rounded-2xl p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-white/40 uppercase tracking-wider">
+          <h2 className="text-sm font-semibold text-fg-muted uppercase tracking-wider">
             {editingId ? 'Edit Coupon' : 'Create Coupon'}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-white/40 mb-1 block">Code</label>
+              <label className="text-xs text-fg-muted mb-1 block">Code</label>
               <input value={form.code} onChange={e => setForm({ ...form, code: e.target.value })} placeholder="SUMMER2025" className={inputClass} />
             </div>
             <div>
-              <label className="text-xs text-white/40 mb-1 block">Discount Type</label>
+              <label className="text-xs text-fg-muted mb-1 block">Discount Type</label>
               <select title="Discount Type" value={form.discount_type} onChange={e => setForm({ ...form, discount_type: e.target.value as Coupon['discount_type'] })} className={inputClass}>
                 <option value="percentage" className="bg-[#1e1b16]">Percentage (%)</option>
                 <option value="fixed" className="bg-[#1e1b16]">Fixed ($)</option>
@@ -106,24 +105,24 @@ export default function AdminCouponsPage() {
               </select>
             </div>
             <div>
-              <label className="text-xs text-white/40 mb-1 block">Amount</label>
+              <label className="text-xs text-fg-muted mb-1 block">Amount</label>
               <input type="number" value={form.discount_amount} onChange={e => setForm({ ...form, discount_amount: e.target.value })} placeholder="10" className={inputClass} />
             </div>
             <div>
-              <label className="text-xs text-white/40 mb-1 block">Usage Limit</label>
+              <label className="text-xs text-fg-muted mb-1 block">Usage Limit</label>
               <input type="number" value={form.usage_limit} onChange={e => setForm({ ...form, usage_limit: e.target.value })} placeholder="100 (leave empty for unlimited)" className={inputClass} />
             </div>
             <div>
-              <label className="text-xs text-white/40 mb-1 block">Valid From</label>
+              <label className="text-xs text-fg-muted mb-1 block">Valid From</label>
               <input type="date" title="Valid From" value={form.valid_from} onChange={e => setForm({ ...form, valid_from: e.target.value })} className={inputClass} />
             </div>
             <div>
-              <label className="text-xs text-white/40 mb-1 block">Valid Until</label>
+              <label className="text-xs text-fg-muted mb-1 block">Valid Until</label>
               <input type="date" title="Valid Until" value={form.valid_until} onChange={e => setForm({ ...form, valid_until: e.target.value })} className={inputClass} />
             </div>
           </div>
           <div className="flex gap-3 justify-end">
-            <button onClick={() => { setShowForm(false); setEditingId(null); }} className="text-sm text-white/40 hover:text-white px-4 py-2">Cancel</button>
+            <button onClick={() => { setShowForm(false); setEditingId(null); }} className="text-sm text-fg-muted hover:text-white px-4 py-2">Cancel</button>
             <button onClick={handleSave} disabled={saving || !form.code || !form.discount_amount}
               className="px-5 py-2 bg-[#f4c025] text-black text-sm font-bold rounded-xl hover:bg-[#f4c025]/90 disabled:opacity-50">
               {saving ? 'Saving...' : editingId ? 'Update' : 'Create'}
@@ -143,17 +142,17 @@ export default function AdminCouponsPage() {
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-white/5">
-                  <th className="px-6 py-3 text-xs font-semibold text-white/30 uppercase tracking-wider">Code</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-white/30 uppercase tracking-wider">Discount</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-white/30 uppercase tracking-wider">Usage</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-white/30 uppercase tracking-wider">Valid Until</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-white/30 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-white/30 uppercase tracking-wider text-right">Actions</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-fg-faint uppercase tracking-wider">Code</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-fg-faint uppercase tracking-wider">Discount</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-fg-faint uppercase tracking-wider">Usage</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-fg-faint uppercase tracking-wider">Valid Until</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-fg-faint uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-fg-faint uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {coupons.length === 0 && (
-                  <tr><td colSpan={6} className="px-6 py-12 text-center text-white/20">No coupons yet</td></tr>
+                  <tr><td colSpan={6} className="px-6 py-12 text-center text-fg-faint">No coupons yet</td></tr>
                 )}
                 {coupons.map(coupon => {
                   const expired = coupon.valid_until && new Date(coupon.valid_until) < new Date();
@@ -163,10 +162,10 @@ export default function AdminCouponsPage() {
                       <td className="px-6 py-4 text-sm text-white">
                         {coupon.discount_type === 'percentage' ? `${coupon.discount_amount}%` : coupon.discount_type === 'free_shipping' ? 'Free Shipping' : formatCurrency(Number(coupon.discount_amount), locale)}
                       </td>
-                      <td className="px-6 py-4 text-sm text-white/40">
+                      <td className="px-6 py-4 text-sm text-fg-muted">
                         {coupon.times_used}{coupon.usage_limit ? ` / ${coupon.usage_limit}` : ''}
                       </td>
-                      <td className="px-6 py-4 text-xs text-white/30">
+                      <td className="px-6 py-4 text-xs text-fg-faint">
                         {coupon.valid_until ? new Date(coupon.valid_until).toLocaleDateString() : '∞'}
                         {expired && <span className="ml-1 text-red-400">(expired)</span>}
                       </td>

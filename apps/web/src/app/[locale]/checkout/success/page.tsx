@@ -5,12 +5,15 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 function SuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
+  const showWhatsapp = searchParams.get('whatsapp') === 'true';
   const { clearCart } = useCart();
   const [loading, setLoading] = useState(true);
+  const t = useTranslations('checkout');
 
   useEffect(() => {
     if (sessionId) {
@@ -29,6 +32,8 @@ function SuccessContent() {
     );
   }
 
+  const orderRef = sessionId ? (sessionId.split('_')[1] || sessionId) : '';
+
   return (
     <div className="min-h-screen bg-[#181611] flex flex-col items-center justify-center py-12 px-4">
       <div className="max-w-md w-full space-y-8 bg-[#1e1b16] p-10 rounded-3xl border border-white/5 text-center relative overflow-hidden">
@@ -40,25 +45,39 @@ function SuccessContent() {
           </div>
           
           <h2 className="text-3xl font-light text-white mb-4">
-            Order Confirmed
+            {t('order_confirmed')}
           </h2>
           
-          <p className="text-white/40 text-lg mb-8">
-            Thank you for your purchase. We&apos;ve received your order and will send you an email confirmation shortly.
+          <p className="text-fg-muted text-lg mb-8">
+            {t('thank_you_msg')}
           </p>
           
           {sessionId && (
-            <p className="text-sm text-white/30 mb-10 break-all font-mono">
-              Order Ref: {sessionId.split('_')[1] || sessionId}
+            <p className="text-sm text-fg-faint mb-10 break-all font-mono">
+              {t('order_ref')} {orderRef}
             </p>
+          )}
+
+          {showWhatsapp && sessionId && (
+            <div className="mb-10 p-6 rounded-2xl bg-green-900/20 border border-green-500/20 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <p className="text-green-400 font-medium mb-4">{t('whatsapp_msg')}</p>
+              <a
+                href={`https://wa.me/201000000000?text=${encodeURIComponent(t('order_success_message', { orderRef }))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center bg-green-500 text-white px-6 h-12 rounded-full font-bold tracking-wide w-full hover:bg-green-400 transition-all"
+              >
+                {t('confirm_whatsapp')}
+              </a>
+            </div>
           )}
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/profile" className="inline-flex items-center justify-center border border-white/20 text-white px-6 h-12 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-white hover:text-black transition-all">
-              View Order History
+              {t('view_history')}
             </Link>
             <Link href="/shop" className="inline-flex items-center justify-center bg-[#f4c025] text-black px-6 h-12 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-white transition-all">
-              Continue Shopping <ArrowRight className="ml-2 w-4 h-4" />
+              {t('continue_shopping')} <ArrowRight className="ml-2 w-4 h-4" />
             </Link>
           </div>
         </div>

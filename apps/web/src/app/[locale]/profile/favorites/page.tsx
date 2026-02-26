@@ -71,7 +71,7 @@ export default function FavoritesPage() {
           {/* Back link */}
           <Link
             href="/profile"
-            className={`inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors text-xs uppercase tracking-widest mb-8 ${rtl ? "flex-row-reverse" : ""}`}
+            className={`inline-flex items-center gap-2 text-fg-muted hover:text-white transition-colors text-xs uppercase tracking-widest mb-8 ${rtl ? "flex-row-reverse" : ""}`}
           >
             <ArrowLeft size={14} className={rtl ? "rotate-180" : ""} />
             {t("my_account")}
@@ -80,7 +80,7 @@ export default function FavoritesPage() {
           {/* Header */}
           <div className={`flex items-center gap-3 mb-10 ${rtl ? "flex-row-reverse" : ""}`}>
             <Heart size={28} className="text-primary" />
-            <h1 className="font-display text-4xl text-white">{t("my_favorites")}</h1>
+            <h1 className="font-sans text-4xl text-white">{t("my_favorites")}</h1>
           </div>
 
           {isPageLoading ? (
@@ -94,9 +94,9 @@ export default function FavoritesPage() {
             /* Empty state */
             <div className="flex flex-col items-center justify-center py-32 gap-6 text-center">
               <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center">
-                <Heart size={32} className="text-white/20" />
+                <Heart size={32} className="text-fg-faint" />
               </div>
-              <p className="text-white/40 text-sm">{t("favorites_empty")}</p>
+              <p className="text-fg-muted text-sm">{t("favorites_empty")}</p>
               <Link
                 href="/shop"
                 className="bg-primary text-black px-8 py-3 rounded-full text-xs uppercase tracking-widest font-bold hover:bg-white transition-colors"

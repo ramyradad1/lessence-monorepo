@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import { SupabaseClient, User, Session } from '@supabase/supabase-js';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { Profile } from '@lessence/core';
 
@@ -32,51 +33,58 @@ export const AuthProvider = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const mountedRef = useRef(true);
 
-  const fetchProfile = useCallback(async (userId: string): Promise<Profile | null> => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+  // Profile fetched automatically via React Query when user.id is present
+  const { data: profile = null, isLoading: isProfileLoading } = useQuery<Profile | null>({
+    queryKey: ['profile', user?.id],
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 60, // 1 hour
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user!.id)
+          .single();
 
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // No profile found, create one
-          const { data: userResp } = await supabase.auth.getUser();
-          const newProfile = {
-            id: userId,
-            email: userResp?.user?.email || '',
-            role: 'user'
-          };
-          const { data: inserted, error: insertError } = await supabase
-            .from('profiles')
-            .insert([newProfile])
-            .select()
-            .single();
+        if (error) {
+          if (error.code === 'PGRST116') {
+            // No profile found, create one
+            const { data: userResp } = await supabase.auth.getUser();
+            const newProfile = {
+              id: user!.id,
+              email: userResp?.user?.email || '',
+              role: 'user'
+            };
+            const { data: inserted, error: insertError } = await supabase
+              .from('profiles')
+              .insert([newProfile])
+              .select()
+              .single();
 
-          if (!insertError && inserted) {
-            return inserted as Profile;
+            if (!insertError && inserted) {
+              return inserted as Profile;
+            }
           }
+          return null;
         }
+        return data as Profile;
+      } catch {
         return null;
       }
-      return data as Profile;
-    } catch {
-      return null;
     }
-  }, [supabase]);
+  });
+
+  const isLoading = isAuthLoading || (!!user?.id && isProfileLoading);
 
   useEffect(() => {
     mountedRef.current = true;
 
     // Safety timeout
     const safetyTimer = setTimeout(() => {
-      if (mountedRef.current) setIsLoading(false);
+      if (mountedRef.current) setIsAuthLoading(false);
     }, 10000);
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
@@ -86,18 +94,11 @@ export const AuthProvider = ({
         if (currentSession?.user) {
           setSession(currentSession);
           setUser(currentSession.user);
-
-          // Fetch profile
-          const p = await fetchProfile(currentSession.user.id);
-          if (mountedRef.current) {
-            setProfile(p);
-            setIsLoading(false);
-          }
+          setIsAuthLoading(false);
         } else {
           setSession(null);
           setUser(null);
-          setProfile(null);
-          setIsLoading(false);
+          setIsAuthLoading(false);
         }
       }
     );
@@ -107,28 +108,29 @@ export const AuthProvider = ({
       clearTimeout(safetyTimer);
       authListener.subscription.unsubscribe();
     };
-  }, [supabase, fetchProfile]);
+  }, [supabase]);
+
+  const queryClient = useQueryClient();
 
   const signIn = async (email: string, password?: string) => {
     try {
-      setIsLoading(true);
-      setProfile(null);
+      setIsAuthLoading(true);
       const { error } = password
         ? await supabase.auth.signInWithPassword({ email, password })
         : await supabase.auth.signInWithOtp({ email });
 
-      if (error) setIsLoading(false);
+      if (error) setIsAuthLoading(false);
       // On success, onAuthStateChange will fire and handle the rest
       return { error };
     } catch (err: any) {
-      setIsLoading(false);
+      setIsAuthLoading(false);
       return { error: err };
     }
   };
 
   const signUp = async (email: string, full_name: string, password?: string) => {
     try {
-      setIsLoading(true);
+      setIsAuthLoading(true);
       const { data, error } = password
         ? await supabase.auth.signUp({
           email,
@@ -145,10 +147,10 @@ export const AuthProvider = ({
         });
       }
 
-      if (error) setIsLoading(false);
+      if (error) setIsAuthLoading(false);
       return { error };
     } catch (err: any) {
-      setIsLoading(false);
+      setIsAuthLoading(false);
       return { error: err };
     }
   };
@@ -181,8 +183,8 @@ export const AuthProvider = ({
       // ALWAYS clear local state regardless of Supabase result
       setUser(null);
       setSession(null);
-      setProfile(null);
-      setIsLoading(false);
+      queryClient.removeQueries({ queryKey: ['profile'] });
+      setIsAuthLoading(false);
       console.log('useAuth: SignOut completed, state cleared');
     }
   };

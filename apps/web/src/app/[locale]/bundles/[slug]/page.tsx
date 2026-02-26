@@ -32,7 +32,7 @@ export default function BundlePage({ params }: { params: { slug: string } }) {
     return (
       <div className="min-h-screen bg-[#181611] flex flex-col pt-32 pb-24 items-center justify-center text-center px-4">
         <h1 className="text-3xl font-bold text-white mb-4">Gift Set Not Found</h1>
-        <p className="text-white/60 mb-8 max-w-md">We couldn&apos;t find the gift set you&apos;re looking for. It may have been removed or the URL is incorrect.</p>
+        <p className="text-fg-muted mb-8 max-w-md">We couldn&apos;t find the gift set you&apos;re looking for. It may have been removed or the URL is incorrect.</p>
         <Link href="/" className="bg-[#f4c025] text-black px-8 py-3 rounded-full font-bold tracking-widest uppercase hover:bg-white transition-colors">
           Return Home
         </Link>
@@ -60,7 +60,7 @@ export default function BundlePage({ params }: { params: { slug: string } }) {
     <div className="min-h-screen bg-[#181611] pb-24">
       {/* Navigation Bar */}
       <nav className="fixed top-0 inset-x-0 h-20 bg-[#181611]/80 backdrop-blur-md z-50 border-b border-white/5 flex items-center px-6">
-        <Link href="/" className="flex items-center gap-2 text-white/60 hover:text-white transition-colors group">
+        <Link href="/" className="flex items-center gap-2 text-fg-muted hover:text-white transition-colors group">
           <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
           <span className="text-sm font-medium tracking-widest uppercase">Back to Store</span>
         </Link>
@@ -106,7 +106,7 @@ export default function BundlePage({ params }: { params: { slug: string } }) {
               {formatCurrency(bundle.price, locale)}
             </div>
             {bundle.description && (
-              <p className="text-lg text-white/60 leading-relaxed mb-8">
+              <p className="text-lg text-fg-muted leading-relaxed mb-8">
                 {bundle.description}
               </p>
             )}
@@ -134,7 +134,7 @@ export default function BundlePage({ params }: { params: { slug: string } }) {
                          </div>
                          <div>
                              <h4 className="text-white font-medium">{item.product?.name}</h4>
-                             <div className="text-sm text-white/50 mt-1 flex flex-wrap gap-x-3 gap-y-1">
+                             <div className="text-sm text-fg-muted mt-1 flex flex-wrap gap-x-3 gap-y-1">
                                  <span>Quantity: {item.quantity}</span>
                                  {item.variant && (
                                      <>
@@ -161,7 +161,7 @@ export default function BundlePage({ params }: { params: { slug: string } }) {
               onClick={handleAddToCart}
               disabled={addingToCart || !bundle.is_active}
               className={`w-full h-16 rounded-full flex items-center justify-center gap-3 font-bold tracking-widest uppercase text-sm transition-all relative overflow-hidden group ${
-                !bundle.is_active ? 'bg-white/5 text-white/40 cursor-not-allowed' :
+                !bundle.is_active ? 'bg-white/5 text-fg-muted cursor-not-allowed' :
                 added ? 'bg-green-500 text-white' :
                 'bg-[#f4c025] text-black hover:bg-white hover:scale-[1.02] shadow-[0_0_auto_rgba(244,192,37,0.3)] hover:shadow-[0_0_auto_rgba(255,255,255,0.4)]'
               }`}
@@ -182,7 +182,7 @@ export default function BundlePage({ params }: { params: { slug: string } }) {
                 </>
               )}
             </button>
-            <p className="text-center text-sm text-white/40 font-medium">Free shipping on all gift sets</p>
+            <p className="text-center text-sm text-fg-muted font-medium">Free shipping on all gift sets</p>
           </div>
         </div>
       </main>

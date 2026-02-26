@@ -35,11 +35,11 @@ export function usePerformanceTracking(
 
     return () => {
       // Track unmount duration if needed, or total lifetime
-      const unmountDuration = Date.now() - mountTimeRef.current;
+      const componentLifetime = Date.now() - mountTimeRef.current;
       loggerRef.current?.perf({
         action: `${actionName}_unmount`,
-        message: `Component unmounted after ${unmountDuration}ms`,
-        duration_ms: unmountDuration,
+        message: `Component lifetime: ${componentLifetime}ms`,
+        duration_ms: componentLifetime,
         metadata: { ...metadata, type: 'react_lifetime' }
       });
     };

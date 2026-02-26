@@ -35,5 +35,7 @@
   "saved_successfully": "تم الحفظ بنجاح",
   "my_favorites": "مفضلاتي",
   "favorites_empty": "لم تقم بإضافة أي عناصر إلى المفضلة بعد.",
-  "view_favorites": "عرض المفضلة"
+  "view_favorites": "عرض المفضلة",
+  "select_province": "اختر المحافظة",
+  "phone_label": "رقم الهاتف"
 }

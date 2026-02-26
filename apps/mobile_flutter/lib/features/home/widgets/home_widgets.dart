@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/models/app_models.dart';
 import '../../../core/utils/egp_formatter.dart';
+import '../../../theme/app_colors.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
+// ── Status Banner ──────────────────────────────────────────────────
 class StatusBanner extends StatelessWidget {
   const StatusBanner({
     super.key,
@@ -19,16 +23,23 @@ class StatusBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.black.withOpacity(0.04),
-        border: Border.all(color: Colors.black.withOpacity(0.06)),
+        borderRadius: BorderRadius.circular(14),
+        color: AppColors.primaryMuted,
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
-          Icon(leadingIcon),
-          const SizedBox(width: 10),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(leadingIcon, color: AppColors.primary, size: 20),
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,13 +48,14 @@ class StatusBanner extends StatelessWidget {
                   title,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
+                    color: AppColors.foreground,
                       ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.black54,
+                    color: AppColors.foregroundMuted,
                       ),
                 ),
               ],
@@ -55,6 +67,7 @@ class StatusBanner extends StatelessWidget {
   }
 }
 
+// ── Inline Message ─────────────────────────────────────────────────
 class InlineMessage extends StatelessWidget {
   const InlineMessage({super.key, required this.text});
 
@@ -66,15 +79,31 @@ class InlineMessage extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.orange.withOpacity(0.10),
+        color: AppColors.warningBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange.withOpacity(0.25)),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.25)),
       ),
-      child: Text(text),
+      child: Row(
+        children: [
+          Icon(LucideIcons.info, size: 18, color: AppColors.warning),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: AppColors.warning,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
+// ── Product Card Tile (for Favorites / lists) ──────────────────────
 class ProductCardTile extends StatelessWidget {
   const ProductCardTile({
     super.key,
@@ -96,30 +125,39 @@ class ProductCardTile extends StatelessWidget {
     final l10n = context.l10n;
     final subtitle = product.displaySubtitle(localeCode);
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
+      decoration: AppColors.surfaceCard,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(14),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── Image ──────────────────────────────────
             ClipRRect(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
               child: Container(
-                width: 72,
-                height: 72,
-                color: Colors.black12,
+                width: 76,
+                height: 76,
+                color: AppColors.backgroundSubtle,
                 child: product.imageUrl == null || product.imageUrl!.isEmpty
-                    ? const Icon(Icons.image_not_supported_outlined)
-                    : Image.network(
-                        product.imageUrl!,
+                    ? Icon(
+                        LucideIcons.image,
+                        color: AppColors.foregroundFaint,
+                      )
+                    : CachedNetworkImage(
+                        imageUrl: product.imageUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) =>
-                            const Icon(Icons.image_not_supported_outlined),
+                        errorWidget: (context, url, error) => Icon(
+                          LucideIcons.image_off,
+                          color: AppColors.foregroundFaint,
+                        ),
                       ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
+
+            // ── Info ───────────────────────────────────
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,11 +169,11 @@ class ProductCardTile extends StatelessWidget {
                         ),
                   ),
                   if (subtitle != null && subtitle.isNotEmpty) ...[
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.black54,
+                        color: AppColors.foregroundMuted,
                           ),
                     ),
                   ],
@@ -143,7 +181,8 @@ class ProductCardTile extends StatelessWidget {
                   Text(
                     EgpFormatter.format(product.price, localeCode: localeCode),
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
                         ),
                   ),
                   if (product.variants.isNotEmpty) ...[
@@ -151,7 +190,7 @@ class ProductCardTile extends StatelessWidget {
                     Text(
                       product.variants.first.label(localeCode: localeCode),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.black54,
+                        color: AppColors.foregroundFaint,
                           ),
                     ),
                   ] else if (product.sizeOptions.isNotEmpty) ...[
@@ -159,7 +198,7 @@ class ProductCardTile extends StatelessWidget {
                     Text(
                       product.sizeOptions.first.size,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.black54,
+                        color: AppColors.foregroundFaint,
                           ),
                     ),
                   ],
@@ -167,19 +206,35 @@ class ProductCardTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
+
+            // ── Actions ────────────────────────────────
             Column(
               children: [
                 IconButton(
                   tooltip: l10n.text('favorites'),
                   onPressed: onToggleFavorite,
                   icon: Icon(
-                    isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? Colors.red : null,
+                    isFavorite
+                        ? LucideIcons.heart
+                        : LucideIcons.heart,
+                    color: isFavorite
+                        ? AppColors.error
+                        : AppColors.foregroundFaint,
                   ),
                 ),
-                FilledButton.tonal(
-                  onPressed: onAddToCart,
-                  child: Text(l10n.text('addToCart')),
+                SizedBox(
+                  height: 34,
+                  child: FilledButton(
+                    onPressed: onAddToCart,
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      textStyle: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    child: Text(l10n.text('addToCart')),
+                  ),
                 ),
               ],
             ),
@@ -190,6 +245,7 @@ class ProductCardTile extends StatelessWidget {
   }
 }
 
+// ── Cart Item Card ─────────────────────────────────────────────────
 class CartItemCard extends StatelessWidget {
   const CartItemCard({
     super.key,
@@ -211,53 +267,60 @@ class CartItemCard extends StatelessWidget {
     final l10n = context.l10n;
     final optionLabel = item.variantLabel ?? item.selectedSize;
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
+      decoration: AppColors.surfaceCard,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // ── Image ────────────────────────────
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Container(
-                    width: 56,
-                    height: 56,
-                    color: Colors.black12,
+                    width: 60,
+                    height: 60,
+                    color: AppColors.backgroundSubtle,
                     child: item.imageUrl == null || item.imageUrl!.isEmpty
-                        ? const Icon(Icons.image_not_supported_outlined, size: 20)
-                        : Image.network(
-                            item.imageUrl!,
+                        ? Icon(
+                            LucideIcons.image,
+                            size: 20,
+                            color: AppColors.foregroundFaint,
+                          )
+                        : CachedNetworkImage(
+                            imageUrl: item.imageUrl!,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => const Icon(
-                              Icons.image_not_supported_outlined,
+                            errorWidget: (context, url, error) => Icon(
+                              LucideIcons.image_off,
                               size: 20,
+                              color: AppColors.foregroundFaint,
                             ),
                           ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 14),
+
+                // ── Info ──────────────────────────────
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         item.displayName(localeCode),
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
                       if (optionLabel != null && optionLabel.isNotEmpty)
                         Padding(
-                          padding: const EdgeInsets.only(top: 2),
+                          padding: const EdgeInsets.only(top: 3),
                           child: Text(
                             optionLabel,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.black54,
-                                ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: AppColors.foregroundMuted),
                           ),
                         ),
                     ],
@@ -265,32 +328,50 @@ class CartItemCard extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: onRemove,
-                  icon: const Icon(Icons.delete_outline),
+                  icon: Icon(
+                    LucideIcons.trash_2,
+                    color: AppColors.error.withValues(alpha: 0.7),
+                  ),
                   tooltip: l10n.text('delete'),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
+
+            // ── Quantity + Price ──────────────────────
             Row(
               children: [
-                Text('${l10n.text('qty')}:'),
-                const SizedBox(width: 8),
-                IconButton(
-                  onPressed: onDecrease,
-                  visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.remove_circle_outline),
+                Text(
+                  '${l10n.text('qty')}:',
+                  style: TextStyle(color: AppColors.foregroundMuted),
                 ),
-                Text('${item.quantity}'),
-                IconButton(
+                const SizedBox(width: 8),
+                _QuantityButton(
+                  icon: LucideIcons.minus,
+                  onPressed: onDecrease,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(
+                    '${item.quantity}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+                _QuantityButton(icon: LucideIcons.plus,
                   onPressed: onIncrease,
-                  visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.add_circle_outline),
                 ),
                 const Spacer(),
                 Text(
-                  EgpFormatter.format(item.unitPrice * item.quantity, localeCode: localeCode),
+                  EgpFormatter.format(
+                    item.unitPrice * item.quantity,
+                    localeCode: localeCode,
+                  ),
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
                       ),
                 ),
               ],
@@ -302,6 +383,33 @@ class CartItemCard extends StatelessWidget {
   }
 }
 
+class _QuantityButton extends StatelessWidget {
+  const _QuantityButton({required this.icon, required this.onPressed});
+
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: AppColors.primaryMuted,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+      ),
+      child: IconButton(
+        onPressed: onPressed,
+        padding: EdgeInsets.zero,
+        iconSize: 16,
+        icon: Icon(icon, color: AppColors.primary),
+      ),
+    );
+  }
+}
+
+// ── Address Card Tile ──────────────────────────────────────────────
 class AddressCardTile extends StatelessWidget {
   const AddressCardTile({
     super.key,
@@ -330,11 +438,12 @@ class AddressCardTile extends StatelessWidget {
     ];
 
     return Container(
-      margin: const EdgeInsets.only(top: 8),
-      padding: const EdgeInsets.all(10),
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black12),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,37 +460,47 @@ class AddressCardTile extends StatelessWidget {
               ),
               if (address.isDefault)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(999),
-                    color: Colors.black12,
+                    gradient: AppColors.primaryGradient,
                   ),
                   child: Text(
                     context.l10n.text('defaultAddress'),
-                    style: theme.textTheme.labelSmall,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               IconButton(
                 onPressed: onEdit,
                 visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.edit_outlined),
+                icon: const Icon(LucideIcons.pencil, size: 18),
+                color: AppColors.primary,
                 tooltip: context.l10n.text('edit'),
               ),
               IconButton(
                 onPressed: onDelete,
                 visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.delete_outline),
+                icon: const Icon(LucideIcons.trash_2, size: 18),
+                color: AppColors.error.withValues(alpha: 0.7),
                 tooltip: context.l10n.text('delete'),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           for (final line in lines.where((line) => line.trim().isNotEmpty))
             Padding(
               padding: const EdgeInsets.only(bottom: 2),
               child: Text(
                 line,
-                style: theme.textTheme.bodySmall?.copyWith(color: Colors.black87),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: AppColors.foregroundMuted,
+                ),
               ),
             ),
         ],

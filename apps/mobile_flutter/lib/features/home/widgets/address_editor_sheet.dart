@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/models/app_models.dart';
 import '../../../core/providers/profile_provider.dart';
+import '../../../theme/app_colors.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class AddressEditorSheet extends ConsumerStatefulWidget {
   const AddressEditorSheet({super.key, this.address});
@@ -16,6 +18,7 @@ class AddressEditorSheet extends ConsumerStatefulWidget {
 
 class _AddressEditorSheetState extends ConsumerState<AddressEditorSheet> {
   final _formKey = GlobalKey<FormState>();
+  
   late final TextEditingController _fullNameController;
   late final TextEditingController _phoneController;
   late final TextEditingController _line1Controller;
@@ -23,22 +26,21 @@ class _AddressEditorSheetState extends ConsumerState<AddressEditorSheet> {
   late final TextEditingController _cityController;
   late final TextEditingController _stateController;
   late final TextEditingController _postalController;
-  late final TextEditingController _countryController;
-  late bool _isDefault;
+  
+  bool _isDefault = false;
 
   @override
   void initState() {
     super.initState();
-    final address = widget.address;
-    _fullNameController = TextEditingController(text: address?.fullName ?? '');
-    _phoneController = TextEditingController(text: address?.phone ?? '');
-    _line1Controller = TextEditingController(text: address?.addressLine1 ?? '');
-    _line2Controller = TextEditingController(text: address?.addressLine2 ?? '');
-    _cityController = TextEditingController(text: address?.city ?? '');
-    _stateController = TextEditingController(text: address?.state ?? '');
-    _postalController = TextEditingController(text: address?.postalCode ?? '');
-    _countryController = TextEditingController(text: address?.country ?? 'EG');
-    _isDefault = address?.isDefault ?? false;
+    final addr = widget.address;
+    _fullNameController = TextEditingController(text: addr?.fullName ?? '');
+    _phoneController = TextEditingController(text: addr?.phone ?? '');
+    _line1Controller = TextEditingController(text: addr?.addressLine1 ?? '');
+    _line2Controller = TextEditingController(text: addr?.addressLine2 ?? '');
+    _cityController = TextEditingController(text: addr?.city ?? '');
+    _stateController = TextEditingController(text: addr?.state ?? '');
+    _postalController = TextEditingController(text: addr?.postalCode ?? '');
+    _isDefault = addr?.isDefault ?? false;
   }
 
   @override
@@ -50,147 +52,11 @@ class _AddressEditorSheetState extends ConsumerState<AddressEditorSheet> {
     _cityController.dispose();
     _stateController.dispose();
     _postalController.dispose();
-    _countryController.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final profileState = ref.watch(profileControllerProvider);
-    final isEditing = widget.address != null;
-
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: MediaQuery.viewInsetsOf(context).bottom + 16,
-      ),
-      child: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                isEditing ? l10n.text('editAddress') : l10n.text('newAddress'),
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-              const SizedBox(height: 12),
-              _AddressField(
-                controller: _fullNameController,
-                label: l10n.text('fullNameLabel'),
-                requiredField: true,
-              ),
-              const SizedBox(height: 8),
-              _AddressField(
-                controller: _phoneController,
-                label: l10n.text('phoneLabel'),
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 8),
-              _AddressField(
-                controller: _line1Controller,
-                label: l10n.text('addressLine1'),
-                requiredField: true,
-              ),
-              const SizedBox(height: 8),
-              _AddressField(
-                controller: _line2Controller,
-                label: l10n.text('addressLine2'),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: _AddressField(
-                      controller: _cityController,
-                      label: l10n.text('city'),
-                      requiredField: true,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _AddressField(
-                      controller: _stateController,
-                      label: l10n.text('state'),
-                      requiredField: true,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: _AddressField(
-                      controller: _postalController,
-                      label: l10n.text('postalCode'),
-                      requiredField: true,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _AddressField(
-                      controller: _countryController,
-                      label: l10n.text('country'),
-                      requiredField: true,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: _isDefault,
-                onChanged: (value) => setState(() => _isDefault = value),
-                title: Text(l10n.text('defaultAddress')),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: profileState.isSaving
-                          ? null
-                          : () => Navigator.of(context).pop(),
-                      child: Text(l10n.text('cancel')),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: profileState.isSaving ? null : _save,
-                      child: profileState.isSaving
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(l10n.text('saveAddress')),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _save() async {
-    final l10n = context.l10n;
-    if (!_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.text('fillRequiredFields'))),
-      );
-      return;
-    }
+  void _save() {
+    if (!_formKey.currentState!.validate()) return;
 
     final draft = AddressDraft(
       fullName: _fullNameController.text.trim(),
@@ -200,51 +66,191 @@ class _AddressEditorSheetState extends ConsumerState<AddressEditorSheet> {
       city: _cityController.text.trim(),
       state: _stateController.text.trim(),
       postalCode: _postalController.text.trim(),
-      country: _countryController.text.trim().toUpperCase(),
+      country: 'Egypt',
       isDefault: _isDefault,
     );
 
-    await ref.read(profileControllerProvider.notifier).saveAddress(
-          draft,
-          addressId: widget.address?.id,
-        );
-
-    if (!mounted) return;
-    final errorMessage = ref.read(profileControllerProvider).errorMessage;
-    if (errorMessage == null) {
-      Navigator.of(context).pop();
-    }
+    ref
+        .read(profileControllerProvider.notifier)
+        .saveAddress(draft, addressId: widget.address?.id);
+    Navigator.pop(context);
   }
-}
-
-class _AddressField extends StatelessWidget {
-  const _AddressField({
-    required this.controller,
-    required this.label,
-    this.requiredField = false,
-    this.keyboardType,
-  });
-
-  final TextEditingController controller;
-  final String label;
-  final bool requiredField;
-  final TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
+    final l10n = context.l10n;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        left: 20,
+        right: 20,
+        top: 24,
       ),
-      validator: (value) {
-        if (requiredField && (value == null || value.trim().isEmpty)) {
-          return context.l10n.text('fillRequiredFields');
-        }
-        return null;
-      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                widget.address == null
+                    ? l10n.text('addAddress')
+                    : l10n.text('editAddress'),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              IconButton(
+                icon: const Icon(LucideIcons.x),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Flexible(
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _fullNameController,
+                      decoration: InputDecoration(
+                        labelText: l10n.text('fullNameLabel'),
+                        prefixIcon: const Icon(LucideIcons.user),
+                      ),
+                      validator: (v) => v == null || v.trim().isEmpty
+                          ? l10n.text('required')
+                          : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        labelText: l10n.text('phoneLabel'),
+                        prefixIcon: const Icon(LucideIcons.phone),
+                      ),
+                      validator: (v) => v == null || v.trim().isEmpty
+                          ? l10n.text('required')
+                          : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _line1Controller,
+                      decoration: InputDecoration(
+                        labelText: l10n.text('addressLabel'),
+                        prefixIcon: const Icon(LucideIcons.map_pin),
+                      ),
+                      validator: (v) => v == null || v.trim().isEmpty
+                          ? l10n.text('required')
+                          : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _line2Controller,
+                      decoration: InputDecoration(
+                        labelText: l10n.text('apartmentLabel'),
+                        prefixIcon: const Icon(LucideIcons.building),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _cityController,
+                            decoration: InputDecoration(
+                              labelText: l10n.text('cityLabel'),
+                            ),
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? l10n.text('required')
+                                : null,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _stateController,
+                            decoration: InputDecoration(
+                              labelText: l10n.text('stateLabel'),
+                            ),
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? l10n.text('required')
+                                : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _postalController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: l10n.text('postalLabel'),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.backgroundSubtle,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: CheckboxListTile(
+                        value: _isDefault,
+                        onChanged: (v) =>
+                            setState(() => _isDefault = v ?? false),
+                        title: Text(l10n.text('setAsDefault')),
+                        activeColor: AppColors.primary,
+                        controlAffinity: ListTileControlAffinity.leading,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 52,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: AppColors.primaryGradient,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.35),
+                    blurRadius: 14,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                onPressed: _save,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  l10n.text('saveAddress'),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+        ],
+      ),
     );
   }
 }

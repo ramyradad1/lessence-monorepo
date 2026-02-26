@@ -1,18 +1,80 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/app_models.dart';
 import 'auth_provider.dart';
 import 'products_provider.dart';
+import '../storage/local_db.dart';
+import '../storage/sync_service.dart';
+import '../utils/fetch_logger.dart';
 
-final cartControllerProvider = StateNotifierProvider<CartController, CartState>(
-  (ref) {
-    return CartController(ref);
-  },
+final cartRepositoryProvider = Provider<CartRepository>((ref) {
+  return CartRepository(ref.watch(supabaseClientProvider));
+});
+
+class CartRepository {
+  CartRepository(this._supabase);
+  final SupabaseClient _supabase;
+
+  Future<String?> fetchCartId(String userId) async {
+    final cartRow = await _supabase
+        .from('carts')
+        .select('id')
+        .eq('user_id', userId)
+        .executeMaybeSingleAndLog('CartRepository:fetchCartId');
+
+    if (cartRow == null) return null;
+    return (cartRow as Map)['id'] as String?;
+  }
+
+  Future<List<Map<String, dynamic>>> fetchCartItems(String cartId) async {
+    final rows = await _supabase
+        .from('cart_items')
+        .select('*')
+        .eq('cart_id', cartId)
+        .executeAndLog('CartRepository:fetchCartItems');
+
+    return (rows as List<dynamic>)
+        .whereType<Map<String, dynamic>>()
+        .map((row) => Map<String, dynamic>.from(row))
+        .toList(growable: false);
+  }
+
+  Future<String> ensureUserCartId(String userId) async {
+    final existing = await _supabase
+        .from('carts')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+    if (existing != null) {
+      return (existing as Map)['id'] as String;
+    }
+
+    final created = await _supabase
+        .from('carts')
+        .insert(<String, dynamic>{'user_id': userId})
+        .select('id')
+        .single();
+
+    return (created as Map)['id'] as String;
+  }
+
+  Future<void> replaceServerCartItems(
+    String cartId,
+    List<Map<String, dynamic>> payload,
+  ) async {
+    await _supabase.from('cart_items').delete().eq('cart_id', cartId);
+    if (payload.isNotEmpty) {
+      await _supabase.from('cart_items').insert(payload);
+    }
+  }
+}
+
+final cartControllerProvider = NotifierProvider<CartController, CartState>(
+  CartController.new,
 );
 
 class CartState {
@@ -51,25 +113,31 @@ class CartState {
   }
 }
 
-class CartController extends StateNotifier<CartState> {
-  CartController(this._ref) : super(const CartState()) {
-    _authSubscription = _supabase.auth.onAuthStateChange.listen(
-      (event) => _handleAuthChange(event.session?.user.id),
-    );
-    _bootstrap();
-  }
-
-  static const _storageKey = 'lessence_cart';
-
-  final Ref _ref;
-  late final SupabaseClient _supabase = _ref.read(supabaseClientProvider);
-  late final ProductsRepository _productsRepository = _ref.read(
-    productsRepositoryProvider,
-  );
+class CartController extends Notifier<CartState> {
   StreamSubscription<AuthState>? _authSubscription;
   String? _lastUserId;
   String? _serverCartId;
   bool _bootstrapped = false;
+
+  SupabaseClient get _supabase => ref.read(supabaseClientProvider);
+  CartRepository get _cartRepository => ref.read(cartRepositoryProvider);
+  ProductsRepository get _productsRepository =>
+      ref.read(productsRepositoryProvider);
+  LocalDb get _localDb => LocalDb.instance;
+  SyncService get _syncService => ref.read(syncServiceProvider);
+
+  @override
+  CartState build() {
+    _authSubscription?.cancel();
+    _authSubscription = _supabase.auth.onAuthStateChange.listen(
+      (event) => _handleAuthChange(event.session?.user.id),
+    );
+    ref.onDispose(() {
+      _authSubscription?.cancel();
+    });
+    Future.microtask(_bootstrap);
+    return const CartState();
+  }
 
   Future<void> _bootstrap() async {
     state = state.copyWith(isLoading: true, clearError: true);
@@ -193,13 +261,23 @@ class CartController extends StateNotifier<CartState> {
       await _replaceServerCart(userId, next);
       state = state.copyWith(isSyncing: false, clearError: true);
     } on PostgrestException catch (error) {
+      // Offline fallback via SyncService enqueue
+      await _enqueueCartSync(next);
       state = state.copyWith(isSyncing: false, errorMessage: error.message);
     } catch (_) {
+      // Offline fallback 
+      await _enqueueCartSync(next);
       state = state.copyWith(
         isSyncing: false,
-        errorMessage: 'Failed to sync cart',
+        errorMessage: 'Added to sync queue',
       );
     }
+  }
+
+  Future<void> _enqueueCartSync(List<CartItemModel> items) async {
+    await _syncService.enqueueAction('sync_cart', {
+      'items': items.map((i) => i.toLocalJson()).toList(),
+    });
   }
 
   Future<void> _mergeLocalAndServer(String userId) async {
@@ -216,7 +294,13 @@ class CartController extends StateNotifier<CartState> {
         clearError: true,
       );
       await _writeLocalCart(mergedItems);
-      await _replaceServerCart(userId, mergedItems);
+      
+      try {
+        await _replaceServerCart(userId, mergedItems);
+      } catch (e) {
+        // Enqueue if offline during merge replace
+        await _enqueueCartSync(mergedItems);
+      }
 
       state = state.copyWith(isSyncing: false, clearError: true);
     } on PostgrestException catch (error) {
@@ -230,31 +314,18 @@ class CartController extends StateNotifier<CartState> {
   }
 
   Future<List<CartItemModel>> _fetchServerCartItems(String userId) async {
-    final cartRow = await _supabase
-        .from('carts')
-        .select('id')
-        .eq('user_id', userId)
-        .maybeSingle();
+    final cartId = await _cartRepository.fetchCartId(userId);
 
-    if (cartRow == null) {
+    if (cartId == null) {
       _serverCartId = null;
       return const <CartItemModel>[];
     }
 
-    final cartMap = Map<String, dynamic>.from(cartRow as Map);
-    final cartId = cartMap['id'] as String?;
-    if (cartId == null) return const <CartItemModel>[];
-
     _serverCartId = cartId;
 
-    final rows = await _supabase
-        .from('cart_items')
-        .select('*')
-        .eq('cart_id', cartId);
+    final rows = await _cartRepository.fetchCartItems(cartId);
 
-    final cartItemsRows = (rows as List<dynamic>)
-        .whereType<Map<String, dynamic>>()
-        .map((row) => Map<String, dynamic>.from(row))
+    final cartItemsRows = rows
         .where((row) => row['product_id'] != null)
         .toList(growable: false);
 
@@ -271,7 +342,7 @@ class CartController extends StateNotifier<CartState> {
         .toSet()
         .toList(growable: false);
 
-    final productsById = await _productsRepository.fetchProductsByIds(
+    final productsById = await _productsRepository.fetchProductsByIdsBatched(
       productIds,
     );
     final variantsById = await _productsRepository.fetchVariantsByIds(
@@ -310,28 +381,8 @@ class CartController extends StateNotifier<CartState> {
 
   Future<String> _ensureUserCartId(String userId) async {
     if (_serverCartId != null) return _serverCartId!;
-
-    final existing = await _supabase
-        .from('carts')
-        .select('id')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-    if (existing != null) {
-      final id = (existing as Map)['id'] as String;
-      _serverCartId = id;
-      return id;
-    }
-
-    final created = await _supabase
-        .from('carts')
-        .insert(<String, dynamic>{'user_id': userId})
-        .select('id')
-        .single();
-
-    final id = (created as Map)['id'] as String;
-    _serverCartId = id;
-    return id;
+    _serverCartId = await _cartRepository.ensureUserCartId(userId);
+    return _serverCartId!;
   }
 
   Future<void> _replaceServerCart(
@@ -340,13 +391,9 @@ class CartController extends StateNotifier<CartState> {
   ) async {
     final cartId = await _ensureUserCartId(userId);
 
-    final existingRows = await _supabase
-        .from('cart_items')
-        .select('*')
-        .eq('cart_id', cartId);
+    final existingRows = await _cartRepository.fetchCartItems(cartId);
 
-    final preservedBundleRows = (existingRows as List<dynamic>)
-        .whereType<Map<String, dynamic>>()
+    final preservedBundleRows = existingRows
         .where((row) => row['bundle_id'] != null)
         .map(
           (row) => <String, dynamic>{
@@ -356,8 +403,6 @@ class CartController extends StateNotifier<CartState> {
           },
         )
         .toList(growable: false);
-
-    await _supabase.from('cart_items').delete().eq('cart_id', cartId);
 
     final payload = items
         .map(
@@ -372,9 +417,7 @@ class CartController extends StateNotifier<CartState> {
         .followedBy(preservedBundleRows)
         .toList(growable: false);
 
-    if (payload.isEmpty) return;
-
-    await _supabase.from('cart_items').insert(payload);
+    await _cartRepository.replaceServerCartItems(cartId, payload);
   }
 
   List<CartItemModel> _mergeCartLists(
@@ -427,41 +470,19 @@ class CartController extends StateNotifier<CartState> {
   }
 
   Future<List<CartItemModel>> _readLocalCart() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_storageKey);
-    if (raw == null || raw.isEmpty) return const <CartItemModel>[];
-
-    try {
-      final decoded = jsonDecode(raw);
-      if (decoded is! List<dynamic>) return const <CartItemModel>[];
-
-      return decoded
-          .whereType<Map>()
-          .map(
-            (row) =>
-                CartItemModel.fromLocalJson(Map<String, dynamic>.from(row)),
-          )
-          .toList(growable: false);
-    } catch (_) {
-      return const <CartItemModel>[];
-    }
+    final mapList = await _localDb.getLocalCart();
+    return mapList.map(CartItemModel.fromLocalJson).toList();
   }
 
   Future<void> _writeLocalCart(List<CartItemModel> items) async {
-    final prefs = await SharedPreferences.getInstance();
     final payload = items
         .map((item) => item.toLocalJson())
         .toList(growable: false);
-    await prefs.setString(_storageKey, jsonEncode(payload));
-  }
-
-  @override
-  void dispose() {
-    _authSubscription?.cancel();
-    super.dispose();
+    await _localDb.saveLocalCart(payload);
   }
 }
 
 extension _FirstOrNullExtension<T> on Iterable<T> {
   T? get firstOrNull => isEmpty ? null : first;
 }
+

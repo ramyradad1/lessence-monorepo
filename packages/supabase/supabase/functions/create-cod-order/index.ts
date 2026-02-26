@@ -88,9 +88,10 @@ serve(async (req: Request) => {
                   .from('inventory')
                   .select('quantity_available')
                   .eq('product_id', bItem.product_id)
-                  .single(); // Doesn't perfectly handle selectedSize if bundles don't specify size, but we'll assume it's general for now or skipped
+                  .maybeSingle(); 
                   
-               if (invError || !inventory || inventory.quantity_available < (item.quantity * bItem.quantity)) {
+               const availableQty = inventory?.quantity_available ?? Infinity;
+               if (invError || availableQty < (item.quantity * bItem.quantity)) {
                    throw new Error(`Insufficient stock for a component of bundle ${bundle.name}`);
                }
             }
@@ -112,7 +113,7 @@ serve(async (req: Request) => {
 
         const { data: product, error: productError } = await supabaseClient
           .from('products')
-          .select('name, size_options')
+          .select('name, price, size_options')
           .eq('id', productId)
           .single()
 
@@ -153,9 +154,11 @@ serve(async (req: Request) => {
               .select('quantity_available')
               .eq('product_id', productId)
               .eq('size', selectedSize)
-              .single();
-              
-            if (inventoryError || !inventory || inventory.quantity_available < item.quantity) {
+              .maybeSingle();
+
+            const availableQty = inventory?.quantity_available ?? Infinity;
+            
+            if (inventoryError || availableQty < item.quantity) {
               throw new Error(`Insufficient stock for ${product.name} (${selectedSize})`)
             }
         }

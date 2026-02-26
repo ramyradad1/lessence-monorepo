@@ -24,7 +24,7 @@ export default function CheckoutCancelPage() {
             {t('payment_cancelled')}
           </h2>
           
-          <p className="text-white/40 text-lg mb-8">
+          <p className="text-fg-muted text-lg mb-8">
             {t('payment_cancelled_message')}
           </p>
 

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import { useAdminCustomers } from '@lessence/supabase';
 import { Search, ArrowUpDown, User as UserIcon, Mail, Phone, ShoppingBag, Loader2 } from 'lucide-react';
@@ -40,13 +41,13 @@ export default function AdminCustomersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white">Customers</h1>
-        <p className="text-white/40 text-sm mt-1">{totalCount} total customers</p>
+        <p className="text-fg-muted text-sm mt-1">{totalCount} total customers</p>
       </div>
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-fg-faint" />
           <input
             type="text"
             placeholder="Search by name or email..."
@@ -56,7 +57,7 @@ export default function AdminCustomersPage() {
           />
         </div>
         <div className="relative">
-          <ArrowUpDown size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" />
+          <ArrowUpDown size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-fg-faint pointer-events-none" />
           <select
             value={sort}
             onChange={e => { setSort(e.target.value); setPage(1); }}
@@ -81,16 +82,16 @@ export default function AdminCustomersPage() {
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-white/5">
-                  <th className="px-6 py-3 text-xs font-semibold text-white/30 uppercase tracking-wider">Customer</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-white/30 uppercase tracking-wider hidden md:table-cell">Phone</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-white/30 uppercase tracking-wider text-center">Orders</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-white/30 uppercase tracking-wider text-right">Total Spend</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-white/30 uppercase tracking-wider text-right hidden sm:table-cell">Last Order</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-fg-faint uppercase tracking-wider">Customer</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-fg-faint uppercase tracking-wider hidden md:table-cell">Phone</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-fg-faint uppercase tracking-wider text-center">Orders</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-fg-faint uppercase tracking-wider text-right">Total Spend</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-fg-faint uppercase tracking-wider text-right hidden sm:table-cell">Last Order</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {customers.length === 0 && (
-                  <tr><td colSpan={5} className="px-6 py-12 text-center text-white/20">No customers found</td></tr>
+                  <tr><td colSpan={5} className="px-6 py-12 text-center text-fg-faint">No customers found</td></tr>
                 )}
                 {customers.map(c => (
                   <tr key={c.id} className="hover:bg-white/[0.02] transition-colors group">
@@ -98,7 +99,7 @@ export default function AdminCustomersPage() {
                       <Link href={`/admin/customers/${c.id}`} className="flex items-center gap-3 group-hover:text-[#f4c025] transition-colors">
                         <div className="w-10 h-10 rounded-full bg-[#f4c025]/10 flex items-center justify-center text-[#f4c025] shrink-0">
                           {c.avatar_url ? (
-                            <img src={c.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+                            <Image src={c.avatar_url} alt="" width={40} height={40} unoptimized className="w-full h-full rounded-full object-cover" />
                           ) : (
                             <UserIcon size={18} />
                           )}
@@ -107,7 +108,7 @@ export default function AdminCustomersPage() {
                           <div className="text-sm font-medium text-white truncate group-hover:text-[#f4c025] transition-colors">
                             {c.full_name || 'Anonymous'}
                           </div>
-                          <div className="text-xs text-white/40 flex items-center gap-1 truncate">
+                          <div className="text-xs text-fg-muted flex items-center gap-1 truncate">
                             <Mail size={11} /> {c.email}
                           </div>
                         </div>
@@ -115,21 +116,21 @@ export default function AdminCustomersPage() {
                     </td>
                     <td className="px-6 py-4 hidden md:table-cell">
                       {c.phone ? (
-                        <span className="text-sm text-white/60 flex items-center gap-1"><Phone size={12} /> {c.phone}</span>
+                        <span className="text-sm text-fg-muted flex items-center gap-1"><Phone size={12} /> {c.phone}</span>
                       ) : (
-                        <span className="text-xs text-white/20">—</span>
+                        <span className="text-xs text-fg-faint">—</span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className="inline-flex items-center gap-1 text-sm font-medium text-white">
-                        <ShoppingBag size={13} className="text-white/30" /> {c.total_orders}
+                        <ShoppingBag size={13} className="text-fg-faint" /> {c.total_orders}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <span className="text-sm font-semibold text-[#f4c025]">{formatCurrency(Number(c.total_spend), locale)}</span>
                     </td>
                     <td className="px-6 py-4 text-right hidden sm:table-cell">
-                      <span className="text-xs text-white/30">
+                      <span className="text-xs text-fg-faint">
                         {c.last_order_date ? new Date(c.last_order_date).toLocaleDateString() : 'Never'}
                       </span>
                     </td>
@@ -147,15 +148,15 @@ export default function AdminCustomersPage() {
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="text-sm text-white/40 hover:text-white disabled:opacity-30 px-3 py-1.5 bg-white/5 rounded-lg"
+            className="text-sm text-fg-muted hover:text-white disabled:opacity-30 px-3 py-1.5 bg-white/5 rounded-lg"
           >
             ← Prev
           </button>
-          <span className="text-sm text-white/40">Page {page}</span>
+          <span className="text-sm text-fg-muted">Page {page}</span>
           <button
             onClick={() => setPage(p => p + 1)}
             disabled={page * 25 >= totalCount}
-            className="text-sm text-white/40 hover:text-white disabled:opacity-30 px-3 py-1.5 bg-white/5 rounded-lg"
+            className="text-sm text-fg-muted hover:text-white disabled:opacity-30 px-3 py-1.5 bg-white/5 rounded-lg"
           >
             Next →
           </button>

@@ -5,11 +5,83 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/app_models.dart';
 import 'auth_provider.dart';
+import '../utils/fetch_logger.dart';
+
+final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
+  return ProfileRepository(ref.watch(supabaseClientProvider));
+});
+
+class ProfileRepository {
+  ProfileRepository(this._supabase);
+  final SupabaseClient _supabase;
+
+  Future<Map<String, dynamic>?> fetchProfile(String userId) async {
+    final response = await _supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+    return response == null ? null : Map<String, dynamic>.from(response as Map);
+  }
+
+  Future<List<Map<String, dynamic>>> fetchAddresses(String userId) async {
+    final response = await _supabase
+        .from('addresses')
+        .select('*')
+        .eq('user_id', userId)
+        .order('is_default', ascending: false)
+        .order('created_at', ascending: false)
+        .executeAndLog('ProfileRepository:fetchAddresses');
+
+    return (response as List<dynamic>)
+        .whereType<Map<String, dynamic>>()
+        .map((row) => Map<String, dynamic>.from(row))
+        .toList(growable: false);
+  }
+
+  Future<void> updateProfile(
+    String userId,
+    Map<String, dynamic> updates,
+  ) async {
+    await _supabase.from('profiles').update(updates).eq('id', userId);
+  }
+
+  Future<void> clearDefaultAddresses(String userId) async {
+    await _supabase
+        .from('addresses')
+        .update(<String, dynamic>{'is_default': false})
+        .eq('user_id', userId);
+  }
+
+  Future<void> insertAddress(Map<String, dynamic> address) async {
+    await _supabase.from('addresses').insert(address);
+  }
+
+  Future<void> updateAddress(
+    String addressId,
+    String userId,
+    Map<String, dynamic> updates,
+  ) async {
+    await _supabase
+        .from('addresses')
+        .update(updates)
+        .eq('id', addressId)
+        .eq('user_id', userId);
+  }
+
+  Future<void> deleteAddress(String addressId, String userId) async {
+    await _supabase
+        .from('addresses')
+        .delete()
+        .eq('id', addressId)
+        .eq('user_id', userId);
+  }
+}
 
 final profileControllerProvider =
-    StateNotifierProvider<ProfileController, ProfileFeatureState>((ref) {
-      return ProfileController(ref);
-    });
+    NotifierProvider<ProfileController, ProfileFeatureState>(
+      ProfileController.new,
+    );
 
 class ProfileFeatureState {
   const ProfileFeatureState({
@@ -51,17 +123,24 @@ class ProfileFeatureState {
   static const empty = ProfileFeatureState();
 }
 
-class ProfileController extends StateNotifier<ProfileFeatureState> {
-  ProfileController(this._ref) : super(ProfileFeatureState.empty) {
+class ProfileController extends Notifier<ProfileFeatureState> {
+  StreamSubscription<AuthState>? _authSubscription;
+
+  SupabaseClient get _supabase => ref.read(supabaseClientProvider);
+  ProfileRepository get _repository => ref.read(profileRepositoryProvider);
+
+  @override
+  ProfileFeatureState build() {
+    _authSubscription?.cancel();
     _authSubscription = _supabase.auth.onAuthStateChange.listen(
       (event) => _handleAuth(event.session?.user),
     );
-    _handleAuth(_supabase.auth.currentUser);
+    ref.onDispose(() {
+      _authSubscription?.cancel();
+    });
+    Future.microtask(() => _handleAuth(_supabase.auth.currentUser));
+    return ProfileFeatureState.empty;
   }
-
-  final Ref _ref;
-  late final SupabaseClient _supabase = _ref.read(supabaseClientProvider);
-  StreamSubscription<AuthState>? _authSubscription;
 
   Future<void> _handleAuth(User? user) async {
     if (user == null) {
@@ -81,28 +160,15 @@ class ProfileController extends StateNotifier<ProfileFeatureState> {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      final profileResult = await _supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle();
+      final profileMap = await _repository.fetchProfile(user.id);
 
-      final profileMap = profileResult == null
-          ? null
-          : Map<String, dynamic>.from(profileResult as Map);
       final profile = profileMap != null
           ? AppProfile.fromMap(profileMap)
           : _fallbackProfileFromUser(user);
 
-      final addressesResult = await _supabase
-          .from('addresses')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('is_default', ascending: false)
-          .order('created_at', ascending: false);
+      final addressesResult = await _repository.fetchAddresses(user.id);
 
-      final addresses = (addressesResult as List<dynamic>)
-          .whereType<Map<String, dynamic>>()
+      final addresses = addressesResult
           .map(AddressModel.fromMap)
           .toList(growable: false);
 
@@ -138,13 +204,10 @@ class ProfileController extends StateNotifier<ProfileFeatureState> {
 
     state = state.copyWith(isSaving: true, clearError: true);
     try {
-      await _supabase
-          .from('profiles')
-          .update(<String, dynamic>{
-            'full_name': fullName.trim().isEmpty ? null : fullName.trim(),
-            'phone': phone.trim().isEmpty ? null : phone.trim(),
-          })
-          .eq('id', user.id);
+      await _repository.updateProfile(user.id, <String, dynamic>{
+        'full_name': fullName.trim().isEmpty ? null : fullName.trim(),
+        'phone': phone.trim().isEmpty ? null : phone.trim(),
+      });
 
       await refresh();
     } on PostgrestException catch (error) {
@@ -165,20 +228,17 @@ class ProfileController extends StateNotifier<ProfileFeatureState> {
 
     try {
       if (draft.isDefault) {
-        await _supabase
-            .from('addresses')
-            .update(<String, dynamic>{'is_default': false})
-            .eq('user_id', user.id);
+        await _repository.clearDefaultAddresses(user.id);
       }
 
       if (addressId == null) {
-        await _supabase.from('addresses').insert(draft.toInsertMap(user.id));
+        await _repository.insertAddress(draft.toInsertMap(user.id));
       } else {
-        await _supabase
-            .from('addresses')
-            .update(draft.toUpdateMap())
-            .eq('id', addressId)
-            .eq('user_id', user.id);
+        await _repository.updateAddress(
+          addressId,
+          user.id,
+          draft.toUpdateMap(),
+        );
       }
 
       await refresh();
@@ -198,11 +258,7 @@ class ProfileController extends StateNotifier<ProfileFeatureState> {
 
     state = state.copyWith(isSaving: true, clearError: true);
     try {
-      await _supabase
-          .from('addresses')
-          .delete()
-          .eq('id', addressId)
-          .eq('user_id', user.id);
+      await _repository.deleteAddress(addressId, user.id);
       await refresh();
     } on PostgrestException catch (error) {
       state = state.copyWith(isSaving: false, errorMessage: error.message);
@@ -224,11 +280,5 @@ class ProfileController extends StateNotifier<ProfileFeatureState> {
       fullName: metadata['full_name'] as String?,
       phone: metadata['phone'] as String?,
     );
-  }
-
-  @override
-  void dispose() {
-    _authSubscription?.cancel();
-    super.dispose();
   }
 }

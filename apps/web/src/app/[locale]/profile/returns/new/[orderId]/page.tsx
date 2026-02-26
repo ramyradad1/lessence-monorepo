@@ -149,11 +149,11 @@ export default function NewReturnPage() {
         <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-6">
           <CheckCircle2 size={32} className="text-green-500" />
         </div>
-        <h1 className="font-display text-2xl text-white mb-2">Request Submitted</h1>
-        <p className="text-white/40 text-center max-w-sm mb-8">
+        <h1 className="font-sans text-2xl text-white mb-2">Request Submitted</h1>
+        <p className="text-fg-muted text-center max-w-sm mb-8">
           Your return request has been submitted successfully. Our team will review it and get back to you soon.
         </p>
-        <p className="text-[10px] text-white/20 uppercase tracking-widest">Redirecting to order details...</p>
+        <p className="text-[10px] text-fg-faint uppercase tracking-widest">Redirecting to order details...</p>
       </div>
     );
   }
@@ -165,19 +165,19 @@ export default function NewReturnPage() {
         <div className="max-w-3xl mx-auto">
           <button 
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-white/40 hover:text-white transition-colors text-sm uppercase tracking-widest font-bold mb-8"
+            className="flex items-center gap-2 text-fg-muted hover:text-white transition-colors text-sm uppercase tracking-widest font-bold mb-8"
           >
             <ChevronLeft size={16} />
             Back
           </button>
 
-          <h1 className="font-display text-3xl text-white mb-2">Request Return</h1>
-          <p className="text-white/40 mb-10 italic">Order {order?.order_number}</p>
+          <h1 className="font-sans text-3xl text-white mb-2">Request Return</h1>
+          <p className="text-fg-muted mb-10 italic">Order {order?.order_number}</p>
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Item Selection */}
             <div className="glass-effect p-8 rounded-3xl border border-white/5">
-              <h2 className="text-lg font-display text-white mb-6">Select Items to Return</h2>
+              <h2 className="text-lg font-sans text-white mb-6">Select Items to Return</h2>
               <div className="space-y-4">
                 {order?.items?.map((item) => {
                   if (!item.id) return null;
@@ -198,11 +198,11 @@ export default function NewReturnPage() {
                         />
                         <label htmlFor={`item-${item.id}`} className="flex-1 cursor-pointer">
                           <p className="text-white font-medium">{item.product_name}</p>
-                          <p className="text-white/40 text-xs">{item.selected_size}</p>
+                          <p className="text-fg-muted text-xs">{item.selected_size}</p>
                         </label>
                         {selectedItems[item.id] && item.quantity > 1 && (
                           <div className="flex items-center gap-3">
-                            <label className="text-[10px] text-white/40 uppercase tracking-widest">Qty:</label>
+                            <label className="text-[10px] text-fg-muted uppercase tracking-widest">Qty:</label>
                             <input 
                               type="number"
                               min="1"
@@ -253,13 +253,14 @@ export default function NewReturnPage() {
             {/* Media Upload */}
             <div className="glass-effect p-8 rounded-3xl border border-white/5">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-display text-white">Upload Photos (Optional)</h2>
-                <span className="text-[10px] text-white/20 uppercase tracking-widest">{mediaFiles.length}/5 files</span>
+                <h2 className="text-lg font-sans text-white">Upload Photos (Optional)</h2>
+                <span className="text-[10px] text-fg-faint uppercase tracking-widest">{mediaFiles.length}/5 files</span>
               </div>
               
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                 {previews.map((preview, index) => (
                   <div key={index} className="aspect-square rounded-xl bg-white/5 relative overflow-hidden group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={preview} alt="Return product" className="w-full h-full object-cover" />
                     <button 
                       type="button"
@@ -274,8 +275,8 @@ export default function NewReturnPage() {
                 
                 {mediaFiles.length < 5 && (
                   <label className="aspect-square rounded-xl border-2 border-dashed border-white/5 bg-white/0 hover:bg-white/[0.02] hover:border-[#f4c025]/20 cursor-pointer flex flex-col items-center justify-center transition-all">
-                    <Camera size={24} className="text-white/20 mb-2" />
-                    <span className="text-[8px] text-white/20 uppercase tracking-widest font-bold font-display">Add Photo</span>
+                    <Camera size={24} className="text-fg-faint mb-2" />
+                    <span className="text-[8px] text-fg-faint uppercase tracking-widest font-bold font-sans">Add Photo</span>
                     <input 
                       type="file" 
                       accept="image/*" 
@@ -286,7 +287,7 @@ export default function NewReturnPage() {
                   </label>
                 )}
               </div>
-              <p className="mt-4 text-[10px] text-white/20 uppercase tracking-widest">Supported formats: JPG, PNG. Max 5MB per file.</p>
+              <p className="mt-4 text-[10px] text-fg-faint uppercase tracking-widest">Supported formats: JPG, PNG. Max 5MB per file.</p>
             </div>
 
             {error && (

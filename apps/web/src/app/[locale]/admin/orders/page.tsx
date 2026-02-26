@@ -43,7 +43,7 @@ export default function AdminOrdersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Orders</h1>
-          <p className="text-white/40 text-sm mt-1">{totalCount} total orders</p>
+          <p className="text-fg-muted text-sm mt-1">{totalCount} total orders</p>
         </div>
       </div>
 
@@ -80,16 +80,16 @@ export default function AdminOrdersPage() {
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-white/5">
-                  <th className="px-6 py-3 text-xs font-semibold text-white/30 uppercase tracking-wider">Order</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-white/30 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-white/30 uppercase tracking-wider text-right">Total</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-white/30 uppercase tracking-wider text-right">Date</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-white/30 uppercase tracking-wider text-right">Action</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-fg-faint uppercase tracking-wider">Order</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-fg-faint uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-fg-faint uppercase tracking-wider text-right">Total</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-fg-faint uppercase tracking-wider text-right">Date</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-fg-faint uppercase tracking-wider text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {orders.length === 0 && (
-                  <tr><td colSpan={5} className="px-6 py-12 text-center text-white/20">No orders found</td></tr>
+                  <tr><td colSpan={5} className="px-6 py-12 text-center text-fg-faint">No orders found</td></tr>
                 )}
                 {orders.map(order => (
                   <tr key={order.id} className="hover:bg-white/[0.02] transition-colors">
@@ -102,7 +102,7 @@ export default function AdminOrdersPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right text-sm font-semibold text-white">{formatCurrency(order.total || order.total_amount || 0, locale)}</td>
-                    <td className="px-6 py-4 text-right text-xs text-white/30">{order.created_at ? new Date(order.created_at).toLocaleDateString() : '-'}</td>
+                    <td className="px-6 py-4 text-right text-xs text-fg-faint">{order.created_at ? new Date(order.created_at).toLocaleDateString() : '-'}</td>
                     <td className="px-6 py-4 text-right">
                       <select
                         value={order.status}
@@ -130,15 +130,15 @@ export default function AdminOrdersPage() {
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="text-sm text-white/40 hover:text-white disabled:opacity-30 px-3 py-1.5 bg-white/5 rounded-lg"
+            className="text-sm text-fg-muted hover:text-white disabled:opacity-30 px-3 py-1.5 bg-white/5 rounded-lg"
           >
             ← Prev
           </button>
-          <span className="text-sm text-white/40">Page {page}</span>
+          <span className="text-sm text-fg-muted">Page {page}</span>
           <button
             onClick={() => setPage(p => p + 1)}
             disabled={page * 25 >= totalCount}
-            className="text-sm text-white/40 hover:text-white disabled:opacity-30 px-3 py-1.5 bg-white/5 rounded-lg"
+            className="text-sm text-fg-muted hover:text-white disabled:opacity-30 px-3 py-1.5 bg-white/5 rounded-lg"
           >
             Next →
           </button>

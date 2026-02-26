@@ -6,6 +6,7 @@ import 'core/constants/env.dart';
 import 'core/localization/app_localizations.dart';
 import 'core/providers/locale_provider.dart';
 import 'core/providers/shared_preferences_provider.dart';
+import 'core/services/notification_service.dart';
 import 'router/app_router.dart';
 import 'theme/app_theme.dart';
 
@@ -15,11 +16,14 @@ void main() async {
 
   await Supabase.initialize(url: Env.supabaseUrl, anonKey: Env.supabaseAnonKey);
 
-  runApp(
-    ProviderScope(
-      overrides: [
-        sharedPreferencesProvider.overrideWithValue(sharedPreferences),
-      ],
+  // Initialize notifications immediately after ProviderScope is created but before runApp finishes
+  final container = ProviderContainer(
+    overrides: [sharedPreferencesProvider.overrideWithValue(sharedPreferences)],
+  );
+
+  await container.read(notificationServiceProvider).initialize();
+
+  runApp(UncontrolledProviderScope(container: container,
       child: const LApp(),
     ),
   );

@@ -1,5 +1,5 @@
 -- Clear existing data
-TRUNCATE public.categories CASCADE;
+TRUNCATE public.categories, public.brands, public.collections, public.promotions CASCADE;
 
 -- Insert Categories
 INSERT INTO public.categories (id, slug, name_en, name_ar, is_active)
@@ -131,3 +131,31 @@ INSERT INTO public.product_variants (id, product_id, sku, size_ml, concentration
 VALUES ('fbda1de1-4902-485e-936d-c6ee3b288d94', '85eef24b-eafc-4925-87c4-276eb4ebf918', 'CHERRY-50', 50, 'Eau de Parfum', 'ماء عطر', 0, 100);
 INSERT INTO public.product_variants (id, product_id, sku, size_ml, concentration_en, concentration_ar, price_adjustment, stock_quantity)
 VALUES ('4248a625-e453-4f77-8f1c-d25c1f74e040', '85eef24b-eafc-4925-87c4-276eb4ebf918', 'CHERRY-100', 100, 'Eau de Parfum', 'ماء عطر', 42.5, 50);
+
+-- Insert Brands
+INSERT INTO public.brands (id, name_en, name_ar, description_en, description_ar, is_active)
+VALUES
+('b1000000-0000-0000-0000-000000000000', 'L''Essence', 'ليسنس', 'Original L''Essence collection', 'مجموعة ليسنس الأصلية', true),
+('b2000000-0000-0000-0000-000000000000', 'Royal Oud', 'العود الملكي', 'Premium oud fragrances', 'عطور عود فاخرة', true);
+
+-- Update products to have a default brand
+UPDATE public.products SET brand_id = 'b1000000-0000-0000-0000-000000000000' WHERE brand_id IS NULL;
+
+-- Insert Collections
+INSERT INTO public.collections (id, slug, name_en, name_ar, description_en, description_ar, is_active)
+VALUES
+('c1000000-0000-0000-0000-000000000000', 'summer-vibes', 'Summer Vibes', 'أجواء الصيف', 'Fresh scents for summer', 'عطور منعشة للصيف', true),
+('c2000000-0000-0000-0000-000000000000', 'best-sellers', 'Best Sellers', 'الأكثر مبيعاً', 'Our most popular fragrances', 'عطورنا الأكثر شعبية', true);
+
+-- Insert Promotions
+INSERT INTO public.promotions (id, name_en, name_ar, discount_type, discount_value, start_date, end_date, is_active)
+VALUES
+('p1000000-0000-0000-0000-000000000000', 'Mega Sale', 'تخفيضات كبرى', 'percentage', 20.00, now() - interval '1 day', now() + interval '10 days', true);
+
+-- Map Collections to Products (using IDs from existing seeding)
+INSERT INTO public.collection_products (collection_id, product_id, sort_order)
+VALUES
+('c1000000-0000-0000-0000-000000000000', '18384223-6de5-49e7-85aa-01501c17fb86', 1),
+('c1000000-0000-0000-0000-000000000000', '690e5122-0518-46c1-83e8-569604d9c269', 2),
+('c2000000-0000-0000-0000-000000000000', 'b2171880-0e1a-4ccb-adac-3e29ef73e78c', 1),
+('c2000000-0000-0000-0000-000000000000', '4cd9aa5e-f832-48d5-b500-5036f8284e08', 2);

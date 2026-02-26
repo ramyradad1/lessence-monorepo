@@ -1,13 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { SupabaseClient } from '@supabase/supabase-js';
 
+export type ReviewStatus = 'pending' | 'approved' | 'hidden' | 'rejected';
+
 export type Review = {
   id: string;
   user_id: string;
   product_id: string;
   rating: number;
   comment: string | null;
-  is_hidden: boolean;
+  status: ReviewStatus;
+  moderation_reason: string | null;
+  admin_note: string | null;
   is_verified_purchase: boolean;
   created_at: string;
   updated_at: string;
@@ -21,11 +25,22 @@ export function useReviews(supabaseClient: SupabaseClient | undefined, productId
   const queryClient = useQueryClient();
   const supabase = supabaseClient || (globalThis as any).supabase;
 
+  // Get current user first so we can fetch their reviews even if pending
+  const { data: userData } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const { data } = await supabase.auth.getUser();
+      return data.user;
+    },
+    staleTime: Infinity,
+  });
+
   const { data: reviews = [], isLoading: loadingReviews, error: reviewsError } = useQuery<Review[]>({
-    queryKey: ['reviews', productId],
+    queryKey: ['reviews', productId, userData?.id],
     queryFn: async () => {
       if (!productId) return [];
-      const { data, error } = await supabase
+      
+      let query = supabase
         .from('reviews')
         .select(`
           *,
@@ -34,23 +49,22 @@ export function useReviews(supabaseClient: SupabaseClient | undefined, productId
             avatar_url
           )
         `)
-        .eq('product_id', productId)
-        .order('created_at', { ascending: false });
+        .eq('product_id', productId);
+
+      // Fetch all public approved OR user's own reviews
+      if (userData?.id) {
+         query = query.or(`status.eq.approved,user_id.eq.${userData.id}`);
+      } else {
+         query = query.eq('status', 'approved');
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
       return data as Review[];
     },
     enabled: !!productId,
     staleTime: 1000 * 60 * 10, // 10 minutes
-  });
-
-  const { data: userData } = useQuery({
-    queryKey: ['user'],
-    queryFn: async () => {
-      const { data } = await supabase.auth.getUser();
-      return data.user;
-    },
-    staleTime: Infinity,
   });
 
   const { data: canReview = false, isLoading: loadingCanReview } = useQuery({
@@ -68,20 +82,13 @@ export function useReviews(supabaseClient: SupabaseClient | undefined, productId
       
       if (existingReview) return false;
 
-      // Check if user has purchased the product
-      const { data: purchaseData } = await supabase
-        .from('orders')
-        .select(`
-          id,
-          status,
-          order_items!inner(product_id)
-        `)
-        .eq('user_id', userData.id)
-        .eq('order_items.product_id', productId)
-        .in('status', ['delivered', 'paid', 'processing', 'shipped'])
-        .limit(1);
-
-      return !!(purchaseData && purchaseData.length > 0);
+      // RPC to check verified purchase
+      const { data: hasPurchased } = await supabase.rpc('check_verified_purchase', {
+         p_product_id: productId,
+         p_user_id: userData.id
+      });
+      
+      return !!hasPurchased;
     },
     enabled: !!userData && !!productId,
   });
@@ -98,8 +105,7 @@ export function useReviews(supabaseClient: SupabaseClient | undefined, productId
           product_id: productId,
           user_id: userData.id,
           rating,
-          comment,
-          is_verified_purchase: true
+          comment
         })
         .select()
         .single();
@@ -119,8 +125,7 @@ export function useReviews(supabaseClient: SupabaseClient | undefined, productId
         .from('reviews')
         .update({
           rating,
-          comment,
-          updated_at: new Date().toISOString(),
+          comment
         })
         .eq('id', reviewId)
         .select()

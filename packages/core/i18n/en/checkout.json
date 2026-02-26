@@ -30,7 +30,7 @@
   "free": "FREE",
   "calculated_next_step": "Calculated at next step",
   "total": "Total",
-  "place_order": "Place Order (Cash on Delivery)",
+  "place_order": "Confirm Order via WhatsApp",
   "cart_empty": "Your Cart is Empty",
   "continue_shopping": "Continue Shopping",
   "error_initiating_checkout": "Error initiating checkout",
@@ -52,5 +52,14 @@
   "error_creating_order": "Failed to create order",
   "cart_title": "My Cart",
   "start_shopping": "Start Shopping",
-  "order_success_message": "Your order #{{orderRef}} has been placed successfully."
+  "order_success_message": "Your order #{{orderRef}} has been placed successfully.",
+  "confirm_whatsapp": "Confirm Order via WhatsApp",
+  "whatsapp_msg": "Please confirm your order by sending us a message on WhatsApp.",
+  "out_of_stock": "Out of stock",
+  "stock_error": "Some items in your cart exceed available stock. Please reduce the quantity or remove them.",
+  "payment_method": "Payment Method",
+  "credit_card": "Credit / Debit Card",
+  "cash_on_delivery": "Cash on Delivery",
+  "redirecting_paymob": "Redirecting to secure payment...",
+  "pay_now": "Pay Now"
 }

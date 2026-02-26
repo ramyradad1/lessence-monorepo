@@ -86,7 +86,7 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen bg-[#181611] flex flex-col items-center justify-center p-4 gap-4">
         <div className="h-8 w-8 border-2 border-[#f4c025] border-t-transparent rounded-full animate-spin mb-2" />
-        <p className="text-white/40 uppercase tracking-widest text-[10px]">
+        <p className="text-fg-muted uppercase tracking-widest text-[10px]">
           {t('signing_out')}
         </p>
       </div>
@@ -98,7 +98,7 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen bg-[#181611] flex flex-col items-center justify-center p-4 gap-4">
         <div className="h-8 w-8 border-2 border-[#f4c025] border-t-transparent rounded-full animate-spin mb-2" />
-        <p className="text-white/40 uppercase tracking-widest text-[10px]">
+        <p className="text-fg-muted uppercase tracking-widest text-[10px]">
           {t('connecting')}
         </p>
       </div>
@@ -110,7 +110,7 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen bg-[#181611] flex flex-col items-center justify-center p-4 gap-4">
         <div className="h-8 w-8 border-2 border-[#f4c025] border-t-transparent rounded-full animate-spin mb-2" />
-        <p className="text-white/40 uppercase tracking-widest text-[10px]">
+        <p className="text-fg-muted uppercase tracking-widest text-[10px]">
           {t('redirecting')}
         </p>
       </div>
@@ -127,7 +127,7 @@ export default function ProfilePage() {
       <Navbar />
       <div className={`min-h-screen bg-background-dark pt-32 pb-20 px-4 ${rtl ? 'rtl' : 'ltr'}`}>
         <div className="max-w-4xl mx-auto">
-        <h1 className={`font-display text-4xl text-white mb-10 ${rtl ? 'text-right' : 'text-left'}`}>
+        <h1 className={`font-sans text-4xl text-white mb-10 ${rtl ? 'text-right' : 'text-left'}`}>
           {t('my_account')}
         </h1>
         
@@ -138,15 +138,15 @@ export default function ProfilePage() {
               <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mb-4">
                 <User size={32} className="text-primary" />
               </div>
-                <h2 className="text-xl font-display text-white mb-1">{displayName}</h2>
-                <p className="text-white/40 text-xs mb-6">{displayEmail}</p>
+                <h2 className="text-xl font-sans text-white mb-1">{displayName}</h2>
+                <p className="text-fg-muted text-xs mb-6">{displayEmail}</p>
 
                 <div className="w-full h-px bg-white/10 my-6"></div>
 
                 <div className="w-full flex flex-col gap-4 text-left">
                   <Link
                     href="/profile/favorites"
-                    className={`flex items-center gap-3 text-white/60 hover:text-white transition-colors text-xs uppercase tracking-widest ${rtl ? 'flex-row-reverse text-right' : ''}`}
+                    className={`flex items-center gap-3 text-fg-muted hover:text-white transition-colors text-xs uppercase tracking-widest ${rtl ? 'flex-row-reverse text-right' : ''}`}
                   >
                     <Heart size={16} />
                     <span>{t('my_favorites')}</span>
@@ -155,7 +155,7 @@ export default function ProfilePage() {
                   <button
                     onClick={handleSignOut}
                     disabled={isSignOutLoading}
-                    className={`flex items-center gap-3 text-white/60 hover:text-white transition-colors text-xs uppercase tracking-widest disabled:opacity-50 ${rtl ? 'flex-row-reverse text-right' : ''}`}
+                    className={`flex items-center gap-3 text-fg-muted hover:text-white transition-colors text-xs uppercase tracking-widest disabled:opacity-50 ${rtl ? 'flex-row-reverse text-right' : ''}`}
                   >
                     <LogOut size={16} className={rtl ? 'rotate-180' : ''} />
                     <span>{isSignOutLoading ? t('exiting') : t('log_out')}</span>
@@ -169,7 +169,7 @@ export default function ProfilePage() {
                   <Shield size={18} className="text-primary" />
                   <h3 className="font-bold text-white uppercase text-xs tracking-widest">{t('administrator')}</h3>
                 </div>
-                <p className={`text-white/40 text-xs mb-4 ${rtl ? 'text-right' : 'text-left'}`}>{t('admin_dashboard_desc')}</p>
+                <p className={`text-fg-muted text-xs mb-4 ${rtl ? 'text-right' : 'text-left'}`}>{t('admin_dashboard_desc')}</p>
                 <button
                   onClick={() => router.push("/admin")}
                   className="w-full bg-primary text-black py-3 rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-white transition-all"
@@ -184,14 +184,14 @@ export default function ProfilePage() {
           <div className="md:col-span-2 space-y-6">
               <div className="glass-effect p-8 rounded-2xl border border-white/5">
                 <div className={`flex items-center gap-3 mb-6 ${rtl ? 'flex-row-reverse' : ''}`}>
-                  <User size={20} className="text-white/60" />
-                  <h3 className="text-lg font-display text-white">{t('personal_info')}</h3>
+                  <User size={20} className="text-fg-muted" />
+                  <h3 className="text-lg font-sans text-white">{t('personal_info')}</h3>
                 </div>
 
                 {isEditing ? (
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="editFullName" className={`text-[10px] text-white/40 uppercase tracking-widest block mb-2 ${rtl ? 'text-right' : 'text-left'}`}>{t('full_name')}</label>
+                      <label htmlFor="editFullName" className={`text-[10px] text-fg-muted uppercase tracking-widest block mb-2 ${rtl ? 'text-right' : 'text-left'}`}>{t('full_name')}</label>
                       <input
                         id="editFullName"
                         type="text"
@@ -220,7 +220,7 @@ export default function ProfilePage() {
                 ) : (
                   <div className={`flex justify-between items-center ${rtl ? 'flex-row-reverse' : ''}`}>
                     <div className={rtl ? 'text-right' : 'text-left'}>
-                      <p className="text-[10px] text-white/40 uppercase tracking-widest mb-1">{t('full_name')}</p>
+                      <p className="text-[10px] text-fg-muted uppercase tracking-widest mb-1">{t('full_name')}</p>
                       <p className="text-white">{profile?.full_name || t('valued_client')}</p>
                     </div>
                     <button
@@ -235,13 +235,13 @@ export default function ProfilePage() {
 
             <div className="glass-effect p-8 rounded-2xl border border-white/5">
               <div className={`flex items-center gap-3 mb-6 ${rtl ? 'flex-row-reverse' : ''}`}>
-                  <Globe size={20} className="text-white/60" />
-                  <h3 className="text-lg font-display text-white">{t('preferences')}</h3>
+                  <Globe size={20} className="text-fg-muted" />
+                  <h3 className="text-lg font-sans text-white">{t('preferences')}</h3>
                 </div>
 
                 <div className={`flex justify-between items-center ${rtl ? 'flex-row-reverse' : ''}`}>
                   <div className={rtl ? 'text-right' : 'text-left'}>
-                    <p className="text-[10px] text-white/40 uppercase tracking-widest mb-1">{t('preferred_language')}</p>
+                    <p className="text-[10px] text-fg-muted uppercase tracking-widest mb-1">{t('preferred_language')}</p>
                     <p className="text-white">{locale === 'ar' ? t('arabic') : t('english')}</p>
                   </div>
 
@@ -266,10 +266,10 @@ export default function ProfilePage() {
 
               <div className="glass-effect p-8 rounded-2xl border border-white/5">
                 <div className={`flex items-center gap-3 mb-6 ${rtl ? 'flex-row-reverse' : ''}`}>
-                  <Package size={20} className="text-white/60" />
-                  <h3 className="text-lg font-display text-white">{t('order_history')}</h3>
+                  <Package size={20} className="text-fg-muted" />
+                  <h3 className="text-lg font-sans text-white">{t('order_history')}</h3>
                 </div>
-                <p className={`text-white/40 text-sm ${rtl ? 'text-right' : 'text-left'}`}>{t('order_history_empty')}</p>
+                <p className={`text-fg-muted text-sm ${rtl ? 'text-right' : 'text-left'}`}>{t('order_history_empty')}</p>
               </div>
 
               <AddressBook />

@@ -30,6 +30,7 @@ interface CartContextType {
   updateQuantity: (productId: string, selectedSize: string | undefined, quantity: number, variantId?: string, isBundle?: boolean) => void;
   clearCart: () => void;
   placeOrder: () => Promise<{ success: boolean; orderNumber?: string; error?: unknown }>;
+  validateStock: () => Promise<{ productId?: string; bundleId?: string; variantId?: string; size?: string; available: number; requested: number; ok: boolean }[]>;
   cartCount: number;
   cartTotal: number;
   isCartOpen: boolean;
@@ -60,6 +61,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     updateQuantity: engine.updateQuantity,
     clearCart: engine.clearCart,
     placeOrder: engine.placeOrder,
+    validateStock: engine.validateStock,
     cartCount: engine.cartCount,
     cartTotal: engine.cartTotal,
     isCartOpen,
@@ -74,6 +76,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     engine.updateQuantity,
     engine.clearCart,
     engine.placeOrder,
+    engine.validateStock,
     isCartOpen,
     addToCart
   ]);

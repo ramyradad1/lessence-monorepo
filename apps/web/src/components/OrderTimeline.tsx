@@ -66,19 +66,19 @@ export default function OrderTimeline({ currentStatus, history = [] }: OrderTime
                     ? 'bg-[#f4c025] border-[#f4c025] text-black' 
                     : stepStatus === 'active'
                     ? 'bg-black border-[#f4c025] text-[#f4c025] shadow-[0_0_15px_rgba(244,192,37,0.3)]'
-                    : 'bg-[#181611] border-white/10 text-white/20'
+                    : 'bg-[#181611] border-white/10 text-fg-faint'
                 }`}
               >
                 {stepStatus === 'completed' ? <Check size={18} /> : step.icon}
               </div>
               <div className="mt-3 text-center">
                 <p className={`text-[10px] font-bold uppercase tracking-widest ${
-                  stepStatus === 'upcoming' ? 'text-white/20' : 'text-white'
+                  stepStatus === 'upcoming' ? 'text-fg-faint' : 'text-white'
                 }`}>
                   {step.label}
                 </p>
                 {date && (
-                  <p className="text-[8px] text-white/30 mt-1">
+                  <p className="text-[8px] text-fg-faint mt-1">
                     {new Date(date).toLocaleDateString()}
                   </p>
                 )}

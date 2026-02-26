@@ -15,11 +15,13 @@
     "@supabase/ssr": "^0.8.0",
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-query-devtools": "^5.91.3",
+    "framer-motion": "^12.34.3",
     "lucide-react": "^0.575.0",
     "next": "14.2.16",
     "next-intl": "^4.8.3",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "recharts": "^3.7.0"
   },
   "devDependencies": {
     "@types/node": "^20",

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f4c025",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#1a120e",
+                        "accent-dark": "#2a1e17",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<title>L'ESSENCE | Shopping Bag</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex min-h-screen w-full flex-col max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-2xl overflow-x-hidden">
+<!-- Header -->
+<header class="sticky top-0 z-10 flex items-center bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md p-4 justify-between border-b border-slate-200 dark:border-accent-dark">
+<div class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-accent-dark transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-slate-900 dark:text-slate-100">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold tracking-tight flex-1 text-center uppercase tracking-[0.1em]">Shopping Bag</h2>
+<div class="flex w-10 items-center justify-end">
+<button class="flex items-center justify-center rounded-full size-10 hover:bg-slate-200 dark:hover:bg-accent-dark transition-colors">
+<span class="material-symbols-outlined text-slate-900 dark:text-slate-100">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Cart Items List -->
+<main class="flex-1 px-4 py-6 space-y-6">
+<!-- Item 1 -->
+<div class="flex flex-col gap-4 pb-6 border-b border-slate-200 dark:border-accent-dark">
+<div class="flex gap-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-xl size-24 shrink-0 shadow-lg border border-slate-200 dark:border-accent-dark" data-alt="Luxury perfume bottle Noire Essence in dark minimalist setting" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAtUZwvgw7vgJgqUp45FscOSaGcmj3qP5m6zpJOxreN2aIMAIxp2jrSSod4e4jKaDiCZ1eTexxL8UN9KFaKVurZRyrz3kEG7vDgezdrbYhFG0TAPfJKGFrjPCX06ftNQRDM7nOsOmgVGnB6K9uqAIojf-c9Dvem4gQcBk4MTlVXl3Y77Twsr1JK2X4pqW2FYXUfi8EwpFwmxZJvIIkIHNKqxPtBkpxW0huSU-_zLdYcYTo_C8vdUYHqLcuYVT3he5dsPXNGRHaO0Ryn");'></div>
+<div class="flex flex-1 flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<p class="text-slate-900 dark:text-slate-100 text-base font-semibold leading-tight">Noire Essence</p>
+<button class="text-slate-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1 uppercase tracking-wider">Parfum | 100ml</p>
+</div>
+<div class="flex items-center justify-between mt-2">
+<p class="text-primary text-lg font-bold leading-normal">$240.00</p>
+<div class="flex items-center gap-3 bg-slate-100 dark:bg-accent-dark rounded-full px-2 py-1 border border-slate-200 dark:border-white/5">
+<button class="flex h-6 w-6 items-center justify-center rounded-full bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 shadow-sm">-</button>
+<span class="text-sm font-bold w-4 text-center">1</span>
+<button class="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-black font-bold shadow-sm">+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex flex-col gap-4 pb-6 border-b border-slate-200 dark:border-accent-dark">
+<div class="flex gap-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-xl size-24 shrink-0 shadow-lg border border-slate-200 dark:border-accent-dark" data-alt="Amber colored perfume bottle Midnight Oud on dark surface" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAiBYryR3UGfaT4Rh1OZpmrLj-5ONp7poy6eZ4IMXXJv4YgpAzknGs3_1eeVhFZHm-tEYz0nNZ3UW5aWWJckUKag7einpDRhwRFuBYxdas4WtVq-o_dr6RPQUkHv1lAqtKoYrgDd9vU59zk98aWMj5OQLQVphIrRFq47tee9QkUOs9wn9_LTA44JCBFg-Ocxhr-FDm3kyIOAq2DrhwqhaWGKrjEOPSi3BheiS_HJQc78DP5S6xGjEd80hSL2ojLK5FWzMZqE6qOuFDU");'></div>
+<div class="flex flex-1 flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<p class="text-slate-900 dark:text-slate-100 text-base font-semibold leading-tight">Midnight Oud</p>
+<button class="text-slate-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1 uppercase tracking-wider">Eau de Parfum | 50ml</p>
+</div>
+<div class="flex items-center justify-between mt-2">
+<p class="text-primary text-lg font-bold leading-normal">$185.00</p>
+<div class="flex items-center gap-3 bg-slate-100 dark:bg-accent-dark rounded-full px-2 py-1 border border-slate-200 dark:border-white/5">
+<button class="flex h-6 w-6 items-center justify-center rounded-full bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 shadow-sm">-</button>
+<span class="text-sm font-bold w-4 text-center">1</span>
+<button class="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-black font-bold shadow-sm">+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Promo Code Section -->
+<div class="pt-4">
+<p class="text-slate-900 dark:text-slate-100 text-sm font-semibold mb-3 uppercase tracking-wider">Promo Code</p>
+<div class="flex gap-2">
+<div class="relative flex-1">
+<input class="w-full bg-slate-100 dark:bg-accent-dark border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary text-slate-900 dark:text-slate-100 placeholder:text-slate-500" placeholder="Enter code" type="text"/>
+</div>
+<button class="bg-slate-200 dark:bg-accent-dark text-slate-900 dark:text-slate-100 px-6 py-3 rounded-xl font-bold text-sm hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors uppercase tracking-tight">Apply</button>
+</div>
+</div>
+<!-- Summary Section -->
+<div class="mt-8 space-y-3 bg-slate-50 dark:bg-accent-dark/30 p-4 rounded-xl">
+<div class="flex justify-between text-sm">
+<span class="text-slate-500 dark:text-slate-400">Subtotal</span>
+<span class="text-slate-900 dark:text-slate-100 font-medium">$425.00</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-slate-500 dark:text-slate-400">Shipping</span>
+<span class="text-slate-900 dark:text-slate-100 font-medium">$15.00</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-slate-500 dark:text-slate-400">Tax</span>
+<span class="text-slate-900 dark:text-slate-100 font-medium">$0.00</span>
+</div>
+<div class="pt-3 border-t border-slate-200 dark:border-accent-dark flex justify-between items-center">
+<span class="text-slate-900 dark:text-slate-100 font-bold text-lg uppercase">Total</span>
+<span class="text-primary font-bold text-xl">$440.00</span>
+</div>
+</div>
+</main>
+<!-- Bottom Action -->
+<footer class="sticky bottom-0 bg-background-light dark:bg-background-dark p-4 border-t border-slate-200 dark:border-accent-dark">
+<button class="w-full bg-primary hover:bg-yellow-500 text-black font-bold py-4 rounded-xl shadow-lg shadow-primary/20 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 uppercase tracking-widest text-sm">
+                Proceed to Checkout
+                <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<!-- Bottom Navigation Mockup -->
+<div class="flex gap-2 bg-transparent px-4 pb-2 pt-6 mt-2">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">home</span>
+<p class="text-[10px] font-medium uppercase tracking-tighter">Shop</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">search</span>
+<p class="text-[10px] font-medium uppercase tracking-tighter">Search</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">shopping_bag</span>
+<p class="text-[10px] font-medium uppercase tracking-tighter">Bag</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">person</span>
+<p class="text-[10px] font-medium uppercase tracking-tighter">Profile</p>
+</a>
+</div>
+</footer>
+</div>
+</body></html>

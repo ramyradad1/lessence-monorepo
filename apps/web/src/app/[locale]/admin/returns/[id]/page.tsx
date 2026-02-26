@@ -232,6 +232,7 @@ export default function AdminReturnDetailPage() {
                       rel="noopener noreferrer"
                       className="aspect-square bg-black/50 rounded-xl border border-white/10 overflow-hidden hover:border-primary/50 transition-colors group"
                     >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img 
                         src={url} 
                         alt={`Evidence ${index + 1}`} 

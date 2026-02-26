@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useRef } from 'react';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 export type Favorite = {
@@ -20,32 +21,8 @@ export function useFavorites(
   userId?: string,
   storage?: FavoritesStorage
 ) {
-  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
   const prevUserIdRef = useRef<string | undefined>(undefined);
-
-  // ── Fetch from Supabase (logged in) or local storage (guest) ──
-  const fetchFavorites = useCallback(async () => {
-    setLoading(true);
-    try {
-      if (userId) {
-        const { data, error } = await supabase
-          .from('favorites')
-          .select('product_id')
-          .eq('user_id', userId);
-        if (!error && data) {
-          setFavoriteIds(new Set(data.map((f: any) => f.product_id)));
-        }
-      } else if (storage) {
-        const ids = await storage.getGuestFavorites();
-        setFavoriteIds(new Set(ids));
-      } else {
-        setFavoriteIds(new Set());
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [supabase, userId, storage]);
 
   // ── Sync guest → server on login ──
   const syncGuestToServer = useCallback(async (uid: string) => {
@@ -62,60 +39,103 @@ export function useFavorites(
   useEffect(() => {
     // Detect login transition: prevUserId was undefined, now it's set
     if (!prevUserIdRef.current && userId && storage) {
-      syncGuestToServer(userId).then(() => fetchFavorites());
-    } else {
-      fetchFavorites();
+      syncGuestToServer(userId).then(() => {
+        // Invalidate so we refetch from the server immediately
+        queryClient.invalidateQueries({ queryKey: ['favorites', userId] });
+      });
     }
     prevUserIdRef.current = userId;
-  }, [userId, fetchFavorites, syncGuestToServer, storage]);
+  }, [userId, syncGuestToServer, storage, queryClient]);
 
-  // ── Toggle ──
+  // ── Fetch from Supabase (logged in) or local storage (guest) ──
+  const { data: favoriteIdsArray = [], isLoading: loading, refetch } = useQuery<string[]>({
+    queryKey: ['favorites', userId || 'guest'],
+    queryFn: async () => {
+      if (userId) {
+        const { data, error } = await supabase
+          .from('favorites')
+          .select('product_id')
+          .eq('user_id', userId);
+        if (!error && data) {
+          return data.map((f: any) => f.product_id);
+        }
+        return [];
+      } else if (storage) {
+        const ids = await storage.getGuestFavorites();
+        return ids;
+      }
+      return [];
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes cache
+  });
+
+  const favoriteIds = new Set(favoriteIdsArray);
+
+  // ── Toggle Mutation ──
+  const toggleMutation = useMutation({
+    mutationFn: async ({ productId, isFav }: { productId: string, isFav: boolean }) => {
+      if (userId) {
+        // Logged in → Supabase
+        if (isFav) {
+          const { error } = await supabase
+            .from('favorites')
+            .delete()
+            .eq('user_id', userId)
+            .eq('product_id', productId);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from('favorites')
+            .insert({ user_id: userId, product_id: productId });
+          if (error) throw error;
+        }
+      } else if (storage) {
+        // Guest → local storage
+        const current = await storage.getGuestFavorites();
+        const updated = isFav
+          ? current.filter(id => id !== productId)
+          : current.concat(productId);
+        await storage.setGuestFavorites(updated);
+      }
+      return { productId, isFav };
+    },
+    onMutate: async ({ productId, isFav }) => {
+      const key = ['favorites', userId || 'guest'];
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<string[]>(key) || [];
+
+      // Optimistic update
+      queryClient.setQueryData<string[]>(key, old => {
+        const current = old || [];
+        if (isFav) return current.filter(id => id !== productId);
+        return [...current, productId];
+      });
+
+      return { previous };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['favorites', userId || 'guest'], context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['favorites', userId || 'guest'] });
+    }
+  });
+
   const toggleFavorite = useCallback(async (productId: string) => {
     const isFav = favoriteIds.has(productId);
-
-    // Optimistic update
-    setFavoriteIds(prev => {
-      const next = new Set(prev);
-      if (isFav) next.delete(productId);
-      else next.add(productId);
-      return next;
-    });
-
-    if (userId) {
-      // Logged in → Supabase
-      if (isFav) {
-        const { error } = await supabase
-          .from('favorites')
-          .delete()
-          .eq('user_id', userId)
-          .eq('product_id', productId);
-        if (error) {
-          setFavoriteIds(prev => { const n = new Set(prev); n.add(productId); return n; });
-          return { error: error.message };
-        }
-      } else {
-        const { error } = await supabase
-          .from('favorites')
-          .insert({ user_id: userId, product_id: productId });
-        if (error) {
-          setFavoriteIds(prev => { const n = new Set(prev); n.delete(productId); return n; });
-          return { error: error.message };
-        }
-      }
-    } else if (storage) {
-      // Guest → local storage
-      const updated = isFav
-        ? Array.from(favoriteIds).filter(id => id !== productId)
-        : Array.from(favoriteIds).concat(productId);
-      await storage.setGuestFavorites(updated);
+    try {
+      await toggleMutation.mutateAsync({ productId, isFav });
+      return { error: null };
+    } catch (e: any) {
+      return { error: e.message || 'Error updating favorite' };
     }
-
-    return { error: null };
-  }, [supabase, userId, favoriteIds, storage]);
+  }, [favoriteIds, toggleMutation]);
 
   const isFavorite = useCallback((productId: string) => {
     return favoriteIds.has(productId);
   }, [favoriteIds]);
 
-  return { favoriteIds, loading, toggleFavorite, isFavorite, refetch: fetchFavorites };
+  return { favoriteIds, loading, toggleFavorite, isFavorite, refetch };
 }

@@ -7,6 +7,7 @@ import { webFavoritesStorage } from "@/lib/favoritesStorage";
 import ProductCard from "./ProductCard";
 import { Product } from "@lessence/core";
 import { useTranslations } from "next-intl";
+import { useStoreSettings } from "@/context/StoreSettingsContext";
 
 export default function RecentlyViewed({ currentProductId }: { currentProductId?: string }) {
   const { user } = useAuth();
@@ -15,6 +16,7 @@ export default function RecentlyViewed({ currentProductId }: { currentProductId?
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const t = useTranslations('common');
+  const { settings } = useStoreSettings();
 
   useEffect(() => {
     async function fetchProducts() {
@@ -45,8 +47,12 @@ export default function RecentlyViewed({ currentProductId }: { currentProductId?
     fetchProducts();
   }, [recentlyViewedIds, currentProductId]);
 
+  if (!settings.features.recently_viewed) {
+    return null;
+  }
+
   if (hookLoading || loading) {
-    return null; // Or skeleton
+    return null;
   }
 
   if (products.length === 0) {
@@ -54,16 +60,24 @@ export default function RecentlyViewed({ currentProductId }: { currentProductId?
   }
 
   return (
-    <section className="bg-background-dark py-24 border-t border-white/5">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex justify-between items-end mb-12">
-          <div>
-            <span className="text-primary text-xs font-bold tracking-widest uppercase">{t('your_history')}</span>
-            <h2 className="text-4xl font-display text-white mt-2">{t('recently_viewed')}</h2>
-          </div>
-        </div>
+    <section className="flex flex-col gap-4 w-full max-w-7xl mx-auto mb-16 md:mb-24">
+      {/* Gold divider */}
+      <div className="section-divider mb-8 md:mb-12" />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      {/* Section Header — Centered */}
+      <div className="flex flex-col items-center text-center px-4 mb-8">
+        <span className="text-[10px] font-semibold tracking-[0.25em] text-primary uppercase mb-3">
+          {t('your_history') || 'YOUR HISTORY'}
+        </span>
+        <h2 className="text-3xl md:text-5xl font-sans text-white italic tracking-wide">
+          {t('recently_viewed') || 'Recently Viewed'}
+        </h2>
+        <div className="section-divider mt-6" />
+      </div>
+
+      {/* Desktop: Grid layout / Mobile: Horizontal scroll */}
+      <div className="hidden md:block px-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-7">
           {products.slice(0, 4).map((product) => (
             <ProductCard
               key={product.id}
@@ -73,6 +87,18 @@ export default function RecentlyViewed({ currentProductId }: { currentProductId?
             />
           ))}
         </div>
+      </div>
+
+      <div className="md:hidden flex w-full snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-6 no-scrollbar">
+        {products.slice(0, 4).map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            isFavorite={isFavorite(product.id)}
+            onToggleFavorite={() => toggleFavorite(product.id)}
+            compact
+          />
+        ))}
       </div>
     </section>
   );

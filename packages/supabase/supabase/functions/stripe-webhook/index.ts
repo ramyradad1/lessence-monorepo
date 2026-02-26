@@ -121,6 +121,7 @@ serve(async (req) => {
           order_id: order.id,
           product_id: item.product_id,
           product_name: item.product_name,
+          variant_id: item.variant_id || null,
           selected_size: item.selected_size,
           price: parseFloat(item.price),
           quantity: item.quantity
@@ -138,20 +139,35 @@ serve(async (req) => {
       for (const item of items) {
           // This approach is naive regarding concurrency (race conditions).
           // In a real production system, you'd use a Postgres RPC (stored procedure) to atomically deduct inventory.
-          const { data: inv } = await supabaseClient
-            .from('inventory')
-            .select('quantity_available')
-            .eq('product_id', item.product_id)
-            .eq('size', item.selected_size)
-            .single();
+          if (item.variant_id) {
+             const { data: varData } = await supabaseClient
+                .from('product_variants')
+                .select('stock_qty')
+                .eq('id', item.variant_id)
+                .single();
+              if (varData) {
+                  const newQty = Math.max(0, varData.stock_qty - item.quantity);
+                  await supabaseClient
+                    .from('product_variants')
+                    .update({ stock_qty: newQty })
+                    .eq('id', item.variant_id);
+              }
+          } else {
+             const { data: inv } = await supabaseClient
+               .from('inventory')
+               .select('quantity_available')
+               .eq('product_id', item.product_id)
+               .eq('size', item.selected_size)
+               .single();
 
-          if (inv) {
-              const newQty = Math.max(0, inv.quantity_available - item.quantity);
-              await supabaseClient
-                .from('inventory')
-                .update({ quantity_available: newQty })
-                .eq('product_id', item.product_id)
-                .eq('size', item.selected_size);
+             if (inv) {
+                 const newQty = Math.max(0, inv.quantity_available - item.quantity);
+                 await supabaseClient
+                   .from('inventory')
+                   .update({ quantity_available: newQty })
+                   .eq('product_id', item.product_id)
+                   .eq('size', item.selected_size);
+             }
           }
       }
 

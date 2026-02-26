@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "../globals.css";
 import { CartProvider } from "@/context/CartContext";
 import CartDrawer from "@/components/CartDrawer";
@@ -8,16 +8,13 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
+import PushNotificationManager from "@/components/PushNotificationManager";
+import { StoreSettingsProvider } from '@/context/StoreSettingsContext';
+import { AnimatePresence } from 'framer-motion';
 
 const sans = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
-});
-
-const display = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-display",
-  style: "italic",
 });
 
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
@@ -53,15 +50,20 @@ export default async function RootLayout({
   const direction = locale === 'ar' ? 'rtl' : 'ltr';
 
   return (
-    <html lang={locale} dir={direction} className="dark scroll-smooth">
-      <body className={`${sans.variable} ${display.variable} font-sans antialiased text-white selection:bg-primary/30 ${direction === 'rtl' ? 'text-right' : 'text-left'}`}>
-        <NextIntlClientProvider messages={messages}>
+    <html lang={locale} dir={direction} className="scroll-smooth">
+      <body className={`${sans.variable} font-sans antialiased text-fg selection:bg-primary/20 ${direction === 'rtl' ? 'text-right' : 'text-left'}`}>
+        <NextIntlClientProvider messages={messages} locale={locale}>
           <QueryProviderWrapper>
             <WebAuthProvider>
-              <CartProvider>
-                {children}
-                <CartDrawer />
-              </CartProvider>
+              <StoreSettingsProvider>
+                <CartProvider>
+                  <PushNotificationManager />
+                  <AnimatePresence mode="wait">
+                    {children}
+                  </AnimatePresence>
+                  <CartDrawer />
+                </CartProvider>
+              </StoreSettingsProvider>
             </WebAuthProvider>
           </QueryProviderWrapper>
         </NextIntlClientProvider>

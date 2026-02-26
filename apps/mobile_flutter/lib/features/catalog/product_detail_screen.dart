@@ -1,8 +1,13 @@
+import 'package:flutter_lucide/flutter_lucide.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:cached_network_image/cached_network_image.dart';
+
 import '../../core/utils/egp_formatter.dart';
+import '../../theme/app_colors.dart';
 import 'data/catalog_repository.dart';
 import 'models/catalog_models.dart';
 import 'widgets/catalog_state_views.dart';
@@ -152,166 +157,264 @@ class _ProductDetailBody extends StatelessWidget {
 
     return Scaffold(
       appBar: _DetailAppBar(title: title.isEmpty ? 'Product' : title),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _ProductGallery(
-            imageUrls: images,
-            fallbackImageUrl: product.imageUrl,
-            selectedIndex: safeImageIndex,
-            onSelect: onSelectImage,
+      body: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                _ProductGallery(
+                  imageUrls: images,
+                  fallbackImageUrl: product.imageUrl,
+                  selectedIndex: safeImageIndex,
+                  onSelect: onSelectImage,
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  title.isEmpty ? 'Unnamed product' : title,
+                  style: Theme.of(context,
+                  ).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.foreground,
+                  ),
+                ),
+                if (subtitle.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context,
+                    ).textTheme.titleMedium?.copyWith(
+                      color: AppColors.foregroundMuted,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        EgpFormatter.format(
+                          currentPrice,
+                          localeCode: locale.toLanguageTag(),
+                        ),
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.primary, // Gold price
+                            ),
+                      ),
+                    ),
+                    _DetailStockChip(status: stockStatus),
+                  ],
+                ),
+                if (product.rating > 0) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(
+                        LucideIcons.star,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${product.rating.toStringAsFixed(1)} • ${product.reviewCount} reviews',
+                        style: Theme.of(context,
+                        ).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.foregroundMuted,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                if (variants.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  Text(
+                    'Select Variant',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      for (var i = 0; i < variants.length; i++)
+                        ChoiceChip(
+                          label: Text(
+                            '${variants[i].displayLabel(locale)} • ${EgpFormatter.format(variants[i].price, localeCode: locale.toLanguageTag())}',
+                          ),
+                          selected: safeVariantIndex == i,
+                          onSelected: (_) => onSelectVariant(i),
+                          selectedColor: AppColors.primary.withAlpha(50),
+                          backgroundColor: AppColors.surface,
+                          side: BorderSide(
+                            color: safeVariantIndex == i
+                                ? AppColors.primary
+                                : AppColors.border,
+                          ),
+                          labelStyle: TextStyle(
+                            color: safeVariantIndex == i
+                                ? AppColors.foreground
+                                : AppColors.foreground,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+                if (product.sizeOptions.isNotEmpty && variants.isEmpty) ...[
+                  const SizedBox(height: 24),
+                  Text(
+                    'Select Size',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      for (final size in product.sizeOptions)
+                        Chip(
+                          label: Text(
+                            '${size.size} • ${EgpFormatter.format(size.price, localeCode: locale.toLanguageTag())}',
+                          ),
+                          backgroundColor: AppColors.surface,
+                          side: const BorderSide(color: AppColors.border),
+                        ),
+                    ],
+                  ),
+                ],
+                if (product.scentProfiles.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  Text(
+                    'Scent profile',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      for (final profile in product.scentProfiles)
+                        Chip(
+                          avatar: (profile.icon ?? '').isNotEmpty
+                              ? Text(
+                                  profile.icon!,
+                                  style: const TextStyle(fontSize: 14),
+                                )
+                              : null,
+                          label: Text(profile.localizedName(locale)),
+                          backgroundColor: AppColors.backgroundSubtle,
+                          side: BorderSide.none,
+                        ),
+                    ],
+                  ),
+                ],
+                if (description.isNotEmpty) ...[
+                  const SizedBox(height: 28),
+                  Text(
+                    'Description',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    description,
+                    style: Theme.of(context,
+                    ).textTheme.bodyMedium?.copyWith(
+                      height: 1.6,
+                      color: AppColors.foregroundMuted,
+                    ),
+                  ),
+                ],
+                if (product.fragranceNotes?.hasContent ?? false) ...[
+                  const SizedBox(height: 28),
+                  Text(
+                    'Fragrance notes',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _NotesSection(notes: product.fragranceNotes!),
+                ],
+                const SizedBox(height: 32),
+                _RelatedProductsSection(currentProduct: product),
+                const SizedBox(height: 16),
+              ]),
+            ),
           ),
-          const SizedBox(height: 16),
-          Text(
-            title.isEmpty ? 'Unnamed product' : title,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          if (subtitle.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(
-              subtitle,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(color: Colors.black54),
+        ],
+      ),
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: MediaQuery.of(context).padding.bottom > 0
+              ? MediaQuery.of(context).padding.bottom
+              : 16,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: const Border(top: BorderSide(color: AppColors.border)),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10,
+              offset: Offset(0, -4),
             ),
           ],
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
+        ),
+        child: Row(
+          children: [
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Total', style: Theme.of(context).textTheme.bodySmall),
+                Text(
                   EgpFormatter.format(
                     currentPrice,
                     localeCode: locale.toLanguageTag(),
                   ),
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(width: 24),
+            Expanded(
+              child: SizedBox(
+                height: 48,
+                child: FilledButton.icon(
+                  onPressed: stockStatus == StockStatus.outOfStock
+                      ? null
+                      : () {},
+                  icon: const Icon(
+                    LucideIcons.shopping_bag,
+                    size: 20,
+                    color: AppColors.background,
+                  ),
+                  label: const Text('Add to Bag'),
+                  style: FilledButton.styleFrom(
+                    foregroundColor: AppColors.background,
                   ),
                 ),
               ),
-              _DetailStockChip(status: stockStatus),
-            ],
-          ),
-          if (product.rating > 0) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.star_rounded, color: Color(0xFFF2B705)),
-                const SizedBox(width: 4),
-                Text(
-                  '${product.rating.toStringAsFixed(1)} • ${product.reviewCount} reviews',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Colors.black54),
-                ),
-              ],
             ),
           ],
-          if (variants.isNotEmpty) ...[
-            const SizedBox(height: 20),
-            Text(
-              'Variants',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (var i = 0; i < variants.length; i++)
-                  ChoiceChip(
-                    label: Text(
-                      '${variants[i].displayLabel(locale)} • ${EgpFormatter.format(variants[i].price, localeCode: locale.toLanguageTag())}',
-                    ),
-                    selected: safeVariantIndex == i,
-                    onSelected: (_) => onSelectVariant(i),
-                  ),
-              ],
-            ),
-          ],
-          if (product.sizeOptions.isNotEmpty && variants.isEmpty) ...[
-            const SizedBox(height: 20),
-            Text(
-              'Sizes',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final size in product.sizeOptions)
-                  Chip(
-                    label: Text(
-                      '${size.size} • ${EgpFormatter.format(size.price, localeCode: locale.toLanguageTag())}',
-                    ),
-                  ),
-              ],
-            ),
-          ],
-          if (product.scentProfiles.isNotEmpty) ...[
-            const SizedBox(height: 20),
-            Text(
-              'Scent profile',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final profile in product.scentProfiles)
-                  Chip(
-                    avatar: (profile.icon ?? '').isNotEmpty
-                        ? Text(
-                            profile.icon!,
-                            style: const TextStyle(fontSize: 12),
-                          )
-                        : null,
-                    label: Text(profile.localizedName(locale)),
-                  ),
-              ],
-            ),
-          ],
-          if (description.isNotEmpty) ...[
-            const SizedBox(height: 20),
-            Text(
-              'Description',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              description,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(height: 1.4),
-            ),
-          ],
-          if (product.fragranceNotes?.hasContent ?? false) ...[
-            const SizedBox(height: 20),
-            Text(
-              'Fragrance notes',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            _NotesSection(notes: product.fragranceNotes!),
-          ],
-          const SizedBox(height: 24),
-          _RelatedProductsSection(currentProduct: product),
-          const SizedBox(height: 16),
-        ],
+        ),
       ),
     );
   }
@@ -342,37 +445,34 @@ class _ProductGallery extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Card(
-          elevation: 0,
-          margin: EdgeInsets.zero,
-          clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-            side: BorderSide(color: Colors.grey.shade200),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+            color: AppColors.surface,
           ),
+          clipBehavior: Clip.antiAlias,
           child: AspectRatio(
             aspectRatio: 4 / 5,
             child: urls.isEmpty
                 ? const _GalleryPlaceholder()
-                : Image.network(
-                    urls[safeIndex],
+                : CachedNetworkImage(
+                    imageUrl: urls[safeIndex],
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const _GalleryPlaceholder(),
-                    loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return const _GalleryPlaceholder();
-                    },
+                    errorWidget: (context, url, error) =>
+                        const _GalleryPlaceholder(),
+                    placeholder: (context, url) => const _GalleryPlaceholder(),
                   ),
           ),
         ),
         if (urls.length > 1) ...[
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           SizedBox(
             height: 72,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: urls.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (context, index) => const SizedBox(width: 10),
               itemBuilder: (context, index) {
                 final isSelected = index == safeIndex;
                 return InkWell(
@@ -384,16 +484,19 @@ class _ProductGallery extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: isSelected
-                            ? Colors.black87
-                            : Colors.grey.shade300,
+                            ? AppColors.primary
+                            : AppColors.border,
                         width: isSelected ? 2 : 1,
                       ),
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: Image.network(
-                      urls[index],
+                    child: CachedNetworkImage(
+                      imageUrl: urls[index],
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const _GalleryPlaceholder(),
+                      errorWidget: (context, url, error) =>
+                          const _GalleryPlaceholder(),
+                      placeholder: (context, url) =>
+                          const _GalleryPlaceholder(),
                     ),
                   ),
                 );
@@ -412,9 +515,13 @@ class _GalleryPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.grey.shade100,
+      color: AppColors.backgroundSubtle,
       alignment: Alignment.center,
-      child: Icon(Icons.image_outlined, size: 42, color: Colors.grey.shade400),
+      child: Icon(
+        LucideIcons.image_off,
+        size: 42,
+        color: AppColors.foregroundFaint,
+      ),
     );
   }
 }
@@ -433,23 +540,23 @@ class _DetailStockChip extends StatelessWidget {
     switch (status) {
       case StockStatus.inStock:
         label = 'In stock';
-        fg = Colors.green.shade800;
-        bg = Colors.green.shade50;
+        fg = AppColors.success;
+        bg = AppColors.successBg;
         break;
       case StockStatus.lowStock:
         label = 'Low stock';
-        fg = Colors.orange.shade800;
-        bg = Colors.orange.shade50;
+        fg = AppColors.warning;
+        bg = AppColors.warningBg;
         break;
       case StockStatus.outOfStock:
         label = 'Out of stock';
-        fg = Colors.red.shade800;
-        bg = Colors.red.shade50;
+        fg = AppColors.error;
+        bg = AppColors.errorBg;
         break;
       case StockStatus.unknown:
         label = 'Stock unavailable';
-        fg = Colors.grey.shade700;
-        bg = Colors.grey.shade100;
+        fg = AppColors.foregroundMuted;
+        bg = AppColors.surfaceMuted;
         break;
     }
 
@@ -457,11 +564,11 @@ class _DetailStockChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: fg),
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: fg),
       ),
     );
   }
@@ -481,31 +588,55 @@ class _NotesSection extends StatelessWidget {
     ].where((e) => e.items.isNotEmpty).toList();
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (var i = 0; i < sections.length; i++) ...[
-          CatalogInlineMessageCard(
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.border),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   sections[i].title,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.foregroundMuted,
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                  spacing: 10,
+                  runSpacing: 10,
                   children: [
                     for (final note in sections[i].items)
-                      Chip(label: Text(note)),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.backgroundSubtle,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          note,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ],
             ),
           ),
-          if (i != sections.length - 1) const SizedBox(height: 10),
+          if (i != sections.length - 1) const SizedBox(height: 12),
         ],
       ],
     );
@@ -560,7 +691,7 @@ class _RelatedProductsSectionState
           return CatalogInlineMessageCard(
             child: Row(
               children: [
-                const Icon(Icons.info_outline, size: 18),
+                const Icon(LucideIcons.info, size: 18),
                 const SizedBox(width: 8),
                 const Expanded(
                   child: Text('Related products unavailable right now.'),
@@ -589,22 +720,23 @@ class _RelatedProductsSectionState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Related products',
+              'You might also like',
               style: Theme.of(
                 context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 16),
             SizedBox(
-              height: 300,
+              height: 290,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
+                clipBehavior: Clip.none,
                 itemCount: items.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                separatorBuilder: (context, index) => const SizedBox(width: 16),
                 itemBuilder: (context, index) {
                   final item = items[index];
                   return CatalogProductCard(
-                    width: 180,
+                    width: 170,
                     product: item,
                     onTap: () {
                       final slugOrId = item.slug.isNotEmpty

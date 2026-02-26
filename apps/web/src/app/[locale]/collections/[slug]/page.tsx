@@ -70,19 +70,19 @@ export default async function CategoryPage({ params }: Props) {
       <div className="pt-32 pb-20">
         <div className="max-w-7xl mx-auto px-4">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-xs text-white/30 mb-8 rtl:flex-row-reverse">
+          <div className="flex items-center gap-2 text-xs text-fg-faint mb-8 rtl:flex-row-reverse">
             <a href={`/${locale}`} className="hover:text-white transition-colors">{t('home')}</a>
             <ChevronRight size={12} className="rtl:rotate-180" />
             <a href={`/${locale}/collections`} className="hover:text-white transition-colors">{t('collections')}</a>
             <ChevronRight size={12} className="rtl:rotate-180" />
-            <span className="text-white/60">{name}</span>
+            <span className="text-fg-muted">{name}</span>
           </div>
 
           <div className="mb-12">
             <span className="text-primary text-xs font-bold tracking-widest uppercase mb-2 block">{t('scent_collection')}</span>
-            <h1 className="text-5xl font-display text-white mb-4 italic">{name}</h1>
+            <h1 className="text-5xl font-sans text-white mb-4 italic">{name}</h1>
             {description && (
-              <p className="text-white/50 max-w-2xl text-lg leading-relaxed">
+              <p className="text-fg-muted max-w-2xl text-lg leading-relaxed">
                 {description}
               </p>
             )}
@@ -90,7 +90,7 @@ export default async function CategoryPage({ params }: Props) {
 
           {!products || products.length === 0 ? (
             <div className="py-20 text-center border border-white/5 rounded-2xl bg-surface-dark/20">
-              <p className="text-white/30 italic">{t('no_fragrances_in_collection')}</p>
+              <p className="text-fg-faint italic">{t('no_fragrances_in_collection')}</p>
               <a href={`/${locale}/shop`} className="text-primary hover:text-white underline text-xs font-bold tracking-widest uppercase mt-4 inline-block transition-colors">
                 {t('explore_all_scents')}
               </a>

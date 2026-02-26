@@ -408,3 +408,136 @@ class CartItemModel {
     );
   }
 }
+
+class AppOrder {
+  const AppOrder({
+    required this.id,
+    required this.orderNumber,
+    required this.userId,
+    required this.status,
+    required this.subtotal,
+    required this.discountAmount,
+    required this.shippingFee,
+    required this.totalAmount,
+    required this.shippingAddress,
+    required this.createdAt,
+    this.items = const [],
+  });
+
+  final String id;
+  final String orderNumber;
+  final String userId;
+  final String status;
+  final double subtotal;
+  final double discountAmount;
+  final double shippingFee;
+  final double totalAmount;
+  final Map<String, dynamic> shippingAddress;
+  final DateTime createdAt;
+  final List<AppOrderItem> items;
+
+  AppOrder copyWith({List<AppOrderItem>? items}) {
+    return AppOrder(
+      id: id,
+      orderNumber: orderNumber,
+      userId: userId,
+      status: status,
+      subtotal: subtotal,
+      discountAmount: discountAmount,
+      shippingFee: shippingFee,
+      totalAmount: totalAmount,
+      shippingAddress: shippingAddress,
+      createdAt: createdAt,
+      items: items ?? this.items,
+    );
+  }
+
+  factory AppOrder.fromJson(Map<String, dynamic> map) {
+    return AppOrder(
+      id: map['id'] as String,
+      orderNumber: map['order_number'] as String,
+      userId: map['user_id'] as String,
+      status: map['status'] as String,
+      subtotal: _toDouble(map['subtotal']),
+      discountAmount: _toDouble(map['discount_amount']),
+      shippingFee: _toDouble(map['shipping_fee']),
+      totalAmount: _toDouble(map['total_amount']),
+      shippingAddress: map['shipping_address'] as Map<String, dynamic>? ?? {},
+      createdAt: DateTime.parse(map['created_at'] as String),
+    );
+  }
+}
+
+class AppOrderItem {
+  const AppOrderItem({
+    required this.id,
+    required this.orderId,
+    required this.productId,
+    required this.variantId,
+    required this.productName,
+    required this.price,
+    required this.quantity,
+  });
+
+  final String id;
+  final String orderId;
+  final String productId;
+  final String? variantId;
+  final String productName;
+  final double price;
+  final int quantity;
+
+  factory AppOrderItem.fromJson(Map<String, dynamic> map) {
+    return AppOrderItem(
+      id: map['id'] as String,
+      orderId: map['order_id'] as String,
+      productId: map['product_id'] as String,
+      variantId: map['variant_id'] as String?,
+      productName: map['product_name'] as String,
+      price: _toDouble(map['price']),
+      quantity: _toInt(map['quantity'], 1),
+    );
+  }
+}
+
+class AppReview {
+  const AppReview({
+    required this.id,
+    required this.productId,
+    this.userId,
+    this.userFullName,
+    required this.rating,
+    this.comment,
+    required this.isApproved,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String productId;
+  final String? userId;
+  final String? userFullName;
+  final int rating;
+  final String? comment;
+  final bool isApproved;
+  final DateTime createdAt;
+
+  factory AppReview.fromJson(Map<String, dynamic> map) {
+    String? fullName;
+    if (map['profiles'] != null && map['profiles'] is Map) {
+      fullName = map['profiles']['full_name'] as String?;
+    } else if (map['user_full_name'] != null) {
+      fullName = map['user_full_name'] as String?;
+    }
+
+    return AppReview(
+      id: map['id'] as String,
+      productId: map['product_id'] as String,
+      userId: map['user_id'] as String?,
+      userFullName: fullName,
+      rating: _toInt(map['rating'], 5),
+      comment: map['comment'] as String?,
+      isApproved: map['is_approved'] as bool? ?? false,
+      createdAt: DateTime.parse(map['created_at'] as String),
+    );
+  }
+}

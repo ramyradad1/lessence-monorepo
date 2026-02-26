@@ -17,6 +17,7 @@ export * from '@lessence/core';
 export * from './hooks/useProducts';
 export * from './hooks/useOrders';
 export * from './hooks/useCategories';
+export * from './hooks/useCollections';
 export * from './hooks/useHeroBanner';
 export * from './hooks/useAuth';
 export * from './hooks/useSearch';
@@ -56,12 +57,16 @@ export * from './hooks/useAdminOrders';
 export * from './hooks/useAdminProducts';
 export * from './hooks/useAdminCoupons';
 export * from './hooks/useAdminUsers';
-export * from './hooks/useAdminReviews';
+export { useAdminReviews } from './hooks/useAdminReviews';
+export type { AdminReview } from './hooks/useAdminReviews';
 export * from './hooks/useAdminCustomers';
 export * from './hooks/useAdminReports';
 export * from './hooks/useAdminBundles';
 export * from './hooks/useAdminNotifications';
 export * from './hooks/useAdminDiagnostics';
+export * from './hooks/useAdminCategories';
+export * from './hooks/useAdminBrands';
+export * from './hooks/useAdminCollections';
 // Monitoring
 export * from './hooks/usePerformanceTracking';
 // Providers

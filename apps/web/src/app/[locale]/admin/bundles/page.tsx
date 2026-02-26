@@ -135,7 +135,7 @@ export default function AdminBundlesPage() {
       <div className="flex justify-between items-center bg-[#1e1b16] p-6 rounded-2xl border border-white/5">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-widest uppercase">Gift Sets</h1>
-          <p className="text-sm text-white/50 mt-1">Manage bundled products and special sets</p>
+          <p className="text-sm text-fg-muted mt-1">Manage bundled products and special sets</p>
         </div>
         <button
           onClick={() => handleOpenModal()}
@@ -148,7 +148,7 @@ export default function AdminBundlesPage() {
       <div className="bg-[#1e1b16] rounded-2xl border border-white/5 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="text-xs text-white/40 uppercase bg-black/20 border-b border-white/5">
+            <thead className="text-xs text-fg-muted uppercase bg-black/20 border-b border-white/5">
               <tr>
                 <th className="px-6 py-4 font-medium tracking-wider">Name</th>
                 <th className="px-6 py-4 font-medium tracking-wider">Items</th>
@@ -162,7 +162,7 @@ export default function AdminBundlesPage() {
                 <tr key={bundle.id} className="hover:bg-white/5 transition-colors">
                   <td className="px-6 py-4">
                     <div className="text-white font-medium">{bundle.name}</div>
-                    <div className="text-xs text-white/40 font-mono mt-0.5">{bundle.slug}</div>
+                    <div className="text-xs text-fg-muted font-mono mt-0.5">{bundle.slug}</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-white/70">
@@ -172,7 +172,7 @@ export default function AdminBundlesPage() {
                   <td className="px-6 py-4 text-[#f4c025] font-medium">{formatCurrency(bundle.price, locale)}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${
-                      bundle.is_active ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-white/40'
+                      bundle.is_active ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-fg-muted'
                     }`}>
                       {bundle.is_active ? 'Active' : 'Inactive'}
                     </span>
@@ -181,13 +181,13 @@ export default function AdminBundlesPage() {
                     <div className="flex items-center justify-end gap-2">
                        <button
                         onClick={() => handleOpenModal(bundle)}
-                        className="p-2 text-white/40 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                        className="p-2 text-fg-muted hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                       >
                         ✏️
                       </button>
                       <button
                         onClick={() => handleDelete(bundle.id)}
-                        className="p-2 text-white/40 hover:text-red-400 hover:bg-white/10 rounded-lg transition-colors"
+                        className="p-2 text-fg-muted hover:text-red-400 hover:bg-white/10 rounded-lg transition-colors"
                       >
                         🗑️
                       </button>
@@ -197,7 +197,7 @@ export default function AdminBundlesPage() {
               ))}
               {bundles.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-white/40">
+                  <td colSpan={5} className="px-6 py-12 text-center text-fg-muted">
                     No gift sets created yet
                   </td>
                 </tr>
@@ -214,7 +214,7 @@ export default function AdminBundlesPage() {
               <h2 className="text-xl font-bold text-white tracking-widest uppercase">
                 {selectedBundle ? 'Edit Gift Set' : 'Create Gift Set'}
               </h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-white/40 hover:text-white">✕</button>
+              <button onClick={() => setIsModalOpen(false)} className="text-fg-muted hover:text-white">✕</button>
             </div>
             
             <div className="p-6 overflow-y-auto space-y-6 flex-1">
@@ -334,7 +334,7 @@ export default function AdminBundlesPage() {
                                     </div>
                                      <button
                                         onClick={() => removeItem(index)}
-                                        className="p-2 text-white/40 hover:text-red-400 hover:bg-white/10 rounded-lg transition-colors mt-0.5"
+                                        className="p-2 text-fg-muted hover:text-red-400 hover:bg-white/10 rounded-lg transition-colors mt-0.5"
                                       >
                                         ✕
                                       </button>
@@ -342,7 +342,7 @@ export default function AdminBundlesPage() {
                              );
                          })}
                           {bundleItems.length === 0 && (
-                            <div className="text-sm text-white/40 text-center py-4 bg-black/20 rounded-xl border border-white/5 border-dashed">
+                            <div className="text-sm text-fg-muted text-center py-4 bg-black/20 rounded-xl border border-white/5 border-dashed">
                                 No components added yet.
                             </div>
                         )}
@@ -353,7 +353,7 @@ export default function AdminBundlesPage() {
             <div className="p-6 border-t border-white/5 bg-black/20 flex justify-end gap-3">
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="px-6 py-2.5 rounded-full font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all"
+                className="px-6 py-2.5 rounded-full font-medium text-fg-muted hover:text-white hover:bg-white/5 transition-all"
               >
                 Cancel
               </button>

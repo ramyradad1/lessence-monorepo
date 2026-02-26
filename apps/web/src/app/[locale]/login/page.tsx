@@ -40,7 +40,7 @@ export default function LoginPage() {
   if (isLoading || user) {
      return (
        <div className="min-h-screen bg-background-dark flex items-center justify-center p-4">
-         <p className="text-white/40 uppercase tracking-widest text-sm">{t('loading')}</p>
+         <p className="text-fg-muted uppercase tracking-widest text-sm">{t('loading')}</p>
        </div>
      );
   }
@@ -54,8 +54,8 @@ export default function LoginPage() {
         <div className={`absolute -top-32 ${rtl ? '-left-32' : '-right-32'} w-64 h-64 bg-primary/20 rounded-full blur-[100px] pointer-events-none`} />
         
         <div className="mb-10 text-center relative z-10">
-          <h1 className="font-display text-4xl text-white mb-3">L&apos;ESSENCE</h1>
-          <p className="text-white/40 text-xs tracking-[0.2em] uppercase">
+          <h1 className="font-sans text-4xl text-white mb-3">L&apos;ESSENCE</h1>
+          <p className="text-fg-muted text-xs tracking-[0.2em] uppercase">
             {isLogin ? t('welcome_back') : t('discover_collection')}
           </p>
         </div>
@@ -75,7 +75,7 @@ export default function LoginPage() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
-                className={`w-full bg-surface-dark border border-white/10 rounded-full px-6 py-4 text-xs tracking-widest text-white placeholder:text-white/20 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all ${rtl ? 'text-right' : 'text-left'}`}
+                className={`w-full bg-surface-dark border border-white/10 rounded-full px-6 py-4 text-xs tracking-widest text-white placeholder:text-fg-faint focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all ${rtl ? 'text-right' : 'text-left'}`}
               />
             </div>
           )}
@@ -86,7 +86,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className={`w-full bg-surface-dark border border-white/10 rounded-full px-6 py-4 text-xs tracking-widest text-white placeholder:text-white/20 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all ${rtl ? 'text-right' : 'text-left'}`}
+              className={`w-full bg-surface-dark border border-white/10 rounded-full px-6 py-4 text-xs tracking-widest text-white placeholder:text-fg-faint focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all ${rtl ? 'text-right' : 'text-left'}`}
             />
           </div>
           <div>
@@ -96,7 +96,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className={`w-full bg-surface-dark border border-white/10 rounded-full px-6 py-4 text-xs tracking-widest text-white placeholder:text-white/20 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all ${rtl ? 'text-right' : 'text-left'}`}
+              className={`w-full bg-surface-dark border border-white/10 rounded-full px-6 py-4 text-xs tracking-widest text-white placeholder:text-fg-faint focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all ${rtl ? 'text-right' : 'text-left'}`}
             />
           </div>
 
@@ -115,7 +115,7 @@ export default function LoginPage() {
               setIsLogin(!isLogin);
               setError("");
             }}
-            className="text-white/40 text-[10px] tracking-[0.1em] uppercase hover:text-white transition-colors"
+            className="text-fg-muted text-[10px] tracking-[0.1em] uppercase hover:text-white transition-colors"
           >
             {isLogin ? t('need_account') : t('already_have_account')}
           </button>
