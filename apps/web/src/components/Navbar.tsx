@@ -317,8 +317,22 @@ export default function Navbar() {
         <div
           className={`fixed inset-0 z-[90] lg:hidden transition-all duration-500 ease-in-out bg-background/98 backdrop-blur-xl ${isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
             }`}
+          onClick={closeMenu} // Close on clicking any empty space
         >
-          <div className="flex flex-col items-center justify-center h-full gap-6 px-4 overflow-y-auto w-full pt-20">
+          {/* Close Button */}
+          <button
+            onClick={closeMenu}
+            className={`absolute top-6 right-6 p-3 rounded-full bg-white/5 text-fg hover:bg-white/10 transition-all duration-500 z-[100] ${isMenuOpen ? "opacity-100 rotate-0" : "opacity-0 rotate-90"
+              }`}
+            aria-label={t('close')}
+          >
+            <X size={24} strokeWidth={1.5} />
+          </button>
+
+          <div
+            className="flex flex-col items-center justify-center h-full gap-6 px-4 overflow-y-auto w-full pt-20"
+            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking actual menu content area
+          >
             {dynNavLinks.map((link, index) => (
               <Link
                 key={link.href + link.name}
@@ -341,14 +355,17 @@ export default function Navbar() {
                 <Search size={22} strokeWidth={1.5} />
                 <span className="text-[9px] uppercase tracking-[0.2em]">{t('search')}</span>
               </Link>
-              <Link href="/profile" className="text-fg-faint hover:text-primary transition-all duration-300 flex flex-col items-center gap-2.5">
+              <Link href="/profile" onClick={closeMenu} className="text-fg-faint hover:text-primary transition-all duration-300 flex flex-col items-center gap-2.5">
                 <User size={22} strokeWidth={1.5} />
                 <span className="text-[9px] uppercase tracking-[0.2em]">{t('profile')}</span>
               </Link>
             </div>
 
             <button
-              onClick={toggleLanguage}
+              onClick={() => {
+                toggleLanguage();
+                closeMenu();
+              }}
               className={`mt-4 px-8 py-2.5 rounded-full border border-primary/30 text-primary font-semibold uppercase tracking-[0.15em] text-xs transition-all duration-500 delay-700 hover:bg-primary/10 hover:border-primary/50 ${isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
               {locale === 'ar' ? 'English' : 'العربية'}

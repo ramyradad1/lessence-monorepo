@@ -12,6 +12,7 @@ import { Search, X, SlidersHorizontal, ChevronDown } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useRouter, usePathname } from "@/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { motion, AnimatePresence } from "framer-motion";
 
 type ProductSort = "newest" | "price_asc" | "price_desc" | "best_rated" | "most_popular";
 const PAGE_SIZE = 12;
@@ -285,19 +286,44 @@ function ShopContent() {
       </div>
 
       {/* Filter Modal Edge/Drawer */}
-      {isFilterOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end rtl:flex-row-reverse">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsFilterOpen(false)} />
-          <div className="relative w-full max-w-sm h-full bg-background-dark border-l border-white/10 rtl:border-l-0 rtl:border-r p-6 flex flex-col pt-10">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-sans text-white">{t('filters')}</h2>
-              <button onClick={() => setIsFilterOpen(false)} className="text-fg-muted hover:text-white" title={t('close_filters')}>
-                <X size={24} />
-              </button>
-            </div>
+      <AnimatePresence>
+        {isFilterOpen && (
+          <div className="fixed inset-0 z-[110] flex justify-end rtl:flex-row-reverse overflow-hidden">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
+              onClick={() => setIsFilterOpen(false)}
+            />
 
-            <div className="flex-1 overflow-y-auto pr-2 rtl:pr-0 rtl:pl-2 flex flex-col gap-8 text-left rtl:text-right">
-              {/* Sort By */}
+            {/* Drawer Sidebar */}
+            <motion.div
+              initial={{ x: locale === 'ar' ? '-100%' : '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: locale === 'ar' ? '-100%' : '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="relative w-full max-w-sm h-full bg-background-dark border-l border-white/10 rtl:border-l-0 rtl:border-r flex flex-col shadow-2xl overflow-hidden pt-10"
+              onClick={() => setIsFilterOpen(false)} // Clicking empty space in the sidebar container closes it
+            >
+              <div
+                className="p-6 flex flex-col h-full"
+                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking content
+              >
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-2xl font-sans text-white uppercase tracking-wider">{t('filters')}</h2>
+                  <button
+                    onClick={() => setIsFilterOpen(false)}
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-fg-muted hover:bg-white/10 hover:text-white transition-all transform hover:rotate-90"
+                    title={t('close_filters')}
+                  >
+                    <X size={20} strokeWidth={1.5} />
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto pr-2 rtl:pr-0 rtl:pl-2 flex flex-col gap-8 text-left rtl:text-right scroll-smooth categories-scrollbar">
+                  {/* Sort By */}
               <div>
                 <label className="block text-xs font-bold tracking-widest uppercase text-fg-muted mb-3">{t('sort_by')}</label>
                 <div className="relative">
@@ -401,11 +427,13 @@ function ShopContent() {
                 className="flex-1 bg-primary text-black py-3 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-primary-light transition-colors"
               >
                 {t('apply_filters')}
-              </button>
-            </div>
-          </div>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
         </div>
       )}
+      </AnimatePresence>
     </>
   );
 }
