@@ -19,6 +19,8 @@ const NAV_ITEMS = [
   { href: '/admin/customers', label: 'Customers', icon: '🧑‍💼' },
   { href: '/admin/users', label: 'Users', icon: '👥' },
   { href: '/admin/settings', label: 'Settings', icon: '⚙️' },
+  { href: '/admin/sections', label: 'Sections', icon: '🧩' },
+  { href: '/admin/seo', label: 'SEO & GEO', icon: '🔍' },
   { href: '/admin/policies', label: 'Policies', icon: '📝' },
   { href: '/admin/translations', label: 'Translations', icon: '🌐' },
   { href: '/admin/variants', label: 'Sizes Mapping', icon: '📏' },

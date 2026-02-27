@@ -51,6 +51,7 @@ export type Product = {
   base_notes?: string[];
   low_stock_threshold?: number;
   gender_target?: 'men' | 'women' | 'unisex';
+  product_type?: 'original' | 'simulation';
   created_at?: string;
   updated_at?: string;
 };

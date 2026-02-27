@@ -25,13 +25,13 @@ export default function ProductDetailPage() {
     price: number; slug: string;
     image_url: string; images: string[];
     status: string; is_active: boolean; is_new: boolean; is_featured: boolean; is_sale: boolean;
-    category_id: string; brand_id: string;
+    category_id: string; brand_id: string; product_type: string;
     tags: string; top_notes: string; heart_notes: string; base_notes: string;
   }>({
     name: '', name_ar: '', subtitle: '', subtitle_ar: '', description: '', description_ar: '',
     price: 0, slug: '', image_url: '', images: [],
     status: 'active', is_active: true, is_new: false, is_featured: false, is_sale: false,
-    category_id: '', brand_id: '',
+    category_id: '', brand_id: '', product_type: 'original',
     tags: '', top_notes: '', heart_notes: '', base_notes: ''
   });
 
@@ -56,7 +56,7 @@ export default function ProductDetailPage() {
           description: data.description_en || data.description || '', description_ar: data.description_ar || '',
           price: data.base_price || data.price, slug: data.slug || '', image_url: data.image_url || '', images: data.images || [],
           status: data.status || 'active', is_active: data.is_active, is_new: data.is_new, is_featured: data.is_featured, is_sale: data.is_sale,
-          category_id: data.category_id || '', brand_id: data.brand_id || '',
+          category_id: data.category_id || '', brand_id: data.brand_id || '', product_type: data.product_type || 'original',
           tags: (data.tags || []).join(', '),
           top_notes: (data.top_notes || []).join(', '),
           heart_notes: (data.heart_notes || []).join(', '),
@@ -108,7 +108,8 @@ export default function ProductDetailPage() {
         subtitle_en: form.subtitle,
         subtitle_ar: form.subtitle_ar,
         image_url: form.image_url,
-        images: form.images.filter(Boolean)
+        images: form.images.filter(Boolean),
+        product_type: form.product_type,
       }).eq('id', pid);
     }
 
@@ -335,6 +336,14 @@ export default function ProductDetailPage() {
                 {brands.map(b => (
                   <option key={b.id} value={b.id} className="bg-[#1e1b16]">{b.name_en}</option>
                 ))}
+              </select>
+            </div>
+
+            <div>
+              <label className={labelClass}>Product Type</label>
+              <select title="Product Type" value={form.product_type} onChange={e => setForm({ ...form, product_type: e.target.value })} className={inputClass}>
+                <option value="original" className="bg-[#1e1b16]">Original</option>
+                <option value="simulation" className="bg-[#1e1b16]">Simulation</option>
               </select>
             </div>
           </div>

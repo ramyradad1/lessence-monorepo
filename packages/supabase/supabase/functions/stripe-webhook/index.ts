@@ -36,6 +36,21 @@ serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   )
 
+  // --- Idempotency Check ---
+  // Use Stripe's event ID to prevent processing the same webhook twice
+  const { error: lockError } = await supabaseClient
+    .from('handled_webhook_events')
+    .insert([{ provider: 'stripe', event_id: event.id }]);
+
+  if (lockError) {
+    if (lockError.code === '23505') {
+      console.log(`Duplicate Stripe webhook blocked: ${event.id}`);
+      return new Response('Webhook already processed', { status: 200 });
+    }
+    console.error(`Failed to acquire idempotency lock: ${lockError.message}`);
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
+  }
+
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
 
@@ -147,10 +162,11 @@ serve(async (req) => {
                 .single();
               if (varData) {
                   const newQty = Math.max(0, varData.stock_qty - item.quantity);
-                  await supabaseClient
+                const { error: invError } = await supabaseClient
                     .from('product_variants')
                     .update({ stock_qty: newQty })
                     .eq('id', item.variant_id);
+                if (invError) console.error(`Failed to update variant stock for ${item.variant_id}:`, invError);
               }
           } else {
              const { data: inv } = await supabaseClient
@@ -162,17 +178,18 @@ serve(async (req) => {
 
              if (inv) {
                  const newQty = Math.max(0, inv.quantity_available - item.quantity);
-                 await supabaseClient
+               const { error: invError } = await supabaseClient
                    .from('inventory')
                    .update({ quantity_available: newQty })
                    .eq('product_id', item.product_id)
                    .eq('size', item.selected_size);
+               if (invError) console.error(`Failed to update inventory for product ${item.product_id}:`, invError);
              }
           }
       }
 
       // 4. Create Payment Record
-      await supabaseClient
+      const { error: paymentError } = await supabaseClient
         .from('payments')
         .insert([{
             order_id: order.id,
@@ -181,6 +198,7 @@ serve(async (req) => {
             provider: 'stripe',
             transaction_id: session.payment_intent as string || session.id
         }]);
+      if (paymentError) console.error(`Failed to create payment record for order ${order.id}:`, paymentError);
 
        // 5. Update Coupon Usage
        if (applied_coupon_id) {
@@ -191,19 +209,21 @@ serve(async (req) => {
                 .eq('id', applied_coupon_id)
                 .single();
             if (coupon) {
-                 await supabaseClient
+              const { error: couponError } = await supabaseClient
                     .from('coupons')
                     .update({ times_used: coupon.times_used + 1 })
                     .eq('id', applied_coupon_id);
+              if (couponError) console.error(`Failed to update coupon ${applied_coupon_id}:`, couponError);
             }
        }
 
        // 6. Clear Cart (if user is known)
        if (dbUserId) {
-            await supabaseClient
+         const { error: cartError } = await supabaseClient
                 .from('carts')
                 .delete()
                 .eq('user_id', dbUserId);
+         if (cartError) console.error(`Failed to clear cart for user ${dbUserId}:`, cartError);
        }
 
       console.log(`Successfully processed order ${orderNumber} for session ${session.id}`)

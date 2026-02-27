@@ -19,7 +19,7 @@ export default function AdminProductsPage() {
 
   const [search, setSearch] = useState('');
   const [showCreate, setShowCreate] = useState(false);
-  const [newProduct, setNewProduct] = useState({ name: '', name_ar: '', subtitle: '', subtitle_ar: '', description: '', description_ar: '', price: '', category_id: '', sku: '' });
+  const [newProduct, setNewProduct] = useState({ name: '', name_ar: '', subtitle: '', subtitle_ar: '', description: '', description_ar: '', price: '', category_id: '', sku: '', product_type: 'original' });
   const [creating, setCreating] = useState(false);
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
@@ -46,13 +46,14 @@ export default function AdminProductsPage() {
       rating: 0,
       review_count: 0,
       is_new: false,
-      status: 'active'
+      status: 'active',
+      product_type: newProduct.product_type as 'original' | 'simulation',
     });
 
     if (!result.success) {
       alert('Error creating product: ' + result.error);
     } else {
-      setNewProduct({ name: '', name_ar: '', subtitle: '', subtitle_ar: '', description: '', description_ar: '', price: '', category_id: '', sku: '' });
+      setNewProduct({ name: '', name_ar: '', subtitle: '', subtitle_ar: '', description: '', description_ar: '', price: '', category_id: '', sku: '', product_type: 'original' });
       setShowCreate(false);
     }
     setCreating(false);
@@ -138,9 +139,15 @@ export default function AdminProductsPage() {
               className="bg-[#181611] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#f4c025]/40" />
 
             <select title="Category" value={newProduct.category_id} onChange={e => setNewProduct({ ...newProduct, category_id: e.target.value })}
-              className="col-span-1 sm:col-span-2 bg-[#181611] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#f4c025]/40">
+              className="bg-[#181611] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#f4c025]/40">
               <option value="">Select Category</option>
               {categories.map(c => <option key={c.id} value={c.id} className="bg-[#1e1b16]">{c.name}</option>)}
+            </select>
+
+            <select title="Product Type" value={newProduct.product_type} onChange={e => setNewProduct({ ...newProduct, product_type: e.target.value })}
+              className="bg-[#181611] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#f4c025]/40">
+              <option value="original" className="bg-[#1e1b16]">Original</option>
+              <option value="simulation" className="bg-[#1e1b16]">Simulation</option>
             </select>
           </div>
 
@@ -258,6 +265,12 @@ export default function AdminProductsPage() {
                       )}
                       {missingTranslation && (
                         <span className="text-[10px] font-bold uppercase bg-purple-500 text-white px-2 py-0.5 rounded-full" title="Missing Arabic Translation">A / E</span>
+                      )}
+                      {product.product_type === 'simulation' && (
+                        <span className="text-[10px] font-bold uppercase bg-violet-500 text-white px-2 py-0.5 rounded-full">Simulation</span>
+                      )}
+                      {product.product_type === 'original' && (
+                        <span className="text-[10px] font-bold uppercase bg-amber-600 text-white px-2 py-0.5 rounded-full">Original</span>
                       )}
                     </div>
                   </div>

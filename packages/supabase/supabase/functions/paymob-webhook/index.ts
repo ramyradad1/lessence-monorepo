@@ -1,23 +1,38 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-// HMAC verification function (from crypto API)
-async function verifyHmac(payload: string, hmac: string, secret: string) {
-    // Note: Paymob computes HMAC differently.
-    // They usually concatenate specific fields to generate the HMAC array of string in a specific order.
-    // However, in NextGen Intention Webhooks, some providers just HMAC-SHA512 the raw body or a strict subset of fields.
-    // The exact algorithm for NextGen might be simpler. Let's assume standard Paymob HMAC (concatenated fields) for transaction objects.
-    // Given the task constraints and lack of exact documentation, we will skip strict HMAC locally if the secret is unavailable 
-    // or log a warning, BUT we'll try to implement the standard Paymob HMAC-SHA512 logic if we know the structure.
-    
-    // For safety and to keep checkout working during this PoC, if HMAC_SECRET isn't present, we'll allow it.
-    // In production, you MUST strictly verify this!
-    if (!secret) return true;
+// HMAC-SHA512 verification using WebCrypto API
+async function verifyHmac(payload: string, hmacHeader: string, secret: string): Promise<boolean> {
+  if (!secret || !hmacHeader) {
+    console.error('HMAC verification failed: missing secret or header');
+    return false;
+  }
 
-    // TODO: Implement Paymob's 14-field concatenation based on payload.
-    // As Paymob's NextGen webhook structure for HMAC isn't perfectly documented publicly without trial-and-error, 
-    // we bypass strict failure and log for now, or you can implement the standard conc_str.
-    return true; 
+  try {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-512' },
+      false,
+      ['verify']
+    );
+
+      // Paymob provides HMAC as a hex string
+      const signatureBytes = new Uint8Array(
+        hmacHeader.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16))
+      );
+
+      return await crypto.subtle.verify(
+        'HMAC',
+        key,
+        signatureBytes,
+        encoder.encode(payload)
+      );
+    } catch (e) {
+      console.error('HMAC verification error:', e);
+      return false;
+    }
 }
 
 const corsHeaders = {
@@ -50,6 +65,23 @@ serve(async (req) => {
         Deno.env.get('SUPABASE_URL') ?? '',
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
+
+    // --- Idempotency Check ---
+    // Use the transaction ID as a deduplication key to prevent processing the same webhook twice
+    const idempotencyKey = transaction.id ? transaction.id.toString() : null;
+    if (idempotencyKey) {
+      const { error: lockError } = await supabaseClient
+        .from('handled_webhook_events')
+        .insert([{ provider: 'paymob', event_id: idempotencyKey }]);
+
+      if (lockError) {
+        if (lockError.code === '23505') {
+          console.log(`Duplicate Paymob webhook blocked: ${idempotencyKey}`);
+          return new Response('Webhook already processed', { status: 200 });
+        }
+        throw new Error(`Failed to acquire idempotency lock: ${lockError.message}`);
+      }
+    }
 
     // According to Paymob doc, the transaction object is usually in payload.obj
     // NextGen intentions might fire different event types, e.g., "TRANSACTION_SUCCESS" or similar.
@@ -177,10 +209,11 @@ serve(async (req) => {
                       .single();
                     if (varData) {
                         const newQty = Math.max(0, varData.stock_qty - (item.quantity * bItem.quantity));
-                        await supabaseClient
+                      const { error: invError } = await supabaseClient
                           .from('product_variants')
                           .update({ stock_qty: newQty })
                           .eq('id', bItem.variant_id);
+                      if (invError) console.error(`Failed to update variant stock for ${bItem.variant_id}:`, invError);
                     }
                } else {
                     const { data: inv } = await supabaseClient
@@ -190,10 +223,11 @@ serve(async (req) => {
                       .single();
                     if (inv) {
                          const newQty = Math.max(0, inv.quantity_available - (item.quantity * bItem.quantity));
-                         await supabaseClient
+                      const { error: invError } = await supabaseClient
                            .from('inventory')
                            .update({ quantity_available: newQty })
                            .eq('product_id', bItem.product_id);
+                      if (invError) console.error(`Failed to update inventory for product ${bItem.product_id}:`, invError);
                     }
                }
             }
@@ -206,10 +240,11 @@ serve(async (req) => {
                   .single();
                 if (varData) {
                     const newQty = Math.max(0, varData.stock_qty - item.quantity);
-                    await supabaseClient
+                  const { error: invError } = await supabaseClient
                       .from('product_variants')
                       .update({ stock_qty: newQty })
                       .eq('id', item.variant_id);
+                  if (invError) console.error(`Failed to update variant stock for ${item.variant_id}:`, invError);
                 }
             } else {
                const { data: inv } = await supabaseClient
@@ -218,21 +253,22 @@ serve(async (req) => {
                  .eq('product_id', item.product_id)
                  .eq('size', item.selected_size)
                  .single();
-     
+
                if (inv) {
                    const newQty = Math.max(0, inv.quantity_available - item.quantity);
-                   await supabaseClient
+                 const { error: invError } = await supabaseClient
                      .from('inventory')
                      .update({ quantity_available: newQty })
                      .eq('product_id', item.product_id)
                      .eq('size', item.selected_size);
+                 if (invError) console.error(`Failed to update inventory for product ${item.product_id}:`, invError);
                }
             }
         }
     }
 
     // 4. Create Payment Record
-    await supabaseClient
+    const { error: paymentError } = await supabaseClient
       .from('payments')
       .insert([{
           order_id: order.id,
@@ -241,6 +277,7 @@ serve(async (req) => {
           provider: 'paymob',
           transaction_id: transaction.id ? transaction.id.toString() : `paymob_${orderNumber}`
       }]);
+    if (paymentError) console.error(`Failed to create payment record for order ${order.id}:`, paymentError);
 
     // 5. Update Coupon Usage
     if (applied_coupon_id) {
@@ -250,19 +287,21 @@ serve(async (req) => {
             .eq('id', applied_coupon_id)
             .single();
         if (coupon) {
-             await supabaseClient
+          const { error: couponError } = await supabaseClient
                 .from('coupons')
                 .update({ times_used: coupon.times_used + 1 })
                 .eq('id', applied_coupon_id);
+          if (couponError) console.error(`Failed to update coupon ${applied_coupon_id}:`, couponError);
         }
     }
 
     // 6. Clear Cart (if user is known)
     if (dbUserId) {
-        await supabaseClient
+      const { error: cartError } = await supabaseClient
             .from('carts')
             .delete()
             .eq('user_id', dbUserId);
+      if (cartError) console.error(`Failed to clear cart for user ${dbUserId}:`, cartError);
             
         // 7. Award Loyalty Points
         try {
@@ -278,7 +317,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({ received: true, orderId: order.id }), { status: 200 })
 
   } catch (err: any) {
-    console.error('Webhook error:', err.message)
-    return new Response(err.message, { status: 400 })
+    console.error('Webhook Execution Failed with full trace:', err);
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 })
   }
 })

@@ -124,5 +124,25 @@
   "load_more": "Load More",
   "showing_of": "Showing {count} of {total}",
   "toggle_favorite": "Toggle favorite",
-  "error_occurred": "An error occurred"
+  "error_occurred": "An error occurred",
+  "for_her": "For Her",
+  "for_him": "For Him",
+  "shop_women": "Shop Women",
+  "shop_men": "Shop Men",
+  "explore_women": "Explore feminine fragrances crafted with elegance and grace.",
+  "explore_men": "Explore masculine fragrances designed with boldness and power.",
+  "shop_by_category": "Shop by Category",
+  "explore_categories": "Explore Our World",
+  "original_perfumes": "Original Perfumes",
+  "simulation_perfumes": "Simulation Perfumes",
+  "discover_original": "Authentic luxury fragrances from the world's finest houses.",
+  "discover_simulation": "Premium-quality inspired fragrances at accessible prices.",
+  "product_type": "Product Type",
+  "original": "Original",
+  "simulation": "Simulation",
+  "view_collection": "View Collection",
+  "womens_fragrances": "Women's Fragrances",
+  "mens_fragrances": "Men's Fragrances",
+  "exclusive": "Exclusive"
 }
+

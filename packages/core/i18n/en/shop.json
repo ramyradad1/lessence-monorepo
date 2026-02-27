@@ -26,5 +26,10 @@
   "clear_all_filters": "Clear all filters",
   "all_scents": "All Scents",
   "clear_search": "Clear search",
-  "close_filters": "Close filters"
+  "close_filters": "Close filters",
+  "product_type": "Product Type",
+  "all_types": "All Types",
+  "original": "Original",
+  "simulation": "Simulation"
 }
+

@@ -7,6 +7,7 @@ export interface ProductSearchFilters {
   searchQuery?: string;
   categorySlugs?: string[];
   genderTargets?: string[];
+  productTypes?: string[];
   sizes?: number[];
   concentrations?: string[];
   minPrice?: number;
@@ -23,6 +24,7 @@ export function useProductSearch(supabase: SupabaseClient, filters: ProductSearc
     filters.searchQuery,
     filters.categorySlugs?.sort().join(','),
     filters.genderTargets?.sort().join(','),
+    filters.productTypes?.sort().join(','),
     filters.sizes?.sort().join(','),
     filters.concentrations?.sort().join(','),
     filters.minPrice,
@@ -41,6 +43,7 @@ export function useProductSearch(supabase: SupabaseClient, filters: ProductSearc
           search_query: filters.searchQuery || null,
           category_slugs: filters.categorySlugs?.length ? filters.categorySlugs : null,
           gender_targets: filters.genderTargets?.length ? filters.genderTargets : null,
+          product_types: filters.productTypes?.length ? filters.productTypes : null,
           sizes: filters.sizes?.length ? filters.sizes : null,
           concentrations: filters.concentrations?.length ? filters.concentrations : null,
           min_price: filters.minPrice ?? null,

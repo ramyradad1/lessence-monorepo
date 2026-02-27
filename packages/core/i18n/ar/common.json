@@ -123,5 +123,25 @@
   "load_more": "تحميل المزيد",
   "showing_of": "عرض {count} من {total}",
   "toggle_favorite": "تبديل المفضلة",
-  "error_occurred": "حدث خطأ"
+  "error_occurred": "حدث خطأ",
+  "for_her": "لها",
+  "for_him": "له",
+  "shop_women": "تسوقي النسائي",
+  "shop_men": "تسوق الرجالي",
+  "explore_women": "اكتشفي عطور نسائية صُممت بأناقة ورقة.",
+  "explore_men": "اكتشف عطور رجالية صُممت بجرأة وقوة.",
+  "shop_by_category": "تسوق حسب الفئة",
+  "explore_categories": "استكشف عالمنا",
+  "original_perfumes": "عطور أصلية",
+  "simulation_perfumes": "عطور محاكاة",
+  "discover_original": "عطور فاخرة أصلية من أرقى دور العطور العالمية.",
+  "discover_simulation": "عطور مستوحاة بجودة عالية بأسعار مناسبة.",
+  "product_type": "نوع المنتج",
+  "original": "أصلي",
+  "simulation": "محاكاة",
+  "view_collection": "عرض المجموعة",
+  "womens_fragrances": "عطور نسائية",
+  "mens_fragrances": "عطور رجالية",
+  "exclusive": "حصري"
 }
+

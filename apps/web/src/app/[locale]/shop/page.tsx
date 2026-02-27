@@ -30,6 +30,7 @@ function ShopContent() {
   const minPrice = searchParams.get("minPrice") ? Number(searchParams.get("minPrice")) : undefined;
   const maxPrice = searchParams.get("maxPrice") ? Number(searchParams.get("maxPrice")) : undefined;
   const genderTarget = searchParams.get("gender") || "";
+  const productType = searchParams.get("productType") || "";
   const inStockOnly = searchParams.get("inStock") === "true";
   const sortBy = searchParams.get("sort") || "newest";
 
@@ -40,13 +41,14 @@ function ShopContent() {
   // Reset visible count when filters change
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [searchQuery, activeCategory, minPrice, maxPrice, genderTarget, inStockOnly, sortBy]);
+  }, [searchQuery, activeCategory, minPrice, maxPrice, genderTarget, productType, inStockOnly, sortBy]);
 
   // Local state for filters in the modal/sidebar before applying
   const [draftState, setDraftState] = useState({
     minPrice: minPrice || "",
     maxPrice: maxPrice || "",
     gender: genderTarget,
+    productType: productType,
     inStock: inStockOnly,
     sort: sortBy,
   });
@@ -55,6 +57,7 @@ function ShopContent() {
     searchQuery: searchQuery,
     categorySlugs: activeCategory !== "all" ? [activeCategory] : undefined,
     genderTargets: genderTarget ? [genderTarget] : undefined,
+    productTypes: productType ? [productType] : undefined,
     minPrice: minPrice,
     maxPrice: maxPrice,
     inStockOnly: inStockOnly,
@@ -96,6 +99,7 @@ function ShopContent() {
       minPrice: draftState.minPrice ? String(draftState.minPrice) : null,
       maxPrice: draftState.maxPrice ? String(draftState.maxPrice) : null,
       gender: draftState.gender || null,
+      productType: draftState.productType || null,
       inStock: draftState.inStock ? "true" : null,
       sort: draftState.sort,
     });
@@ -107,6 +111,7 @@ function ShopContent() {
       minPrice: "",
       maxPrice: "",
       gender: "",
+      productType: "",
       inStock: false,
       sort: "newest",
     });
@@ -114,6 +119,7 @@ function ShopContent() {
       minPrice: null,
       maxPrice: null,
       gender: null,
+      productType: null,
       inStock: null,
       sort: "newest",
     });
@@ -158,6 +164,7 @@ function ShopContent() {
                     minPrice: minPrice || "",
                     maxPrice: maxPrice || "",
                     gender: genderTarget,
+                    productType: productType,
                     inStock: inStockOnly,
                     sort: sortBy,
                   });
@@ -167,7 +174,7 @@ function ShopContent() {
               >
                 <SlidersHorizontal size={16} />
                 {t('filters')}
-                {(minPrice || maxPrice || genderTarget || inStockOnly || sortBy !== 'newest') && (
+                {(minPrice || maxPrice || genderTarget || productType || inStockOnly || sortBy !== 'newest') && (
                   <span className="w-2 h-2 rounded-full bg-primary ml-1 rtl:ml-0 rtl:mr-1" />
                 )}
               </button>
@@ -243,7 +250,7 @@ function ShopContent() {
             </div>
           ) : (
             <>
-                    {(searchQuery || minPrice || maxPrice || genderTarget || activeCategory !== "all") && (
+                    {(searchQuery || minPrice || maxPrice || genderTarget || productType || activeCategory !== "all") && (
                       <p className="text-fg-faint text-xs tracking-widest uppercase mb-6">
                         {t('results_found', { count: products.length })}
                 </p>
@@ -345,6 +352,25 @@ function ShopContent() {
                     <label key={option.value} className="flex items-center gap-3 cursor-pointer group">
                       <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${draftState.gender === option.value ? 'bg-primary border-primary' : 'border-white/20 group-hover:border-white/40'}`}>
                         {draftState.gender === option.value && <div className="w-2 h-2 bg-black rounded-sm" />}
+                      </div>
+                      <span className="text-sm text-fg group-hover:text-white transition-colors">{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Product Type */}
+              <div>
+                <label className="block text-xs font-bold tracking-widest uppercase text-fg-muted mb-3">{t('product_type')}</label>
+                <div className="flex flex-col gap-2">
+                  {[
+                    { label: t('all_types'), value: '' },
+                    { label: t('original'), value: 'original' },
+                    { label: t('simulation'), value: 'simulation' },
+                  ].map(option => (
+                    <label key={option.value} className="flex items-center gap-3 cursor-pointer group">
+                      <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${draftState.productType === option.value ? 'bg-primary border-primary' : 'border-white/20 group-hover:border-white/40'}`}>
+                        {draftState.productType === option.value && <div className="w-2 h-2 bg-black rounded-sm" />}
                       </div>
                       <span className="text-sm text-fg group-hover:text-white transition-colors">{option.label}</span>
                     </label>

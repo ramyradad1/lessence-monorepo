@@ -26,5 +26,10 @@
   "clear_all_filters": "مسح كل الفلاتر",
   "all_scents": "كل العطور",
   "clear_search": "مسح البحث",
-  "close_filters": "إغلاق التصفية"
+  "close_filters": "إغلاق التصفية",
+  "product_type": "نوع المنتج",
+  "all_types": "جميع الأنواع",
+  "original": "أصلي",
+  "simulation": "محاكاة"
 }
+

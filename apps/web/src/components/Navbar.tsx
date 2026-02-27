@@ -165,6 +165,8 @@ export default function Navbar() {
   // Build dynamic navigation items based on active entities in db
   const dynNavLinks = [
     { name: t('fragrances'), href: "/shop" },
+    { name: t('shop_women'), href: "/shop?gender=women" },
+    { name: t('shop_men'), href: "/shop?gender=men" },
     ...categories.map(c => ({
       name: locale === 'ar' && c.name_ar ? c.name_ar : c.name_en || c.name,
       href: `/shop?category=${c.slug}`
@@ -181,6 +183,8 @@ export default function Navbar() {
   // Split nav links for symmetric desktop layout
   const leftNavLinks = [
     { name: t('fragrances'), href: "/shop" },
+    { name: t('shop_women'), href: "/shop?gender=women" },
+    { name: t('shop_men'), href: "/shop?gender=men" },
     { name: t('collections'), href: "/collections" },
   ];
 
