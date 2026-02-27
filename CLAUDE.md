@@ -1,7 +1,7 @@
 <!-- gitnexus:start -->
 # GitNexus MCP
 
-This project is indexed by GitNexus as **Perfumes** (1372 symbols, 2612 relationships, 42 execution flows).
+This project is indexed by GitNexus as **Perfumes** (2813 symbols, 6785 relationships, 186 execution flows).
 
 GitNexus provides a knowledge graph over this codebase — call chains, blast radius, execution flows, and semantic search.
 
