@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useCallback, useEffect } from 'react';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Profile } from '@lessence/core';

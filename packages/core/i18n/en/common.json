@@ -72,7 +72,7 @@
   "price_drop_desc": "You'll be notified here when prices drop on items in your Favorites.",
   "new_unread": "{{count}} new",
   "return_request": "Return Request",
-  "order_no": "Order #{{number}}",
+  "order_no": "Order #{number}",
   "select_items": "Select Items",
   "reason": "Reason",
   "additional_comments": "Additional Comments",
@@ -143,6 +143,20 @@
   "view_collection": "View Collection",
   "womens_fragrances": "Women's Fragrances",
   "mens_fragrances": "Men's Fragrances",
-  "exclusive": "Exclusive"
+  "exclusive": "Exclusive",
+  "exclusive_scents": "Exclusive Scents",
+  "discover": "Discover",
+  "explore": "Explore",
+  "best_sellers": "Best Sellers",
+  "luxury_collections": "Luxury Collections",
+  "view_all_scents": "View All Scents",
+  "footer_tagline": "Crafting elegant, timeless scents for the modern aesthete. Experience true luxury in every drop.",
+  "newsletter_title": "Newsletter",
+  "newsletter_desc": "Subscribe to receive exclusive offers and updates.",
+  "email_placeholder": "YOUR EMAIL",
+  "subscribe": "Subscribe",
+  "support": "Support",
+  "shipping": "Shipping & Delivery",
+  "contact": "Contact Us"
 }
 

@@ -1,0 +1,121 @@
+/* ═══════════════════════════════════════════════════
+   V2 Luxury Theme — CSS Custom Properties
+   ═══════════════════════════════════════════════════ */
+
+/* ── Dark Mode (Default) ── */
+.v2-themed[data-theme="dark"] {
+  --v2-bg:            #0a0907;
+  --v2-bg-elevated:   #12100c;
+  --v2-bg-card:       #1c1a14;
+  --v2-bg-card-hover: #221f18;
+  --v2-bg-overlay:    rgba(0, 0, 0, 0.6);
+  --v2-bg-glass:      rgba(10, 9, 7, 0.85);
+
+  --v2-text:          #ffffff;
+  --v2-text-secondary: rgba(255, 255, 255, 0.6);
+  --v2-text-faint:    rgba(255, 255, 255, 0.35);
+  --v2-text-inverted: #0a0907;
+
+  --v2-border:        rgba(255, 255, 255, 0.06);
+  --v2-border-hover:  rgba(255, 255, 255, 0.12);
+  --v2-border-subtle: rgba(255, 255, 255, 0.03);
+
+  --v2-gold:          #d4a76a;
+  --v2-gold-light:    #e4c590;
+  --v2-gold-text:     #d4a76a;
+  --v2-gold-glow:     rgba(212, 167, 106, 0.15);
+  --v2-gold-shadow:   rgba(212, 167, 106, 0.35);
+
+  --v2-product-bg:    linear-gradient(to bottom, #1c1a14, #0a0907);
+  --v2-product-shadow: rgba(0, 0, 0, 0.8);
+
+  --v2-hero-gradient: linear-gradient(180deg, transparent, rgba(10, 9, 7, 0.95));
+  --v2-section-glow:  rgba(212, 167, 106, 0.05);
+
+  --v2-selection-bg:  rgba(212, 167, 106, 0.3);
+  --v2-selection-text: #ffffff;
+
+  --v2-scrollbar-track: #12100c;
+  --v2-scrollbar-thumb: #2a2520;
+
+  --v2-red:           #ef4444;
+  --v2-red-faint:     rgba(239, 68, 68, 0.5);
+  --v2-green:         #4ade80;
+}
+
+/* ── Light Mode ── */
+.v2-themed[data-theme="light"] {
+  /* Cleaner, brighter backgrounds */
+  --v2-bg:            #FFFFFF;
+  /* Warm luxurious light mode palette with subtle gradient tones */
+  --v2-bg:            #FDFCF9;
+  --v2-bg-gradient:   linear-gradient(to bottom, #FDFCF9, #F5F1E8);
+  --v2-bg-elevated:   #F5F1E8;
+  --v2-bg-elevated-gradient: linear-gradient(to bottom, #F5F1E8, #EBE5D8);
+  --v2-bg-card:       #FFFFFF;
+  --v2-bg-card-hover: #FDFCF9;
+  --v2-bg-overlay:    rgba(253, 251, 247, 0.95);
+  --v2-bg-glass:      rgba(253, 251, 247, 0.85);
+
+  /* Higher contrast text */
+  --v2-text:          #2A2520;
+  --v2-text-secondary: #4A423A;
+  --v2-text-faint:    #8C7C6B;
+  --v2-text-inverted: #FFFFFF;
+
+  /* Sharper borders and shadows for popup effect */
+  --v2-border:        rgba(196, 155, 79, 0.2);
+  --v2-border-hover:  rgba(196, 155, 79, 0.35);
+  --v2-border-subtle: rgba(196, 155, 79, 0.1);
+
+  /* Richer gold for better visibility */
+  --v2-gold:          #a67c3d;
+  --v2-gold-light:    #c59b5f;
+  --v2-gold-text:     #8a632d;
+  --v2-gold-glow:     rgba(166, 124, 61, 0.15);
+  --v2-gold-shadow:   rgba(166, 124, 61, 0.25);
+
+  --v2-product-bg:    linear-gradient(to bottom, #FFFFFF, #FDFCF9);
+  --v2-product-shadow: rgba(0, 0, 0, 0.08);
+
+  --v2-hero-gradient: linear-gradient(180deg, transparent, rgba(253, 251, 247, 0.98));
+  --v2-section-glow:  rgba(166, 124, 61, 0.05);
+
+  --v2-selection-bg:  rgba(166, 124, 0, 0.2);
+  --v2-selection-text: #000000;
+
+  --v2-scrollbar-track: #F2F2F2;
+  --v2-scrollbar-thumb: #CCCCCC;
+
+  --v2-red:           #dc2626;
+  --v2-red-faint:     rgba(220, 38, 38, 0.15);
+  --v2-green:         #16a34a;
+}
+
+/* ── Utility Classes ── */
+.v2-themed {
+  background-color: var(--v2-bg);
+  color: var(--v2-text);
+  /* Smoother, longer transitions for base colors */
+  transition: background-color 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
+              color 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  scroll-behavior: smooth;
+}
+
+.v2-themed ::selection {
+  background: var(--v2-selection-bg);
+  color: var(--v2-selection-text);
+}
+
+/* Ultra-smooth transition for all themed elements */
+.v2-themed * {
+  transition-property: background-color, border-color, color, box-shadow, transform;
+  transition-duration: 0.5s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Override transitions for framer-motion elements to prevent conflicts while maintaining smoothness */
+.v2-themed [style*="transform"],
+.v2-themed [style*="opacity"] {
+  transition-property: background-color, border-color, color, box-shadow;
+}

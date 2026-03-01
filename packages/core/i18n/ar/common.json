@@ -71,7 +71,7 @@
   "price_drop_desc": "سيتم إعلامك هنا عند انخفاض أسعار العناصر الموجودة في مفضلاتك.",
   "new_unread": "{{count}} جديد",
   "return_request": "طلب إرجاع",
-  "order_no": "طلب رقم {{number}}",
+  "order_no": "طلب رقم {number}",
   "select_items": "اختر العناصر",
   "reason": "السبب",
   "additional_comments": "تعليقات إضافية",
@@ -142,6 +142,20 @@
   "view_collection": "عرض المجموعة",
   "womens_fragrances": "عطور نسائية",
   "mens_fragrances": "عطور رجالية",
-  "exclusive": "حصري"
+  "exclusive": "حصري",
+  "exclusive_scents": "عطور حصرية",
+  "discover": "اكتشف",
+  "explore": "استكشف",
+  "best_sellers": "الأكثر مبيعاً",
+  "luxury_collections": "مجموعات فاخرة",
+  "view_all_scents": "عرض جميع العطور",
+  "footer_tagline": "نصنع عطوراً أنيقة خالدة لعشاق الجمال العصري. اختبر الفخامة الحقيقية في كل قطرة.",
+  "newsletter_title": "النشرة الإخبارية",
+  "newsletter_desc": "اشترك لتحصل على العروض الحصرية والتحديثات.",
+  "email_placeholder": "بريدك الإلكتروني",
+  "subscribe": "اشتراك",
+  "support": "الدعم",
+  "shipping": "الشحن والتوصيل",
+  "contact": "اتصل بنا"
 }
 

@@ -96,10 +96,9 @@ export function StoreSettingsProvider({ children }: { children: React.ReactNode 
         // RPC may not exist yet — use defaults
       }
 
-      // Fetch variant normalizations (may not exist yet)
       try {
         const normalsRes = await supabase.from('variant_normalizations').select('original_value, normalized_en, normalized_ar');
-        if (normalsRes.data) {
+        if (!normalsRes.error && normalsRes.data) {
           loadedSettings.variant_normalizations = normalsRes.data as { original_value: string; normalized_en: string; normalized_ar: string }[];
         }
       } catch {

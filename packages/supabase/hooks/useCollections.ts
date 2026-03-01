@@ -1,3 +1,5 @@
+"use client";
+
 import { useQuery } from '@tanstack/react-query';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Collection } from './useAdminCollections';
@@ -10,7 +12,7 @@ export function useCollections(supabase: SupabaseClient) {
         .from('collections')
         .select('*')
         .eq('is_active', true)
-        .order('sort_order');
+        .order('created_at', { ascending: false });
       if (error) throw error;
       return data || [];
     },

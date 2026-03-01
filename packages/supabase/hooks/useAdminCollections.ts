@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useCallback } from 'react';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -26,7 +28,7 @@ export function useAdminCollections(supabase: SupabaseClient) {
   const { data: collections = [], isLoading: loading } = useQuery({
     queryKey: ['admin-collections', searchTerm],
     queryFn: async () => {
-      let query = supabase.from('collections').select('*').order('sort_order', { ascending: true });
+      let query = supabase.from('collections').select('*').order('created_at', { ascending: false });
       if (searchTerm) {
         query = query.ilike('name_en', `%${searchTerm}%`);
       }
@@ -130,7 +132,7 @@ export function useAdminCollections(supabase: SupabaseClient) {
       .from('collection_products')
       .select('*, products(*)')
       .eq('collection_id', collectionId)
-      .order('sort_order');
+      .order('created_at', { ascending: false });
     if (error) {
       console.error('Error fetching collection products', error);
       return [];

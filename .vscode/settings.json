@@ -2,5 +2,6 @@
   "css.lint.validProperties": [
     "scrollbar-width",
     "text-wrap"
-  ]
+  ],
+  "java.compile.nullAnalysis.mode": "automatic"
 }

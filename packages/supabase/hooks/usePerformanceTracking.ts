@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef } from 'react';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { TelemetryLogger } from '../src/utils/telemetry';

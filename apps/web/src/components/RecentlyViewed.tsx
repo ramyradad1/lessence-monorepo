@@ -66,13 +66,13 @@ export default function RecentlyViewed({ currentProductId }: { currentProductId?
 
       {/* Section Header — Centered */}
       <div className="flex flex-col items-center text-center px-4 mb-8">
-        <span className="text-[10px] font-semibold tracking-[0.25em] text-primary uppercase mb-3">
+        <span className="text-[10px] font-semibold tracking-[0.25em] uppercase mb-3 text-[var(--v2-gold)]">
           {t('your_history') || 'YOUR HISTORY'}
         </span>
-        <h2 className="text-3xl md:text-5xl font-sans text-white italic tracking-wide">
+        <h2 className="text-3xl md:text-5xl font-serif italic tracking-wide text-[var(--v2-text)]">
           {t('recently_viewed') || 'Recently Viewed'}
         </h2>
-        <div className="section-divider mt-6" />
+        <div className="w-24 h-px bg-[#c9a96e]/30 mx-auto mt-8" />
       </div>
 
       {/* Desktop: Grid layout / Mobile: Horizontal scroll */}

@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
   return {
     title: {
       default: title,
-      template: `%s | L'Essence`,
+      template: `%s | L&apos;ESSENCE`,
     },
     description,
     keywords,
@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
       title,
       description,
       url: `${baseUrl}/${locale}`,
-      siteName: "L'Essence",
+      siteName: "L&apos;ESSENCE",
       locale: isAr ? 'ar_EG' : 'en_US',
       alternateLocale: isAr ? 'en_US' : 'ar_EG',
       type: 'website',
@@ -122,12 +122,12 @@ export default async function RootLayout({
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": ["Organization", "LocalBusiness"],
-    name: "L'Essence",
+    name: "L&apos;ESSENCE",
     url: baseUrl,
     logo: `${baseUrl}/icon.png`,
     description: locale === 'ar'
       ? "ليسنس - أرقى العطور الفاخرة والمحاكاة في مصر"
-      : "L'Essence - Premium luxury & simulation perfumes in Egypt",
+      : "L&apos;ESSENCE - Premium luxury & simulation perfumes in Egypt",
     address: {
       "@type": "PostalAddress",
       addressCountry: "EG",
@@ -151,7 +151,7 @@ export default async function RootLayout({
   const websiteJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "L'Essence",
+    name: "L&apos;ESSENCE",
     url: baseUrl,
     inLanguage: [locale === 'ar' ? 'ar-EG' : 'en-US'],
     potentialAction: {
