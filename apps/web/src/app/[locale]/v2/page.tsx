@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { getFeaturedProducts } from "@/services/products.service";
 import { getCategories } from "@/services/categories.service";
-import { Product, formatCurrency } from "@lessence/core";
+import { Product, Category, formatCurrency } from "@lessence/core";
 import LuxuryButton from "@/components/v2/LuxuryButton";
 import RevealOnScroll from "@/components/RevealOnScroll";
 import { useTranslations, useLocale } from "next-intl";
@@ -72,7 +72,7 @@ export default function V2HomePage() {
   const t = useTranslations('common');
   const locale = useLocale();
   const [bestSellers, setBestSellers] = useState<Product[]>([]);
-  const [collections, setCollections] = useState<Array<{id: string; name: string; name_en: string; slug: string; image_url: string}>>([]);
+  const [collections, setCollections] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

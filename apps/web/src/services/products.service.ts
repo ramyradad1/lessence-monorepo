@@ -1,7 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "@lessence/supabase"; // Assuming Database types are exported
+import { Product } from "@lessence/core";
 
-type Product = Database["public"]["Tables"]["products"]["Row"];
 
 export async function getProducts(supabase: SupabaseClient) {
   const { data, error } = await supabase

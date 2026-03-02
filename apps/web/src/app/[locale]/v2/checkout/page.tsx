@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { CartItem } from "@lessence/core";
 import { useCart } from "@/context/CartContext";
 import LuxuryButton from "@/components/v2/LuxuryButton";
 import SectionTitle from "@/components/v2/SectionTitle";
@@ -8,7 +9,7 @@ import { useLocale } from "next-intl";
 import Image from "next/image";
 
 export default function V2CheckoutPage() {
-  const { cartItems, cartTotalItems, cartSubtotal } = useCart();
+  const { cart, cartCount, cartTotal } = useCart();
   const locale = useLocale();
   const [loading, setLoading] = useState(false);
 
@@ -21,7 +22,7 @@ export default function V2CheckoutPage() {
     }, 1500);
   };
 
-  if (cartTotalItems === 0) {
+  if (cartCount === 0) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center">
         <h2 className="text-2xl font-serif text-white uppercase tracking-widest mb-6">Your Bag is Empty</h2>
@@ -74,18 +75,18 @@ export default function V2CheckoutPage() {
             <h3 className="text-sm font-serif text-primary uppercase tracking-widest mb-6">Order Summary</h3>
             
             <div className="flex flex-col gap-6 mb-8 max-h-[40vh] overflow-y-auto no-scrollbar pr-2">
-              {cartItems.map((item) => (
+              {cart.map((item: CartItem) => (
                 <div key={item.id} className="flex gap-4 items-center">
                   <div className="relative w-16 h-20 bg-[#1c1a14] rounded-sm p-2">
-                    <Image src={item.product?.image_url || ""} alt="" fill className="object-contain" />
+                    <Image src={item.image_url || ""} alt="" fill className="object-contain" />
                   </div>
                   <div className="flex-1">
                     <h4 className="text-xs font-semibold text-white uppercase tracking-wider mb-1">
-                      {locale === 'ar' ? (item.product?.name_ar || item.product?.name) : (item.product?.name_en || item.product?.name)}
+                      {locale === 'ar' ? (item.name_ar || item.name) : (item.name_en || item.name)}
                     </h4>
                     <p className="text-[10px] text-fg-faint uppercase tracking-widest">Qty: {item.quantity}</p>
                   </div>
-                  <p className="text-xs text-primary font-bold">{formatCurrency((item.product?.price || 0) * item.quantity, locale)}</p>
+                  <p className="text-xs text-primary font-bold">{formatCurrency((item.price || 0) * item.quantity, locale)}</p>
                 </div>
               ))}
             </div>
@@ -93,7 +94,7 @@ export default function V2CheckoutPage() {
             <div className="border-t border-white/10 pt-6 space-y-4 mb-8">
               <div className="flex justify-between text-xs tracking-widest uppercase text-white/70">
                 <span>Subtotal</span>
-                <span>{formatCurrency(cartSubtotal, locale)}</span>
+                <span>{formatCurrency(cartTotal, locale)}</span>
               </div>
               <div className="flex justify-between text-xs tracking-widest uppercase text-white/70">
                 <span>Shipping</span>
@@ -101,7 +102,7 @@ export default function V2CheckoutPage() {
               </div>
               <div className="flex justify-between text-sm tracking-widest uppercase text-white font-bold pt-4 border-t border-white/10 mt-4">
                 <span>Total</span>
-                <span className="text-primary text-lg">{formatCurrency(cartSubtotal, locale)}</span>
+                <span className="text-primary text-lg">{formatCurrency(cartTotal, locale)}</span>
               </div>
             </div>
 

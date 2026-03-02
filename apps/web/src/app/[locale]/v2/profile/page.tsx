@@ -15,9 +15,16 @@ import { motion, AnimatePresence } from "framer-motion";
 
 type ProfileTab = "orders" | "details" | "addresses";
 
+interface Order {
+  id: string;
+  created_at: string;
+  status: string;
+  total_amount: number;
+}
+
 export default function V2ProfilePage() {
   const { user, profile, isLoading, signOut } = useAuth();
-  const [orders, setOrders] = useState<unknown[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<ProfileTab>("orders");
   const [isSignOutLoading, setIsSignOutLoading] = useState(false);

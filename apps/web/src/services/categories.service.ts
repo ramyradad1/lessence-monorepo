@@ -1,7 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "@lessence/supabase"; // Assuming Database types are exported
+import { Category } from "@lessence/core";
 
-type Category = Database["public"]["Tables"]["categories"]["Row"];
 
 export async function getCategories(supabase: SupabaseClient) {
   const { data, error } = await supabase

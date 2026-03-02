@@ -3,14 +3,14 @@ import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { getProducts } from "@/services/products.service";
 import { getCategories } from "@/services/categories.service";
-import { Product } from "@lessence/core";
+import { Product, Category } from "@lessence/core";
 import ProductCard from "@/components/v2/ProductCard";
 import RevealOnScroll from "@/components/RevealOnScroll";
 import SectionTitle from "@/components/v2/SectionTitle";
 
 export default function ShopCollection({ initialCategory = 'all', title = "The Collection" }: { initialCategory?: string, title?: string }) {
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Array<{ id: string, name: string, name_en: string, slug: string }>>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
 
