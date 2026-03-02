@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { motion, HTMLMotionProps } from "framer-motion";
+import { motion } from "framer-motion";
 
 export interface LuxuryButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onDrag' | 'onDragStart' | 'onDragEnd' | 'onAnimationStart'> {
   variant?: "primary" | "outline" | "ghost";
@@ -49,6 +49,7 @@ export default function LuxuryButton({
         ${className || ""}
       `}
       style={variantStyles}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...(props as any)}
     >
       {/* Primary hover shine effect */}

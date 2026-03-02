@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { getProductBySlug } from "@/services/products.service";
-import { Product, formatCurrency, isRTL } from "@lessence/core";
+import { Product, formatCurrency } from "@lessence/core";
 import LuxuryButton from "@/components/v2/LuxuryButton";
 import { useCart } from "@/context/CartContext";
 import { useLocale } from "next-intl";

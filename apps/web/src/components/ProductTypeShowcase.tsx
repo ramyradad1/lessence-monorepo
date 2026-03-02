@@ -7,7 +7,7 @@ import { Link } from "@/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import RevealOnScroll from "./RevealOnScroll";
 import { ArrowRight, Crown, Sparkles } from "lucide-react";
-import { motion } from "framer-motion";
+
 
 function ProductTypeSection({
   type,

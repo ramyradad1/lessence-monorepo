@@ -8,7 +8,7 @@ import { useLocale } from "next-intl";
 import Image from "next/image";
 
 export default function V2CheckoutPage() {
-  const { cartItems, cartTotalItems, cartSubtotal, removeFromCart } = useCart();
+  const { cartItems, cartTotalItems, cartSubtotal } = useCart();
   const locale = useLocale();
   const [loading, setLoading] = useState(false);
 

@@ -17,7 +17,7 @@ type ProfileTab = "orders" | "details" | "addresses";
 
 export default function V2ProfilePage() {
   const { user, profile, isLoading, signOut } = useAuth();
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<ProfileTab>("orders");
   const [isSignOutLoading, setIsSignOutLoading] = useState(false);

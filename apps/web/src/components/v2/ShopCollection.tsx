@@ -10,7 +10,7 @@ import SectionTitle from "@/components/v2/SectionTitle";
 
 export default function ShopCollection({ initialCategory = 'all', title = "The Collection" }: { initialCategory?: string, title?: string }) {
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Array<{ id: string, name: string, name_en: string, slug: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
 
@@ -35,7 +35,7 @@ export default function ShopCollection({ initialCategory = 'all', title = "The C
 
   const displayedProducts = products.filter(p => {
     if (activeCategory === 'all') return true;
-    return (p as any).category?.slug === activeCategory;
+    return (p as unknown as { category?: { slug?: string } }).category?.slug === activeCategory;
   });
 
   return (

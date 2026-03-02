@@ -1,9 +1,9 @@
 "use client";
 import React, { memo, useState } from "react";
-import { Product, formatCurrency, isRTL } from "@lessence/core";
+import { Product, formatCurrency } from "@lessence/core";
 import { Link } from "@/navigation";
 import Image from "next/image";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import LuxuryButton from "./LuxuryButton";
 import { useCart } from "@/context/CartContext";
 
@@ -21,7 +21,6 @@ function ProductCard({
   const [imgSrc, setImgSrc] = useState(product.image_url || FALLBACK_IMAGE);
 
   const defaultSize = product.size_options?.[0]?.size || "50ml";
-  const rtl = isRTL(locale);
 
   const name = locale === 'ar' ? (product.name_ar || product.name_en || product.name || "") : (product.name_en || product.name || "");
   const subtitle = locale === 'ar' ? (product.subtitle_ar || product.subtitle_en || product.subtitle || "") : (product.subtitle_en || product.subtitle || "");

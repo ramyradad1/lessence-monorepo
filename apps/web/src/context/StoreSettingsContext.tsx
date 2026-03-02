@@ -106,7 +106,7 @@ export function StoreSettingsProvider({ children }: { children: React.ReactNode 
       }
       
       setSettings(loadedSettings);
-    } catch (error) {
+    } catch {
       // Fallback to defaults silently
     } finally {
       setLoading(false);
