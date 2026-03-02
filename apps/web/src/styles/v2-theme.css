@@ -2,6 +2,18 @@
    V2 Luxury Theme — CSS Custom Properties
    ═══════════════════════════════════════════════════ */
 
+/* GPU-composited float animation for hero bottle */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0) translateZ(0);
+  }
+
+  50% {
+    transform: translateY(-8px) translateZ(0);
+  }
+}
 /* ── Dark Mode (Default) ── */
 .v2-themed[data-theme="dark"] {
   --v2-bg:            #0a0907;

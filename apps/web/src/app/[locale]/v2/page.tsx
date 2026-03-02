@@ -57,16 +57,7 @@ const staggerContainer: Variants = {
   visible: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } }
 };
 
-const glowPulse = {
-  animate: {
-    boxShadow: [
-      "0 0 20px rgba(201,169,110,0.1)",
-      "0 0 40px rgba(201,169,110,0.2)",
-      "0 0 20px rgba(201,169,110,0.1)",
-    ],
-    transition: { duration: 3, repeat: Infinity, ease: "easeInOut" as const }
-  }
-};
+/* glowPulse removed — animating boxShadow is extremely expensive */
 
 export default function V2HomePage() {
   const t = useTranslations('common');
@@ -108,21 +99,7 @@ export default function V2HomePage() {
           transition={{ duration: 1.5 }}
         />
         
-        {/* Animated gold particle dots – reduced count for perf */}
-        <div className="absolute inset-0 z-[1] overflow-hidden pointer-events-none">
-          {[...Array(3)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 bg-[#c9a96e]/30 rounded-full will-change-transform"
-              style={{ left: `${20 + i * 25}%`, top: `${25 + (i % 2) * 30}%` }}
-              animate={{
-                y: [0, -15, 0],
-                opacity: [0.2, 0.5, 0.2],
-              }}
-              transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut", delay: i * 0.6 }}
-            />
-          ))}
-        </div>
+        {/* Particles removed for scroll performance */}
         
         <div className="relative z-10 w-full max-w-[1300px] mx-auto px-4 flex items-end justify-center pb-0 min-h-[55vh] md:min-h-[70vh]">
           
@@ -133,25 +110,22 @@ export default function V2HomePage() {
             initial="hidden"
             animate="visible"
           >
-            {/* Left Arch Border with glow animation */}
+            {/* Left Arch Border — static, no glow animation */}
             <div className="absolute top-0 w-[85%] mx-auto left-0 right-0 h-3/4">
-              <motion.div 
-                className="w-full h-full border-2 border-[#c9a96e]/25 rounded-t-full border-b-0"
-                {...glowPulse}
-              />
+              <div className="w-full h-full border-2 border-[#c9a96e]/25 rounded-t-full border-b-0" />
               <div className="absolute inset-0 rounded-t-full bg-gradient-to-b from-[#c9a96e]/5 to-transparent" />
             </div>
-            {/* Gold vertical accent bars */}
+            {/* Gold vertical accent bars — use scaleY instead of height for perf */}
             <motion.div 
-              className="absolute left-0 top-[10%] w-[3px] h-[55%] bg-gradient-to-b from-[#c9a96e]/40 via-[#c9a96e]/20 to-transparent"
-              initial={{ height: 0 }}
-              animate={{ height: "55%" }}
+              className="absolute left-0 top-[10%] w-[3px] h-[55%] bg-gradient-to-b from-[#c9a96e]/40 via-[#c9a96e]/20 to-transparent origin-top will-change-transform"
+              initial={{ scaleY: 0 }}
+              animate={{ scaleY: 1 }}
               transition={{ duration: 1.2, delay: 0.5, ease: "easeOut" }}
             />
             <motion.div 
-              className="absolute right-0 top-[10%] w-[3px] h-[55%] bg-gradient-to-b from-[#c9a96e]/40 via-[#c9a96e]/20 to-transparent"
-              initial={{ height: 0 }}
-              animate={{ height: "55%" }}
+              className="absolute right-0 top-[10%] w-[3px] h-[55%] bg-gradient-to-b from-[#c9a96e]/40 via-[#c9a96e]/20 to-transparent origin-top will-change-transform"
+              initial={{ scaleY: 0 }}
+              animate={{ scaleY: 1 }}
               transition={{ duration: 1.2, delay: 0.5, ease: "easeOut" }}
             />
             
@@ -171,7 +145,7 @@ export default function V2HomePage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <LuxuryButton variant="outline" size="sm" className="bg-black/40 backdrop-blur border-[#c9a96e]/40 text-[#c9a96e] text-xs tracking-widest px-6">
+                <LuxuryButton variant="outline" size="sm" className="bg-black/50 border-[#c9a96e]/40 text-[#c9a96e] text-xs tracking-widest px-6">
                   {t('discover') || 'DISCOVER'}
                 </LuxuryButton>
               </motion.div>
@@ -198,21 +172,21 @@ export default function V2HomePage() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1.2, delay: 0.3 }}
             >
-              <div className="w-full h-full border-[3px] border-[#c9a96e] rounded-t-full border-b-0 shadow-[0_0_40px_rgba(201,169,110,0.15)]" />
+              <div className="w-full h-full border-[3px] border-[#c9a96e] rounded-t-full border-b-0" />
               <div className="absolute inset-[3px] rounded-t-full bg-gradient-to-b from-[#1a1508]/60 via-[#12100a]/30 to-transparent" />
             </motion.div>
             
-            {/* Gold vertical pillars */}
+            {/* Gold vertical pillars — scaleY instead of height */}
             <motion.div 
-              className="absolute left-0 top-[5%] w-1 bg-gradient-to-b from-[#c9a96e]/50 via-[#c9a96e]/25 to-transparent"
-              initial={{ height: 0 }}
-              animate={{ height: "65%" }}
+              className="absolute left-0 top-[5%] w-1 h-[65%] bg-gradient-to-b from-[#c9a96e]/50 via-[#c9a96e]/25 to-transparent origin-top will-change-transform"
+              initial={{ scaleY: 0 }}
+              animate={{ scaleY: 1 }}
               transition={{ duration: 1.5, delay: 0.6, ease: "easeOut" }}
             />
             <motion.div 
-              className="absolute right-0 top-[5%] w-1 bg-gradient-to-b from-[#c9a96e]/50 via-[#c9a96e]/25 to-transparent"
-              initial={{ height: 0 }}
-              animate={{ height: "65%" }}
+              className="absolute right-0 top-[5%] w-1 h-[65%] bg-gradient-to-b from-[#c9a96e]/50 via-[#c9a96e]/25 to-transparent origin-top will-change-transform"
+              initial={{ scaleY: 0 }}
+              animate={{ scaleY: 1 }}
               transition={{ duration: 1.5, delay: 0.6, ease: "easeOut" }}
             />
 
@@ -236,10 +210,8 @@ export default function V2HomePage() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 1.2, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              <motion.div 
-                className="relative w-full h-full min-h-[250px] sm:min-h-[300px] md:min-h-[320px]"
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              <div
+                className="relative w-full h-full min-h-[250px] sm:min-h-[300px] md:min-h-[320px] animate-[float_5s_ease-in-out_infinite]"
               >
                 <Image 
                   src={FALLBACK_IMAGE}
@@ -248,7 +220,7 @@ export default function V2HomePage() {
                   className="object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.6)]"
                   priority
                 />
-              </motion.div>
+              </div>
             </motion.div>
 
             {/* Mobile CTA buttons */}
@@ -271,7 +243,7 @@ export default function V2HomePage() {
             
             {/* Master Podium */}
             <div className="relative w-full mt-auto z-20">
-              <div className="w-[120%] sm:w-[130%] -ml-[10%] sm:-ml-[15%] h-8 sm:h-10 bg-gradient-to-t from-[#0a0a0a] via-[#151515] to-[#222] rounded-t-[55%] mx-auto shadow-[0_-8px_20px_rgba(0,0,0,0.8)]" />
+              <div className="w-[120%] sm:w-[130%] -ml-[10%] sm:-ml-[15%] h-8 sm:h-10 bg-gradient-to-t from-[#0a0a0a] via-[#151515] to-[#222] rounded-t-[55%] mx-auto" />
               <div className="w-[105%] sm:w-[115%] -ml-[2.5%] sm:-ml-[7.5%] h-5 sm:h-6 bg-[#111] rounded-t-[50%] mx-auto -mt-2 border-t border-white/5" />
               <div className="w-full h-3 sm:h-4 bg-[#0a0a0a] rounded-t-[50%] mx-auto -mt-1" />
             </div>
@@ -285,22 +257,19 @@ export default function V2HomePage() {
             animate="visible"
           >
             <div className="absolute top-0 w-[85%] mx-auto left-0 right-0 h-3/4">
-              <motion.div 
-                className="w-full h-full border-2 border-[#c9a96e]/25 rounded-t-full border-b-0"
-                {...glowPulse}
-              />
+              <div className="w-full h-full border-2 border-[#c9a96e]/25 rounded-t-full border-b-0" />
               <div className="absolute inset-0 rounded-t-full bg-gradient-to-b from-[#c9a96e]/5 to-transparent" />
             </div>
             <motion.div 
-              className="absolute left-0 top-[10%] w-[3px] bg-gradient-to-b from-[#c9a96e]/40 via-[#c9a96e]/20 to-transparent"
-              initial={{ height: 0 }}
-              animate={{ height: "55%" }}
+              className="absolute left-0 top-[10%] w-[3px] h-[55%] bg-gradient-to-b from-[#c9a96e]/40 via-[#c9a96e]/20 to-transparent origin-top will-change-transform"
+              initial={{ scaleY: 0 }}
+              animate={{ scaleY: 1 }}
               transition={{ duration: 1.2, delay: 0.5, ease: "easeOut" }}
             />
             <motion.div 
-              className="absolute right-0 top-[10%] w-[3px] bg-gradient-to-b from-[#c9a96e]/40 via-[#c9a96e]/20 to-transparent"
-              initial={{ height: 0 }}
-              animate={{ height: "55%" }}
+              className="absolute right-0 top-[10%] w-[3px] h-[55%] bg-gradient-to-b from-[#c9a96e]/40 via-[#c9a96e]/20 to-transparent origin-top will-change-transform"
+              initial={{ scaleY: 0 }}
+              animate={{ scaleY: 1 }}
               transition={{ duration: 1.2, delay: 0.5, ease: "easeOut" }}
             />
             
@@ -319,7 +288,7 @@ export default function V2HomePage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <LuxuryButton variant="outline" size="sm" className="bg-black/40 backdrop-blur border-[#c9a96e]/40 text-[#c9a96e] text-xs tracking-widest px-6">COLLECTION</LuxuryButton>
+                <LuxuryButton variant="outline" size="sm" className="bg-black/50 border-[#c9a96e]/40 text-[#c9a96e] text-xs tracking-widest px-6">COLLECTION</LuxuryButton>
               </motion.div>
             </motion.div>
             
