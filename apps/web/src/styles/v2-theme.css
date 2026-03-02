@@ -99,7 +99,7 @@
   /* Smoother, longer transitions for base colors */
   transition: background-color 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
               color 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  scroll-behavior: smooth;
+  /* Do NOT set scroll-behavior: smooth — Lenis handles this */
 }
 
 .v2-themed ::selection {
@@ -107,15 +107,19 @@
   color: var(--v2-selection-text);
 }
 
-/* Ultra-smooth transition for all themed elements */
-.v2-themed * {
-  transition-property: background-color, border-color, color, box-shadow, transform;
-  transition-duration: 0.5s;
+/*
+ * Theme transition: only color-related properties, never transform/opacity.
+ * The old wildcard rule was applying transition to EVERY element including
+ * transform, which fought with Lenis + framer-motion causing scroll jank.
+ */
+.v2-themed *:not([style*="transform"]):not([style*="opacity"]):not(canvas) {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.4s;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Override transitions for framer-motion elements to prevent conflicts while maintaining smoothness */
+/* Ensure framer-motion and Lenis elements have zero CSS transition interference */
 .v2-themed [style*="transform"],
 .v2-themed [style*="opacity"] {
-  transition-property: background-color, border-color, color, box-shadow;
+  transition: none !important;
 }

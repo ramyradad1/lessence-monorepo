@@ -108,18 +108,18 @@ export default function V2HomePage() {
           transition={{ duration: 1.5 }}
         />
         
-        {/* Animated gold particle dots */}
+        {/* Animated gold particle dots – reduced count for perf */}
         <div className="absolute inset-0 z-[1] overflow-hidden pointer-events-none">
-          {[...Array(6)].map((_, i) => (
+          {[...Array(3)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-1 h-1 bg-[#c9a96e]/30 rounded-full"
-              style={{ left: `${15 + i * 15}%`, top: `${20 + (i % 3) * 25}%` }}
+              className="absolute w-1 h-1 bg-[#c9a96e]/30 rounded-full will-change-transform"
+              style={{ left: `${20 + i * 25}%`, top: `${25 + (i % 2) * 30}%` }}
               animate={{
-                y: [0, -20, 0],
-                opacity: [0.2, 0.6, 0.2],
+                y: [0, -15, 0],
+                opacity: [0.2, 0.5, 0.2],
               }}
-              transition={{ duration: 3 + i * 0.5, repeat: Infinity, ease: "easeInOut", delay: i * 0.4 }}
+              transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut", delay: i * 0.6 }}
             />
           ))}
         </div>
@@ -245,7 +245,7 @@ export default function V2HomePage() {
                   src={FALLBACK_IMAGE}
                   alt="Signature Perfume"
                   fill
-                  className="object-contain drop-shadow-[0_30px_40px_rgba(0,0,0,0.9)]"
+                  className="object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.6)]"
                   priority
                 />
               </motion.div>
@@ -391,7 +391,7 @@ export default function V2HomePage() {
                         src={cat.image_url || FALLBACK_IMAGE}
                         alt={cat.name_en || cat.name}
                         fill
-                        className="object-contain drop-shadow-[0_15px_25px_rgba(0,0,0,0.5)]"
+                        className="object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.3)]"
                       />
                     </div>
                   </div>
@@ -480,7 +480,7 @@ export default function V2HomePage() {
                           src={product.image_url || FALLBACK_IMAGE}
                           alt={product.name_en || product.name || ""}
                           fill
-                          className="object-contain drop-shadow-[0_25px_35px_var(--v2-product-shadow)]"
+                          className="object-contain drop-shadow-[0_15px_20px_var(--v2-product-shadow)]"
                         />
                       </div>
                     </div>
@@ -489,7 +489,7 @@ export default function V2HomePage() {
                     <div className="absolute bottom-14 sm:bottom-16 left-1/2 -translate-x-1/2 w-[75%] h-3 bg-gradient-to-t from-black/40 to-transparent rounded-[50%]" />
                     
                     {/* Bottom info bar with silkiest animation */}
-                    <div className="absolute bottom-0 left-0 right-0 px-4 sm:px-5 py-3 sm:py-4 flex justify-between items-center text-[8px] sm:text-[9px] uppercase tracking-[0.2em] sm:tracking-[0.25em] backdrop-blur-md z-10 transition-colors duration-700 text-[var(--v2-text-faint)] bg-[var(--v2-bg-glass)] border-t border-[var(--v2-border)]">
+                    <div className="absolute bottom-0 left-0 right-0 px-4 sm:px-5 py-3 sm:py-4 flex justify-between items-center text-[8px] sm:text-[9px] uppercase tracking-[0.2em] sm:tracking-[0.25em] z-10 text-[var(--v2-text-faint)] bg-[var(--v2-bg-card)] border-t border-[var(--v2-border)]">
                       <div className="flex flex-col gap-0.5">
                         <span className="text-[#c9a96e]/70 group-hover:text-[#c9a96e] transition-colors duration-700 truncate font-bold text-[9px] sm:text-[10px]">{product.name_en || product.name}</span>
                         <span className="opacity-50 group-hover:opacity-100 transition-opacity duration-700 text-[var(--v2-text)]">{t('explore')}</span>
